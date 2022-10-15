@@ -1,0 +1,16 @@
+{
+  "dependencies": {
+    "node-fetch": "^3.2.10"
+  },
+  "name": "jellyfin-rewind",
+  "version": "0.1.0",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Chaphasilor",
+  "license": "GPL-3.0",
+  "description": "",
+  "type": "module"
+}
