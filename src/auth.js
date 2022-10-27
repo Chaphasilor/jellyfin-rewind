@@ -117,15 +117,22 @@ export default class Auth {
   }
 
   saveSession() {
-    localStorage.setItem('session', JSON.stringify(this.config.user));
+    localStorage.setItem('session', JSON.stringify(this.config));
   }
 
   restoreSession() {
     const session = localStorage.getItem('session');
     if (session) {
-      this.config.user = JSON.parse(session);
-      setDefaultHeaders();
+      this.config = JSON.parse(session);
+      this.setDefaultHeaders();
+      return true;
     }
+    return false
+  }
+
+  destroySession() {
+    localStorage.removeItem('session');
+    this.config = null;
   }
 
 }

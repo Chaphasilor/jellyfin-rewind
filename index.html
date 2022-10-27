@@ -1,171 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="app"></div>
 
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <main class="p-2">
 
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <title>Jellyfin Rewind</title>
-
-</head>
-<body>
-
-  <main class="p-2">
-
-    <div id="server-config">
-      <label for="serverUrl">Server URL:</label>
-      <input class="border border-gray-500 p-1 rounded" type="text" name="serverUrl" id="serverUrl">
-      <button class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" id="connectToServer" type="button">Connect!</button>
-    </div>
-  
-    <ul id="user-select" class="hidden flex flex-col p-2 gap-3">
-      <li id="manual-user" class="rounded-md p-2 italic cursor-pointer hover:bg-blue-200">Manual User Input</li>
-    </ul>
-  
-    <div id="user-login" class="hidden">
-
-      <span id="username-input" class="hidden">
-        <label for="username">Username:</label>
-        <input class="border border-gray-500 p-1 rounded" type="text" name="username" id="username">
+      <span>
+        <button class="hidden border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
       </span>
-
-      <label for="password">Password:</label>
-      <input class="border border-gray-500 p-1 rounded" type="password" name="password" id="password">
-    
-      <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
-    </div>
-  
-    <span class="flex flex-row place-items-center">
-      <button id="generate-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">Generate Rewind</button>
-      <svg id="loading-spinner" class="hidden animate-spin inline-block ml-2 text-blue-900 icon icon-tabler icon-tabler-refresh"
-      width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
-        <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
-     </svg>
-    </span>
-  
-    <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1" name="output" id="output" cols="80" rows="40"></textarea>
-
-  </main>
-  
-
-  <!-- Scripts -->
-  
-  <script type="module" src="index.js"></script>
-
-  <script>
-
-    let userInfo = null;
-
-    const connectToServer = document.querySelector(`#connectToServer`)
-    const serverUrl = document.querySelector(`#serverUrl`)
-    const serverConfig = document.querySelector(`#server-config`)
-    const userSelect = document.querySelector(`#user-select`)
-    const userLogin = document.querySelector(`#user-login`)
-    const manualUser = document.querySelector(`#manual-user`)
-    const usernameInput = document.querySelector(`#username-input`)
-    const username = document.querySelector(`#username`)
-    const password = document.querySelector(`#password`)
-    const authenticateUser = document.querySelector(`#authenticateUser`)
-    const generateReport = document.querySelector(`#generate-report`)
-    const loadingSpinner = document.querySelector(`#loading-spinner`)
-    const output = document.querySelector(`#output`)
-
-    let selectedUsername = ``
-    
-    connectToServer.addEventListener(`click`, async () => {
-      try {
-        await window.jellyfinRewind.auth.connectToServer(serverUrl.value)
-        userInfo = await window.jellyfinRewind.auth.fetchUsers()
-        console.info(`Connected to server!`)
-        console.info(`Users:`, userInfo)
-        serverConfig.classList.add(`hidden`)
-        showUsers()
-      } catch (err) {
-        console.error(`Error while connecting to the server:`, err)
-      }
-    })
-
-    function showUsers() {
-
-      userSelect.classList.remove(`hidden`)
       
-      manualUser.addEventListener(`click`, () => {
-          userLogin.classList.remove(`hidden`)
-          usernameInput.classList.remove(`hidden`)
-          userSelect.classList.add(`hidden`)
-          username.addEventListener(`keyup`, () => {
-            selectedUsername = username.value
-          })
-          authenticateUser.removeEventListener(`click`, login(``))
-          authenticateUser.addEventListener(`click`, login(``))
-          password.removeEventListener(`keydown`, login(``))
-          password.addEventListener(`keydown`, login(``))
-        })
-      
-      userInfo.forEach(user => {
-        const li = document.createElement(`li`)
-        li.textContent = user.Name
-        li.setAttribute(`data-user-id`, user.Id)
-        li.classList.add(`rounded-md`, `p-2`, `cursor-pointer`, `hover:bg-blue-200`)
-        userSelect.appendChild(li)
-        li.addEventListener(`click`, () => {
-          userLogin.classList.remove(`hidden`)
-          selectedUsername = user.Name
-          console.info(`User selected:`, user)
-          userSelect.classList.add(`hidden`)
-          authenticateUser.removeEventListener(`click`, login(user.Id))
-          authenticateUser.addEventListener(`click`, login(user.Id))
-          password.removeEventListener(`keydown`, login(user.Id))
-          password.addEventListener(`keydown`, login(user.Id))
-        })
-      })
-    }
-
-    const login = (userId) => async (event) => {
-
-      if (event.type !== `click` && event.key !== `Enter`) {
-        return
-      } 
-      
-      try {
-
-        await window.jellyfinRewind.auth.authenticateUser(selectedUsername, password.value)
-        console.info(`Successfully logged in as ${selectedUsername}`)
-        window.jellyfinRewind.auth.saveSession()
-
-        generateReport.addEventListener(`click`, generateRewindReport)
-        generateReport.classList.remove(`hidden`)
-        userLogin.classList.add(`hidden`)
-        
-      } catch (err) {
-        console.error(`Error while logging in:`, err)
-      }
-    }
-
-    async function generateRewindReport() {
-
-      try {
-        
-        loadingSpinner.classList.remove(`hidden`)
-        const report = await window.jellyfinRewind.generateRewindReport()
-        console.info(`Report generated successfully!`)
-        loadingSpinner.classList.add(`hidden`)
-
-        output.value = JSON.stringify(report, null, 2)
-        
-      } catch (err) {
-        console.error(`Error while generating the report:`, err)
-      }
-      
-    }
+      <div id="server-config">
+        <label for="serverUrl">Server URL:</label>
+        <input class="border border-gray-500 p-1 rounded" type="text" name="serverUrl" id="serverUrl">
+        <button class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" id="connectToServer" type="button">Connect!</button>
+      </div>
     
+      <ul id="user-select" class="hidden flex flex-col p-2 gap-3">
+        <li id="manual-user" class="rounded-md p-2 italic cursor-pointer hover:bg-blue-200">Manual User Input</li>
+      </ul>
     
-  </script>
+      <div id="user-login" class="hidden">
   
-</body>
+        <span id="username-input" class="hidden">
+          <label for="username">Username:</label>
+          <input class="border border-gray-500 p-1 rounded" type="text" name="username" id="username">
+        </span>
+  
+        <label for="password">Password:</label>
+        <input class="border border-gray-500 p-1 rounded" type="password" name="password" id="password">
+      
+        <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
+      </div>
+    
+      <span class="flex flex-row place-items-center">
+        <button id="generate-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">Generate Rewind</button>
+        <svg id="loading-spinner" class="hidden animate-spin inline-block ml-2 text-blue-900 icon icon-tabler icon-tabler-refresh"
+        width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+       </svg>
+      </span>
+    
+      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1" name="output" id="output" cols="80" rows="40"></textarea>
+  
+    </main>
+
+    <script type="module" src="/main.js"></script>
+  </body>
 </html>

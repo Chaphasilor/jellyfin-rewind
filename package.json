@@ -1,16 +1,24 @@
 {
-  "dependencies": {
-    "node-fetch": "^3.2.10"
-  },
   "name": "jellyfin-rewind",
+  "private": true,
   "version": "0.1.0",
-  "main": "index.js",
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "author": "Chaphasilor",
   "license": "GPL-3.0",
   "description": "",
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.12",
+    "node-fetch": "^3.2.10",
+    "postcss": "^8.4.18",
+    "tailwindcss": "^3.2.1",
+    "vite": "^3.2.0"
+  },
+  "dependencies": {
+    "blurhash": "^2.0.3"
+  }
 }

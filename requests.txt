@@ -1,0 +1,33 @@
+http://192.168.31.40:8096/user_usage_stats/submit_custom_query?stamp=1665757270586
+{"CustomQueryString":"SELECT count(*) from (SELECT ROWID, count(*) from PlaybackActivity where ItemType=\"Audio\" group by ItemId)","ReplaceUseIrd":false}
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+LIMIT 30
+			
+
+SELECT ROWID, count(*) from PlaybackActivity where ItemType="Audio" group by ItemId
+
+
+SELECT count(*) from (SELECT ROWID, count(*) from PlaybackActivity where ItemType="Audio" group by ItemId)
+
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio" and ItemName like "% - %-%"
+
+http://192.168.31.40:8096/Users/13c597ac83f74af9a2d26235a1c23524/Items?SortBy=Album%2CSortName&SortOrder=Ascending&IncludeItemTypes=Audio&Recursive=true&Fields=AudioInfo%2CParentId&EnableImageTypes=Primary&ids=4673eb1597b5208f999a9a479223302b,c44f444851325ae5ca0acdb3ca5405f2,d437c474d322dc7d261ed810061cd91a
+
+
+SELECT ROWID, SUM(PlayDuration), * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+GROUP BY ItemId
+LIMIT 30
+
+SELECT ROWID, SUM(PlayDuration) AS TotalDuration, ItemId, ItemName
+  FROM PlaybackActivity
+  WHERE ItemType="Audio"
+    AND UserId="13c597ac83f74af9a2d26235a1c23524"
+  GROUP BY ItemId
