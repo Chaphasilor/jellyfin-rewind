@@ -1,25 +1,30 @@
 import './style.css'
+
+import { reactive, html } from '@arrow-js/core'
+
 import javascriptLogo from './javascript.svg'
 import * as jellyfinRewind from './src/index.js'
 import JellyHelper from './src/jelly-helper.js'
 
+import * as Features from './src/features.js'
+
 document.querySelector('#app').innerHTML = `
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
-      <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
-    </a>
-    <h1>Hello Vite!</h1>
-    <div class="card">
-      <button id="counter" type="button"></button>
-    </div>
-    <p class="read-the-docs">
-      Click on the Vite logo to learn more
-    </p>
-  </div>
 `
+// {/* <div>
+//   <a href="https://vitejs.dev" target="_blank">
+//     <img src="/vite.svg" class="logo" alt="Vite logo" />
+//   </a>
+//   <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript" target="_blank">
+//     <img src="${javascriptLogo}" class="logo vanilla" alt="JavaScript logo" />
+//   </a>
+//   <h1>Hello Vite!</h1>
+//   <div class="card">
+//     <button id="counter" type="button"></button>
+//   </div>
+//   <p class="read-the-docs">
+//     Click on the Vite logo to learn more
+//   </p>
+// </div> */}
 
 let userInfo = null;
 let helper = null;
@@ -49,6 +54,8 @@ window.onload = () => {
     serverConfig.classList.add(`hidden`)
     init()
   }
+
+  Features.init()
   
 }
 

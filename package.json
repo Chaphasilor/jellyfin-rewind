@@ -19,6 +19,8 @@
     "vite": "^3.2.0"
   },
   "dependencies": {
-    "blurhash": "^2.0.3"
+    "@arrow-js/core": "^1.0.0-alpha.5",
+    "blurhash": "^2.0.3",
+    "zuck.js": "^1.6.0"
   }
 }
