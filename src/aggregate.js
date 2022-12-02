@@ -29,6 +29,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         playbackReport: Number(playbackReportItem?.TotalPlayCount || 0),
         average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(playbackReportItem?.TotalPlayCount || 0))/2),
       },
+      plays: item.Plays,
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: Number(playbackReportItem?.TotalDuration),
       isFavorite: item.UserData?.IsFavorite,
@@ -182,4 +183,18 @@ export function generateTopArtists(topArtistInfo, { by = `duration`, limit = 25 
     })
     .slice(0, limit)
   return topArtists
+}
+
+export function generateTotalPlaybackDurationByMonth(indexedPlaybackReport) {
+  const totalPlaybackDurationByMonth = Object.values(indexedPlaybackReport).reduce((acc, cur) => {
+    cur.Plays.forEach(play => {
+      const month = play.date.getMonth()
+      acc[month] += play.duration
+    })
+    return acc
+  }, {0: 0, 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0, 10: 0, 11: 0})
+  Object.keys(totalPlaybackDurationByMonth).forEach(month => {
+    totalPlaybackDurationByMonth[month] = Math.ceil(totalPlaybackDurationByMonth[month] / 60) // convert to minutes
+  })
+  return totalPlaybackDurationByMonth
 }

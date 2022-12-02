@@ -3,6 +3,8 @@
 import Auth from './auth.js'
 import * as aggregate from './aggregate.js'
 
+let rewindReport = null
+
 const auth = new Auth()
 
 const playbackReportQuery = () => {
@@ -64,6 +66,8 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
       continue
     }
 
+    // adjust playback duration if necessary
+
     const playbackReportDuration = Number(item.PlayDuration)
     const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000)
     
@@ -71,6 +75,7 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
       console.warn(`Wrong duration for ${item.ItemId} (${item.ItemName}), adjusting from ${playbackReportDuration} to ${jellyfinItemDuration}`)
       playbackReportJSON.items[index].PlayDuration = jellyfinItemDuration
     }
+
   }
 
   return playbackReportJSON
@@ -80,16 +85,22 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
 function indexPlaybackReport(playbackReportJSON) {
   const items = {}
   for (const item of playbackReportJSON.items) {
+    const playInfo = {
+      date: new Date(item.DateCreated),
+      duration: Number(item.PlayDuration),
+    }
     if (!items[item.ItemId]) {
       items[item.ItemId] = {
         ...item,
         TotalDuration: Number(item.PlayDuration),
         TotalPlayCount: 1,
+        Plays: [playInfo],
       }
 
     } else {
       items[item.ItemId].TotalDuration += Number(item.PlayDuration)
       items[item.ItemId].TotalPlayCount += 1
+      items[item.ItemId].Plays.push(playInfo)
     }
       
   }
@@ -155,10 +166,13 @@ async function generateRewindReport() {
     allItemInfo.push(...itemInfo.Items)
   }
 
+  console.log(`allItemInfo:`, allItemInfo)
+  
   const allItemInfoIndexed = indexItemInfo(allItemInfo)
-
-  const adjustedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
-  const indexedPlaybackReport = indexPlaybackReport(adjustedPlaybackReportJSON)
+  
+  const enhancedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
+  const indexedPlaybackReport = indexPlaybackReport(enhancedPlaybackReportJSON)
+  console.log(`indexedPlaybackReport:`, indexedPlaybackReport)
   
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
@@ -173,10 +187,14 @@ async function generateRewindReport() {
   }
 
   jellyfinRewindReport.generalStats[`totalPlays`] = totalStats.totalPlayCount.average
-  jellyfinRewindReport.generalStats[`totalPlaybackDuration`] = `${Number((totalStats.totalPlayDuration / 60 / 60).toFixed(1))} hours (${Number((totalStats.totalPlayDuration / 60).toFixed(1))} minutes)`
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = Number((totalStats.totalPlayDuration / 60).toFixed(1))
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationHours`] = Number((totalStats.totalPlayDuration / 60 / 60).toFixed(1))
   jellyfinRewindReport.generalStats[`uniqueTracksPlayed`] = totalStats.uniqueTracks.size
   jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums.size
   jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists.size
+
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`] = aggregate.generateTotalPlaybackDurationByMonth(indexedPlaybackReport)
+  console.log(`jellyfinRewindReport.generalStats['totalPlaybackDurationByMonth']:`, jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`])
 
   const topTracksByDuration = aggregate.generateTopTracks(allTopTrackInfo, { by: `duration`, limit: 10 })
   const topTracksByPlayCount = aggregate.generateTopTracks(allTopTrackInfo, { by: `playCount`, limit: 10 })
@@ -215,11 +233,34 @@ async function generateRewindReport() {
 
   console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
   
+  rewindReport = jellyfinRewindReport
+  
   return jellyfinRewindReport
   
 }
 
+function saveRewindReport() {
+  if (rewindReport !== null) {
+    const rewindReportJSON = JSON.stringify(rewindReport)
+    localStorage.setItem(`rewindReport`, rewindReportJSON)
+  } else {
+    console.warn(`No Rewind report to save!`)
+  }
+}
+
+function restoreRewindReport() {
+  const rewindReportJSON = localStorage.getItem(`rewindReport`)
+  if (rewindReportJSON !== null) {
+    rewindReport = JSON.parse(rewindReportJSON)
+  } else {
+    throw new Error(`No Rewind report to restore!`)
+  }
+  return rewindReport
+}
+
 export {
   generateRewindReport,
+  saveRewindReport,
+  restoreRewindReport,
   auth,
 }

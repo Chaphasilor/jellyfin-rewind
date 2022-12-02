@@ -6,14 +6,21 @@ export default class JellyHelper {
     this.auth = auth;
   }
   
-  loadImage(element, imageInfo) {
+  loadImage(elements, imageInfo) {
 
+    if (!Array.isArray(elements)) {
+      elements = [elements];
+    }
+    
     const blurhash = imageInfo.blurhash
     const primaryTag = imageInfo.primaryTag
     const parentItemId = imageInfo.parentItemId
   
     if (blurhash) {
-      element.src = blurhashToDataURI(blurhash)
+      const dataUri = blurhashToDataURI(blurhash)
+      elements.forEach(element => {
+        element.src = dataUri
+      })
     }
   
     if (primaryTag) {
@@ -33,7 +40,10 @@ export default class JellyHelper {
       })
       .then(blob => {
         if (blob) {
-          element.src = URL.createObjectURL(blob)
+          const objectUrl = URL.createObjectURL(blob)
+          elements.forEach(element => {
+            element.src = objectUrl
+          })
         }
       })
     }

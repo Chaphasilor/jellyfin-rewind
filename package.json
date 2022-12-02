@@ -21,6 +21,7 @@
   "dependencies": {
     "@arrow-js/core": "^1.0.0-alpha.5",
     "blurhash": "^2.0.3",
+    "chart.js": "^4.0.1",
     "zuck.js": "^1.6.0"
   }
 }

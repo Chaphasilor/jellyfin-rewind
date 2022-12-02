@@ -3,7 +3,7 @@ import './style.css'
 import { reactive, html } from '@arrow-js/core'
 
 import javascriptLogo from './javascript.svg'
-import * as jellyfinRewind from './src/index.js'
+import * as jellyfinRewind from './src/rewind.js'
 import JellyHelper from './src/jelly-helper.js'
 
 import * as Features from './src/features.js'
@@ -39,6 +39,7 @@ const usernameInput = document.querySelector(`#username-input`)
 const username = document.querySelector(`#username`)
 const password = document.querySelector(`#password`)
 const authenticateUser = document.querySelector(`#authenticateUser`)
+const showReport = document.querySelector(`#show-report`)
 const generateReport = document.querySelector(`#generate-report`)
 const loadingSpinner = document.querySelector(`#loading-spinner`)
 const output = document.querySelector(`#output`)
@@ -54,8 +55,6 @@ window.onload = () => {
     serverConfig.classList.add(`hidden`)
     init()
   }
-
-  Features.init()
   
 }
 
@@ -109,7 +108,7 @@ function showUsers() {
     const button = document.createElement(`button`)
     button.textContent = user.Name
     button.setAttribute(`data-user-id`, user.Id)
-    button.classList.add(`rounded-md`, `p-2`, `cursor-pointer`, `focus:bg-blue-200 hover:bg-blue-200`)
+    button.classList.add(`rounded-md`, `p-2`, `cursor-pointer`, `focus:bg-blue-200`, `hover:bg-blue-200`)
     button.addEventListener(`click`, () => {
       userLogin.classList.remove(`hidden`)
       selectedUsername = user.Name
@@ -146,20 +145,52 @@ const login = (userId) => async (event) => {
 }
 
 function init() {
-  generateReport.addEventListener(`click`, generateAndShowRewindReport)
+  showReport.addEventListener(`click`, async () => {
+    let rewindReport = null
+    try {
+      rewindReport = jellyfinRewind.restoreRewindReport()
+    } catch (err) {
+      console.warn(`Couldn't restore Rewind report:`, err)
+      console.info(`Generating new report...`)
+      rewindReport = await generateRewindReport()
+    }
+
+    showRewindReport(rewindReport)
+    initializeFeatureStory(rewindReport)
+
+  })
+  generateReport.addEventListener(`click`, async () => {
+    console.info(`Generating new report...`)
+    let rewindReport = await generateRewindReport()
+
+    showRewindReport(rewindReport)
+    initializeFeatureStory(rewindReport)
+
+  })
   generateReport.classList.remove(`hidden`)
+  showReport.classList.remove(`hidden`)
   helper = new JellyHelper(jellyfinRewind.auth)
 }
 
-async function generateAndShowRewindReport() {
+async function generateRewindReport() {
 
   try {
     
     loadingSpinner.classList.remove(`hidden`)
     const report = await jellyfinRewind.generateRewindReport()
     console.info(`Report generated successfully!`)
+    jellyfinRewind.saveRewindReport()
     
-    output.value = JSON.stringify(report, null, 2)
+    return report    
+  } catch (err) {
+    console.error(`Error while generating the report:`, err)
+  }
+  
+}
+
+function showRewindReport(report) {
+
+  output.value = JSON.stringify(report, null, 2)
     loadingSpinner.classList.add(`hidden`)
 
     const topSongByDuration = report.tracks?.[`topTracksByPlayCount`]?.[0]
@@ -173,13 +204,16 @@ async function generateAndShowRewindReport() {
             <span class="font-semibold mt-2">${topSongByDuration?.name}</span>
             <span class="italic pl-3 mt-1">by ${topSongByDuration.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
           </div>
+        </div>
       `
       const testImage = document.querySelector(`#test-image`)
       helper.loadImage(testImage, topSongByDuration.image)
     }
-    
-  } catch (err) {
-    console.error(`Error while generating the report:`, err)
-  }
   
+}
+
+function initializeFeatureStory(report) {
+
+  Features.init(report, helper)
+
 }
