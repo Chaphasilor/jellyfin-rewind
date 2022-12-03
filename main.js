@@ -149,22 +149,25 @@ function init() {
   showReport.addEventListener(`click`, async () => {
     let rewindReport = null
     try {
+      loadingSpinner.classList.remove(`hidden`)
       rewindReport = jellyfinRewind.restoreRewindReport()
+      loadingSpinner.classList.add(`hidden`)
     } catch (err) {
       console.warn(`Couldn't restore Rewind report:`, err)
       console.info(`Generating new report...`)
       rewindReport = await generateRewindReport()
     }
 
-    showRewindReport(rewindReport)
+    // showRewindReport(rewindReport)
     initializeFeatureStory(rewindReport)
 
   })
   generateReport.addEventListener(`click`, async () => {
     console.info(`Generating new report...`)
+    featuresInitialized = false // reset features
     let rewindReport = await generateRewindReport()
 
-    showRewindReport(rewindReport)
+    // showRewindReport(rewindReport)
     initializeFeatureStory(rewindReport)
 
   })
@@ -180,6 +183,7 @@ async function generateRewindReport() {
     loadingSpinner.classList.remove(`hidden`)
     const report = await jellyfinRewind.generateRewindReport()
     console.info(`Report generated successfully!`)
+    loadingSpinner.classList.add(`hidden`)
     jellyfinRewind.saveRewindReport()
     
     return report    
@@ -192,24 +196,23 @@ async function generateRewindReport() {
 function showRewindReport(report) {
 
   output.value = JSON.stringify(report, null, 2)
-    loadingSpinner.classList.add(`hidden`)
 
-    const topSongByDuration = report.tracks?.[`topTracksByPlayCount`]?.[0]
+  const topSongByDuration = report.tracks?.[`topTracksByPlayCount`]?.[0]
 
-    if (topSongByDuration) {
-      document.querySelector('#app').innerHTML += `
-        <div class="m-4 text-gray-800">
-          <h3 class="text-xl">Your Top Song of the Year</h3>
-          <div class="flex mt-4 flex-col">
-            <img id="test-image" class="w-64 h-auto rounded-md" />
-            <span class="font-semibold mt-2">${topSongByDuration?.name}</span>
-            <span class="italic pl-3 mt-1">by ${topSongByDuration.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
-          </div>
+  if (topSongByDuration) {
+    document.querySelector('#app').innerHTML += `
+      <div class="m-4 text-gray-800">
+        <h3 class="text-xl">Your Top Song of the Year</h3>
+        <div class="flex mt-4 flex-col">
+          <img id="test-image" class="w-64 h-auto rounded-md" />
+          <span class="font-semibold mt-2">${topSongByDuration?.name}</span>
+          <span class="italic pl-3 mt-1">by ${topSongByDuration.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
         </div>
-      `
-      const testImage = document.querySelector(`#test-image`)
-      helper.loadImage(testImage, topSongByDuration.image)
-    }
+      </div>
+    `
+    const testImage = document.querySelector(`#test-image`)
+    helper.loadImage(testImage, topSongByDuration.image)
+  }
   
 }
 

@@ -107,6 +107,21 @@ function indexPlaybackReport(playbackReportJSON) {
   return items
 }
 
+function indexArtists(artistInfoJSON) {
+  const items = {}
+  for (const item of artistInfoJSON.Items) {
+    if (!items[item.Id]) {
+      items[item.Id] = {
+        ...item,
+      }
+
+    } else {
+    }
+      
+  }
+  return items
+}
+
 async function loadItemInfo(items) {
 
   const params = {
@@ -116,7 +131,7 @@ async function loadItemInfo(items) {
     'Recursive': `true`,
     'Fields': `AudioInfo,ParentId,Ak`,
     'EnableImageTypes': `Primary`,
-    'Ids': items.map(item => item.ItemId).join(','),
+    'Ids': [...new Set(items.map(item => item.ItemId))].join(','),
   }
 
   const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')
@@ -131,6 +146,45 @@ async function loadItemInfo(items) {
 
   const json = await response.json()
   return json
+
+}
+
+async function loadArtistInfo(items) {
+
+  const params = {
+    // 'SortBy': `Album,SortName`,
+    // 'SortOrder': `Ascending`,
+    // 'IncludeItemTypes': `Audio`,
+    'Recursive': `true`,
+    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo`,
+    'EnableImageTypes': `Primary,Backdrop,Banner,Thumb`,
+    'userId': auth.config.user.id,
+    // 'Ids': items.map(item => item.id).join(','),
+  }
+
+  const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')
+
+  let response = await fetch(`${auth.config.baseUrl}/Artists?${queryParams}`, {
+    method: 'GET',
+    headers: {
+      ...auth.config.defaultHeaders,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  let artistResponse = await response.json()
+
+  response = await fetch(`${auth.config.baseUrl}/Artists/AlbumArtists?${queryParams}`, {
+    method: 'GET',
+    headers: {
+      ...auth.config.defaultHeaders,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  let albumArtistResponse = await response.json()
+  artistResponse.Items = artistResponse.Items.concat(albumArtistResponse.Items)
+  return artistResponse
 
 }
 
@@ -177,6 +231,14 @@ async function generateRewindReport() {
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
 
+  let artistIds = allTopTrackInfo.reduce((acc, item) => {
+    acc = acc.concat(item.artistsBaseInfo)
+    return acc
+  }, [])
+  console.log(`artistIds:`, artistIds)
+  const artistInfo = indexArtists(await loadArtistInfo())
+  console.log(`artistInfo:`, artistInfo)
+
   const totalStats = aggregate.generateTotalStats(allTopTrackInfo)
 
   const jellyfinRewindReport = {
@@ -187,8 +249,8 @@ async function generateRewindReport() {
   }
 
   jellyfinRewindReport.generalStats[`totalPlays`] = totalStats.totalPlayCount.average
-  jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = Number((totalStats.totalPlayDuration / 60).toFixed(1))
-  jellyfinRewindReport.generalStats[`totalPlaybackDurationHours`] = Number((totalStats.totalPlayDuration / 60 / 60).toFixed(1))
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = Number((totalStats.totalPlayDuration).toFixed(1))
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationHours`] = Number((totalStats.totalPlayDuration / 60).toFixed(1))
   jellyfinRewindReport.generalStats[`uniqueTracksPlayed`] = totalStats.uniqueTracks.size
   jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums.size
   jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists.size
@@ -219,7 +281,7 @@ async function generateRewindReport() {
   jellyfinRewindReport.albums[`topAlbumsByLastPlayed`] = topAlbumsByLastPlayed
   // .map(x => `${x.name} by ${x.albumArtist.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
-  const topArtistInfo = aggregate.generateTopArtistInfo(allTopTrackInfo)
+  const topArtistInfo = aggregate.generateTopArtistInfo(allTopTrackInfo, artistInfo)
   const topArtistsByDuration = aggregate.generateTopArtists(topArtistInfo, { by: `duration`, limit: 25 })
   const topArtistsByPlayCount = aggregate.generateTopArtists(topArtistInfo, { by: `playCount`, limit: 25 })
   const topArtistsByLastPlayed = aggregate.generateTopArtists(topArtistInfo, { by: `lastPlayed`, limit: 25 })
