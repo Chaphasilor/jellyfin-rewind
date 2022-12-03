@@ -21,19 +21,21 @@ export default class JellyHelper {
       elements.forEach(element => {
         element.src = dataUri
       })
+    } else {
+      console.warn(`No blurhash found for item`)
     }
   
-    if (primaryTag) {
+    if (primaryTag && parentItemId) {
       fetch(`${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`, {
-        method: 'GET',
+        method: `GET`,
         headers: {
           ...this.auth.config.defaultHeaders,
         },
       })
       .then(response => {
         if (response.ok) {
-          const contentType = response.headers.get('content-type')
-          if (contentType && contentType.includes('image')) {
+          const contentType = response.headers.get(`content-type`)
+          if (contentType && contentType.includes(`image`)) {
             return response.blob()
           }
         }
@@ -46,6 +48,8 @@ export default class JellyHelper {
           })
         }
       })
+    } else {
+      console.warn(`No primary image found for item`)
     }
     
   }
@@ -54,7 +58,7 @@ export default class JellyHelper {
 
 function blurhashToDataURI(blurhash) {
   const pixels = decodeBlurhash(blurhash, 128, 128)
-  const ctx = document.createElement('canvas').getContext('2d')
+  const ctx = document.createElement(`canvas`).getContext(`2d`)
   const imageData = ctx.createImageData(128, 128)
   imageData.data.set(pixels)
   ctx.putImageData(imageData, 0, 0)

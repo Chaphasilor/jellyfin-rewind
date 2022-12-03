@@ -196,9 +196,9 @@ async function generateRewindReport() {
   jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`] = aggregate.generateTotalPlaybackDurationByMonth(indexedPlaybackReport)
   console.log(`jellyfinRewindReport.generalStats['totalPlaybackDurationByMonth']:`, jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`])
 
-  const topTracksByDuration = aggregate.generateTopTracks(allTopTrackInfo, { by: `duration`, limit: 10 })
-  const topTracksByPlayCount = aggregate.generateTopTracks(allTopTrackInfo, { by: `playCount`, limit: 10 })
-  const topTracksByLastPlayed = aggregate.generateTopTracks(allTopTrackInfo, { by: `lastPlayed`, limit: 10 })
+  const topTracksByDuration = aggregate.generateTopTracks(allTopTrackInfo, { by: `duration`, limit: 25 })
+  const topTracksByPlayCount = aggregate.generateTopTracks(allTopTrackInfo, { by: `playCount`, limit: 25 })
+  const topTracksByLastPlayed = aggregate.generateTopTracks(allTopTrackInfo, { by: `lastPlayed`, limit: 25 })
   
   jellyfinRewindReport.tracks[`topTracksByDuration`] = topTracksByDuration
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
@@ -208,9 +208,9 @@ async function generateRewindReport() {
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)
 
   const topAlbumInfo = aggregate.generateTopAlbumInfo(allTopTrackInfo)
-  const topAlbumsByDuration = aggregate.generateTopAlbums(topAlbumInfo, { by: `duration`, limit: 10 })
-  const topAlbumsByPlayCount = aggregate.generateTopAlbums(topAlbumInfo, { by: `playCount`, limit: 10 })
-  const topAlbumsByLastPlayed = aggregate.generateTopAlbums(topAlbumInfo, { by: `lastPlayed`, limit: 10 })
+  const topAlbumsByDuration = aggregate.generateTopAlbums(topAlbumInfo, { by: `duration`, limit: 25 })
+  const topAlbumsByPlayCount = aggregate.generateTopAlbums(topAlbumInfo, { by: `playCount`, limit: 25 })
+  const topAlbumsByLastPlayed = aggregate.generateTopAlbums(topAlbumInfo, { by: `lastPlayed`, limit: 25 })
 
   jellyfinRewindReport.albums[`topAlbumsByDuration`] = topAlbumsByDuration
   // .map(x => `${x.name} by ${x.albumArtist.name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
@@ -220,9 +220,9 @@ async function generateRewindReport() {
   // .map(x => `${x.name} by ${x.albumArtist.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
   const topArtistInfo = aggregate.generateTopArtistInfo(allTopTrackInfo)
-  const topArtistsByDuration = aggregate.generateTopArtists(topArtistInfo, { by: `duration`, limit: 10 })
-  const topArtistsByPlayCount = aggregate.generateTopArtists(topArtistInfo, { by: `playCount`, limit: 10 })
-  const topArtistsByLastPlayed = aggregate.generateTopArtists(topArtistInfo, { by: `lastPlayed`, limit: 10 })
+  const topArtistsByDuration = aggregate.generateTopArtists(topArtistInfo, { by: `duration`, limit: 25 })
+  const topArtistsByPlayCount = aggregate.generateTopArtists(topArtistInfo, { by: `playCount`, limit: 25 })
+  const topArtistsByLastPlayed = aggregate.generateTopArtists(topArtistInfo, { by: `lastPlayed`, limit: 25 })
 
   jellyfinRewindReport.artists[`topArtistsByDuration`] = topArtistsByDuration
   // .map(x => `${x.name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)

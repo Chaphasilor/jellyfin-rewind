@@ -4,7 +4,7 @@ import Chart from 'chart.js/auto';
 const mainElement = document.querySelector('main');
 
 let state = reactive({
-  featuresOpen: true,
+  featuresOpen: false,
   currentFeature: -1,
   features: null,
   featureSideEffects: null,
@@ -13,18 +13,25 @@ let state = reactive({
 })
 
 state.featureSideEffects = {
-  0: showPlaytimeByMonthChart,
-  1: loadTopSongMedia,
-  2: loadTopSongsMedia,
+  0: {
+    load: showPlaytimeByMonthChart,
+    unload: destroyPlayTimeByMonthChart,
+  },
+  1: {
+    load: loadTopSongMedia,
+  },
+  2: {
+    load: loadTopSongsMedia,
+  }
 }
 
 state.features = [
   // total playtime
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl mt-16">Your Total Playtime<br>of 2022:</h2>
+      <h2 class="text-2xl font-medium mt-16">Your Total Playtime<br>of 2022:</h2>
       
-      <div class="mt-28 -rotate-6 text-sky-500 text-5xl"><span class="font-semibold">${() => insertCommas(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
+      <div class="mt-28 -rotate-6 font-quicksand text-sky-500 text-5xl"><span class="font-quicksand-bold">${() => insertCommas(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
 
       <div class="absolute bottom-16 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart"></canvas>
@@ -37,14 +44,14 @@ state.features = [
       <h2 class="text-2xl mt-10">Your Top Song<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-song-image" class="w-64 h-auto mx-auto rounded-md" />
-        <div class="-rotate-6 mr-6 mt-10 text-5xl font-semibold">
+        <div class="-rotate-6 -ml-10 mt-10 text-5xl font-semibold">
           <div class="">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0].artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)} -</div>
-          <div class="mt-8 ml-6">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.name}</div>
+          <div class="mt-8 ml-10">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.name}</div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-6">
-        <div>Streamed <span class="font-semibold">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount.average}</span> times.<div>
-        <div>Listened for <span class="font-semibold mt-4">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration}</span> minutes.<div>
+      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+        <div>Streamed <span class="font-semibold">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount.average}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 -left-32 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -54,25 +61,26 @@ state.features = [
   // top songs of the year
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl mt-10">Your Top Songs<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-10">Your Top Songs<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5).map((track, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-songs-image-${index}`}" class="w-16 h-auto rounded-md" src="${track.artworkUrl}" />
-            <div class="flex flex-col gap-1 bg-white/30 px-2 py-1 rounded-md">
-              <div class="flex flex-row w-full justify-start items-center">
-                <span class="font-semibold mr-2">${index + 1}.</span>
-                <!-- <span class="text-sm">${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span> -->
-                <!-- <span class="mx-1">-</span> -->
-                <span class="font-semibold">${track.name}</span>
+            <img id="${() => `top-songs-image-${index}`}" class="h-20 w-auto rounded-md" src="${track.artworkUrl}" />
+            <div class="flex flex-col gap-1 bg-white/30 px-2 py-1 h-20 w-full rounded-md">
+              <div class="flex flex-col gap-0.25 items-start">
+                <div class="flex flex-row w-full justify-start items-center">
+                  <span class="font-semibold text-lg mr-2">${index + 1}.</span>
+                  <span class="font-semibold text-lg leading-tight">${track.name}</span>
+                </div>
+                  <span class="text-sm ml-2">by ${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
               </div>
-              <div class="flex flex-row justify-start gap-3 text-xs">
-                <div><span class="font-semibold">${track.playCount.average}</span> streams</div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-1.5 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
+                <div><span class="font-semibold text-black">${track.playCount.average}</span> streams</div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-1.5 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold">${track.totalPlayDuration}</span> minutes</div>
+                <div><span class="font-semibold text-black">${track.totalPlayDuration}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -81,7 +89,33 @@ state.features = [
           </li>
         `)}
       </ol>
-      <!-- TODO continue as simple list -->
+    </div>
+    <!-- continue as simple list -->
+    <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
+      ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(5, 20).map((track, index) => html`
+        <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
+          <div class="flex flex-col gap-1 w-full">
+            <div class="flex flex-col gap-0.25 items-start">
+              <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
+                <span class="font-semibold mr-2">${index + 1 + 5}.</span>
+                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+              </div>
+                <div class="ml-6 text-xs">by <span class="font-semibold">${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+            </div>
+            <!--
+            <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
+              <div><span class="font-semibold text-black">${track.playCount.average}</span> streams</div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-1.5 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              <div><span class="font-semibold text-black">${track.totalPlayDuration}</span> minutes</div>
+            </div>
+            -->
+          </div>
+        </li>
+      `)}
+    </ol>
   `),
 ]
 
@@ -99,14 +133,14 @@ export function init(rewindReport, jellyHelper) {
       ${() => {
         return state.featuresOpen ?
           html`<div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white border-red-500">
-          <button class="absolute top-2 right-3 z-[150]" @click="${() => closeFeatures()}" type="button">
+          <button class="absolute top-0.5 right-3 z-[150]" @click="${() => closeFeatures()}" type="button">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white icon icon-tabler icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
           </button>
-          <ul class="absolute top-0 left-0 pl-4 pr-12 py-5 bg-gray-700/30 z-[100] w-full h-12 flex flex-row justify-between">
+          <ul class="absolute top-0 left-0 pl-4 pr-12 py-3 bg-gray-700/30 z-[100] w-full h-8 flex flex-row justify-between">
             ${() => {
               return state.features.map((feature, index) => {
                 return html`<li class="${() => `relative block w-full mx-2 rounded-full h-full text-white/0 ${state.currentFeature === index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
@@ -118,7 +152,7 @@ export function init(rewindReport, jellyHelper) {
           </ul>
         </div>`
         :
-        html`<button type="button" @click="${() => openFeatures()}">Open</button>`
+        html`<br>`
       }}
   `
   content(mainElement);
@@ -139,10 +173,10 @@ function autoAdvance() {
   }, 5000)
 }
 
-function openFeatures() {
+export function openFeatures() {
   state.featuresOpen = true
 }
-function closeFeatures() {
+export function closeFeatures() {
   mainElement.innerHTML = ``;
   state.featuresOpen = false
 }
@@ -155,14 +189,21 @@ watch(() => state.featuresOpen, (value) => {
   }
 })
 
-watch(() => state.currentFeature, (index) => {
-  if (state.featuresOpen && state.featureSideEffects[index]) {
-    state.featureSideEffects[index]()
+watch(() => state.featuresOpen && state.currentFeature, () => {
+  if (state.featuresOpen) {
+    let index = state.currentFeature
+    state.featureSideEffects[index]?.load?.()
+    state.featureSideEffects[(index-1) % state.features.length]?.unload?.()
   }
 })
 
 function next() {
-  state.currentFeature = (state.currentFeature + 1) % state.features.length;
+  if (state.currentFeature >= state.features.length - 1) {
+    state.featuresOpen = false
+    state.currentFeature = 0
+  } else {
+    state.currentFeature++;
+  }
 }
 function previous() {
   state.currentFeature = (state.currentFeature - 1) % state.features.length;
@@ -183,15 +224,64 @@ function showPlaytimeByMonthChart() {
   
   console.log(`Loading chart...`)
 
-  const canvas = document.querySelector(`#playtime-by-month-chart`);
+  let canvas;
 
+  const initializeChart = () => {
+    new Chart(canvas, {
+      type: 'bar',
+      data,
+      plugins: [
+      ],
+      options: {
+        plugins: {
+          legend: {
+            display: false,
+          }
+        },
+        responsive: true,
+        maintainAspectRatio: false,
+        backgroundColor: `#ffffff`,
+        scales: {
+          x: {
+            grid: {
+              display: false,
+            },
+            border: {
+              width: 3,
+              color: `#002633`,
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              display: false,
+            },
+            border: {
+              width: 3,
+              color: `#002633`,
+            }
+          }
+        },
+        layout: {
+        },
+        elements: {
+          bar: {
+            backgroundColor: '#00a4dc',
+            borderWidth: 0,
+            borderRadius: 4,
+            borderSkipped: `bottom`,
+            minBarLength: 32,
+          },
+        }
+      }
+    });
+  }
+  
   let monthData = Object.keys(state.rewindReport.generalStats.totalPlaybackDurationByMonth).reduce((acc, month) => {
     acc[month] = state.rewindReport.generalStats.totalPlaybackDurationByMonth[month];
     return acc;
   }, [])
-
-
-
+  
   let data = {
     labels: [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`],
     datasets: [{
@@ -199,56 +289,22 @@ function showPlaytimeByMonthChart() {
       data: monthData,
     }]
   }
-
-  new Chart(canvas, {
-    type: 'bar',
-    data,
-    plugins: [
-    ],
-    options: {
-      plugins: {
-        legend: {
-          display: false,
-        }
-      },
-      responsive: true,
-      maintainAspectRatio: false,
-      backgroundColor: `#ffffff`,
-      scales: {
-        x: {
-          grid: {
-            display: false,
-          },
-          border: {
-            width: 3,
-            color: `#002633`,
-          }
-        },
-        y: {
-          beginAtZero: true,
-          grid: {
-            display: false,
-          },
-          border: {
-            width: 3,
-            color: `#002633`,
-          }
-        }
-      },
-      layout: {
-      },
-      elements: {
-        bar: {
-          backgroundColor: '#00a4dc',
-          borderWidth: 0,
-          borderRadius: 4,
-          borderSkipped: `bottom`,
-          minBarLength: 32,
-        },
-      }
-    }
-  });
   
+  const pollCanvas = () => {
+    canvas = document.querySelector(`#playtime-by-month-chart`)
+    console.log(`canvas:`, canvas)
+    if (canvas === null) {
+      setTimeout(pollCanvas, 100);
+    } else {
+      initializeChart();
+    }
+  }
+  pollCanvas()
+  
+}
+
+function destroyPlayTimeByMonthChart() {
+  Chart.getChart(`playtime-by-month-chart`)?.destroy()
 }
 
 function loadTopSongMedia() {
@@ -257,6 +313,7 @@ function loadTopSongMedia() {
   const topSongBackgroundImage = document.querySelector(`#top-song-background-image`);
   console.log(`img:`, topSongPrimaryImage)
   const topSongByDuration = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
+  console.log(`topSongByDuration:`, topSongByDuration)
   state.jellyHelper.loadImage([topSongPrimaryImage, topSongBackgroundImage], topSongByDuration.image)
 
 }

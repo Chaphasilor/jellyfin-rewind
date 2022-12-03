@@ -46,6 +46,7 @@ const output = document.querySelector(`#output`)
 const logOutButton = document.querySelector(`#log-out`)
 
 let selectedUsername = ``
+let featuresInitialized = false
 
 window.onload = () => {
 
@@ -214,6 +215,11 @@ function showRewindReport(report) {
 
 function initializeFeatureStory(report) {
 
-  Features.init(report, helper)
+  Features.openFeatures()
+
+  if (!featuresInitialized) {
+    Features.init(report, helper)
+    featuresInitialized = true
+  }
 
 }
