@@ -22,12 +22,13 @@ export class BackdropImage {
 }
 
 export class Artist {
-  constructor({ id, name, tracks, images, playCount, plays, lastPlayed, totalPlayDuration }) {
+  constructor({ id, name, tracks, images, playCount, uniqueTracks, plays, lastPlayed, totalPlayDuration }) {
     this.name = name
     this.id = id
     this.tracks = tracks
     this.images = images
     this.playCount = playCount
+    this.uniqueTracks = uniqueTracks
     this.plays = plays
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration

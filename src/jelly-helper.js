@@ -6,7 +6,7 @@ export default class JellyHelper {
     this.auth = auth;
   }
   
-  loadImage(elements, imageInfo) {
+  loadImage(elements, imageInfo, type = `track`) {
 
     if (!Array.isArray(elements)) {
       elements = [elements];
@@ -23,6 +23,22 @@ export default class JellyHelper {
       })
     } else {
       console.warn(`No blurhash found for item`)
+      elements.forEach(element => {
+        switch (type) {
+          case `track`:
+            element.src = `/media/TrackPlaceholder.png`
+            break;
+          case `artist`:
+            element.src = `/media/ArtistPlaceholder.png`
+            break;
+            case `album`:
+              element.src = `/media/AlbumPlaceholder.png`
+            break;
+        
+          default:
+            break;
+        }
+      })
     }
   
     if (primaryTag && parentItemId) {
@@ -50,6 +66,22 @@ export default class JellyHelper {
       })
     } else {
       console.warn(`No primary image found for item`)
+      elements.forEach(element => {
+        switch (type) {
+          case `track`:
+            element.src = `/media/TrackPlaceholder.png`
+            break;
+          case `artist`:
+            element.src = `/media/ArtistPlaceholder.png`
+            break;
+            case `album`:
+              element.src = `/media/AlbumPlaceholder.png`
+            break;
+        
+          default:
+            break;
+        }
+      })
     }
     
   }
@@ -57,9 +89,9 @@ export default class JellyHelper {
 }
 
 function blurhashToDataURI(blurhash) {
-  const pixels = decodeBlurhash(blurhash, 128, 128)
+  const pixels = decodeBlurhash(blurhash, 256, 256)
   const ctx = document.createElement(`canvas`).getContext(`2d`)
-  const imageData = ctx.createImageData(128, 128)
+  const imageData = ctx.createImageData(256, 256)
   imageData.data.set(pixels)
   ctx.putImageData(imageData, 0, 0)
   return ctx.canvas.toDataURL()

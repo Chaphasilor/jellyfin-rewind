@@ -57,12 +57,14 @@ function generateJSONFromPlaybackReport(playbackReportInfo) {
 
 function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
 
+  playbackReportJSON.notFound = [] // deleted or otherwise not found items that should still contribute to the general stats
   for (const index in playbackReportJSON.items) {
     const item = playbackReportJSON.items[index] //!!! don't use this as a left-hand expression
     const itemInfo = indexedItemInfo[item.ItemId]
     if (!itemInfo) {
       console.warn(`Item info not found: ${item.ItemId} (${item.ItemName})`)
-      //TODO try to find a replacement item
+      //TODO try to find a replacement item based on name and artist (case-insensitive, maybe even using a fuzzy score) (not album!)
+      playbackReportJSON.notFound.push(item)
       continue
     }
 
@@ -110,6 +112,21 @@ function indexPlaybackReport(playbackReportJSON) {
 function indexArtists(artistInfoJSON) {
   const items = {}
   for (const item of artistInfoJSON.Items) {
+    if (!items[item.Id]) {
+      items[item.Id] = {
+        ...item,
+      }
+
+    } else {
+    }
+      
+  }
+  return items
+}
+
+function indexAlbums(albumInfoJSON) {
+  const items = {}
+  for (const item of albumInfoJSON.Items) {
     if (!items[item.Id]) {
       items[item.Id] = {
         ...item,
@@ -188,6 +205,35 @@ async function loadArtistInfo(items) {
 
 }
 
+async function loadAlbumInfo() {
+
+  const params = {
+    // 'SortBy': `Album,SortName`,
+    // 'SortOrder': `Ascending`,
+    'IncludeItemTypes': `MusicAlbum`,
+    'Recursive': `true`,
+    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo`,
+    'EnableImageTypes': `Primary,Backdrop,Banner,Thumb`,
+    'userId': auth.config.user.id,
+    // 'Ids': items.map(item => item.id).join(','),
+  }
+
+  const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')
+
+  let response = await fetch(`${auth.config.baseUrl}/Users/${auth.config.user.id}/Items?${queryParams}`, {
+    method: 'GET',
+    headers: {
+      ...auth.config.defaultHeaders,
+      'Content-Type': 'application/json',
+    },
+  })
+
+  let responseJSON = await response.json()
+
+  return responseJSON
+
+}
+
 function indexItemInfo(itemInfo) {
   const items = {}
   itemInfo.forEach(item => {
@@ -210,7 +256,7 @@ async function generateRewindReport() {
   const playbackReportInfo = await loadPlaybackReport()
 
   const playbackReportJSON = generateJSONFromPlaybackReport(playbackReportInfo)
-  // console.log(`playbackReportJSON:`, playbackReportJSON)
+  console.log(`playbackReportJSON:`, playbackReportJSON)
 
   const allItemInfo = []
 
@@ -239,7 +285,10 @@ async function generateRewindReport() {
   const artistInfo = indexArtists(await loadArtistInfo())
   console.log(`artistInfo:`, artistInfo)
 
-  const totalStats = aggregate.generateTotalStats(allTopTrackInfo)
+  const albumInfo = indexAlbums(await loadAlbumInfo())
+  console.log(`albumInfo:`, albumInfo)
+
+  const totalStats = aggregate.generateTotalStats(allTopTrackInfo, enhancedPlaybackReportJSON)
 
   const jellyfinRewindReport = {
     generalStats: {},
@@ -269,7 +318,7 @@ async function generateRewindReport() {
   jellyfinRewindReport.tracks[`topTracksByLastPlayed`] = topTracksByLastPlayed
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)
 
-  const topAlbumInfo = aggregate.generateTopAlbumInfo(allTopTrackInfo)
+  const topAlbumInfo = aggregate.generateTopAlbumInfo(allTopTrackInfo, albumInfo)
   const topAlbumsByDuration = aggregate.generateTopAlbums(topAlbumInfo, { by: `duration`, limit: 25 })
   const topAlbumsByPlayCount = aggregate.generateTopAlbums(topAlbumInfo, { by: `playCount`, limit: 25 })
   const topAlbumsByLastPlayed = aggregate.generateTopAlbums(topAlbumInfo, { by: `lastPlayed`, limit: 25 })
