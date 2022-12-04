@@ -33,6 +33,24 @@ export class Artist {
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration
   }
+
+  /**
+   * Only return things that are not a long array or large object
+   * Convert long arrays to their length
+   */
+   subsetOnly() {
+    return {
+      id: this.id,
+      name: this.name,
+      tracks: this.tracks.length,
+      images: this.images,
+      playCount: this.playCount,
+      uniqueTracks: this.uniqueTracks.length,
+      plays: this.plays.length,
+      lastPlayed: this.lastPlayed,
+      totalPlayDuration: this.totalPlayDuration,
+    }
+  }
 }
 
 export class Album {
@@ -49,14 +67,35 @@ export class Album {
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration
   }
+
+  /**
+   * Only return things that are not a long array or large object
+   * Convert long arrays to their length
+   */
+   subsetOnly() {
+    return {
+      id: this.id,
+      name: this.name,
+      artists: this.artists.length,
+      albumArtist: this.albumArtist,
+      tracks: this.tracks.length,
+      year: this.year,
+      image: this.image,
+      playCount: this.playCount,
+      plays: this.plays.length,
+      lastPlayed: this.lastPlayed,
+      totalPlayDuration: this.totalPlayDuration,
+    }
+  }
 }
 
 export class Track {
-  constructor({ name, id, artistsBaseInfo, albumArtistBaseInfo, albumBaseInfo, image, year, duration, playCount, plays, lastPlayed, totalPlayDuration, isFavorite }) {
+  constructor({ name, id, artistsBaseInfo, albumBaseInfo, genreBaseInfo, image, year, duration, playCount, plays, lastPlayed, totalPlayDuration, isFavorite }) {
     this.name = name
     this.id = id
     this.artistsBaseInfo = artistsBaseInfo
     this.albumBaseInfo = albumBaseInfo
+    this.genreBaseInfo = genreBaseInfo
     this.image = image
     this.year = year
     this.duration = duration
@@ -69,5 +108,60 @@ export class Track {
 
   get albumArtist() {
     return this.albumBaseInfo.albumArtistBaseInfo
+  }
+
+  /**
+   * Only return things that are not a long array or large object
+   * Convert long arrays to their length
+   */
+   subsetOnly() {
+    return {
+      id: this.id,
+      name: this.name,
+      artistsBaseInfo: this.artistsBaseInfo,
+      albumBaseInfo: this.albumBaseInfo,
+      genreBaseInfo: this.genreBaseInfo,
+      image: this.image,
+      year: this.year,
+      duration: this.duration,
+      playCount: this.playCount,
+      plays: this.plays.length,
+      lastPlayed: this.lastPlayed,
+      totalPlayDuration: this.totalPlayDuration,
+      isFavorite: this.isFavorite
+    }
+  }
+  
+}
+
+export class Genre {
+  constructor({ id, name, tracks, image, playCount, uniqueTracks, plays, lastPlayed, totalPlayDuration }) {
+    this.name = name
+    this.id = id
+    this.tracks = tracks
+    this.image = image
+    this.playCount = playCount
+    this.uniqueTracks = uniqueTracks
+    this.plays = plays
+    this.lastPlayed = lastPlayed
+    this.totalPlayDuration = totalPlayDuration
+  }
+
+  /**
+   * Only return things that are not a long array or large object
+   * Convert long arrays to their length
+   */
+  subsetOnly() {
+    return {
+      id: this.id,
+      name: this.name,
+      tracks: this.tracks.length,
+      image: this.image,
+      playCount: this.playCount,
+      uniqueTracks: this.uniqueTracks.length,
+      plays: this.plays.length,
+      lastPlayed: this.lastPlayed,
+      totalPlayDuration: this.totalPlayDuration
+    }
   }
 }

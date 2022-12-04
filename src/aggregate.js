@@ -4,6 +4,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   const topTrackInfo = Object.values(itemInfo).map(item => {
 
     const playbackReportItem = playbackReportJSON[item.Id]
+    const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
 
     if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
       console.log(`item.ArtistItems:`, item.ArtistItems)
@@ -21,6 +22,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
         },
       },
+      genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
       image: new PrimaryImage({
         parentItemId: item.Id,
         primaryTag: item.ImageTags?.Primary,
@@ -30,8 +32,9 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
       duration: Math.round(item.RunTimeTicks / 10000000),
       playCount: {
         jellyfin: item.UserData?.PlayCount || 0,
-        playbackReport: Number(playbackReportItem?.TotalPlayCount || 0),
-        average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(playbackReportItem?.TotalPlayCount || 0))/2),
+        // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
+        playbackReport: adjustedPlaybackReportPlayCount || 0,
+        average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
       plays: playbackReportItem.Plays || [],
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
@@ -46,7 +49,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   return topTrackInfo
 }
 
-export function generateTopAlbumInfo(topTrackInfo, albumInfo) {
+export function generateAlbumInfo(topTrackInfo, albumInfo) {
   const topAlbumInfo = topTrackInfo.reduce((acc, cur) => {
     const albumId = cur.albumBaseInfo?.id
     const currentAlbumInfo = albumInfo[albumId]
@@ -90,7 +93,7 @@ export function generateTopAlbumInfo(topTrackInfo, albumInfo) {
   return topAlbumInfo
 }
 
-export function generateTopArtistInfo(topTrackInfo, artistInfo) {
+export function generateArtistInfo(topTrackInfo, artistInfo) {
   const topArtistInfo = topTrackInfo.reduce((acc, cur) => {
     cur.artistsBaseInfo.forEach(artist => {
       const artistId = artist.id
@@ -144,6 +147,47 @@ export function generateTopArtistInfo(topTrackInfo, artistInfo) {
   return topArtistInfo
 }
 
+export function generateGenreInfo(topTrackInfo) {
+  const topGenreInfo = topTrackInfo.reduce((acc, cur) => {
+    cur.genreBaseInfo.forEach(genre => {
+      const genreId = genre.id
+      if (!acc[genreId]) {
+        acc[genreId] = new Artist({
+          id: genre.id,
+          name: genre.name,
+          tracks: [cur],
+          image: null,
+          playCount: {
+            jellyfin: cur.playCount?.jellyfin,
+            playbackReport: cur.playCount?.playbackReport,
+            average: cur.playCount?.average,
+          },
+          uniqueTracks: new Set([{id: cur.id, name: cur.name}]),
+          plays: cur.plays,
+          lastPlayed: cur.lastPlayed,
+          totalPlayDuration: cur.totalPlayDuration,
+        })
+      } else {
+        acc[genreId].tracks.push(cur)
+        acc[genreId].playCount.jellyfin += cur.playCount?.jellyfin
+        acc[genreId].playCount.playbackReport += cur.playCount?.playbackReport
+        acc[genreId].playCount.average = Math.ceil(((acc[genreId]?.playCount?.jellyfin || 0) + (acc[genreId]?.playCount?.playbackReport || 0))/2)
+        acc[genreId].uniqueTracks.add({id: cur.id, name: cur.name})
+        acc[genreId].plays.concat(cur.plays)
+        acc[genreId].lastPlayed = (acc[genreId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[genreId]?.lastPlayed || 0) : cur.lastPlayed
+        acc[genreId].totalPlayDuration += cur.totalPlayDuration
+      }
+    })
+    return acc
+  }, {})
+
+  Object.entries(topGenreInfo).forEach(([genreId, genre]) => {
+    genre.uniqueTracks = Array.from(genre.uniqueTracks)
+  })
+  
+  return topGenreInfo
+}
+
 export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   const totalStats = topTrackInfo.reduce((acc, cur) => {
     acc.totalPlayCount.jellyfin += cur.playCount?.jellyfin || 0
@@ -177,24 +221,17 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   return totalStats
 }
 
-export function generateTopTracks(topTrackInfo, { by = `duration`, limit = 25 }) {
-  const topTracks = topTrackInfo
-    .sort((a, b) => {
-      if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
-      } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
-      } else if (by === `lastPlayed`) {
-        return b.lastPlayed - a.lastPlayed
-      }
-    })
-    .slice(0, limit)
-  return topTracks
-}
+export function getTopItems(itemInfo, { by = `duration`, limit = 25 }) {
+  console.log(`itemInfo:`, itemInfo)
+  let topItems
+  if (!Array.isArray(itemInfo)) {
+    topItems = Object.values(itemInfo)
+  } else {
+    topItems = [...itemInfo]
+  }
+  // console.log(`topItems[0]:`, JSON.stringify(topItems[0]))
 
-export function generateTopAlbums(topAlbumInfo, { by = `duration`, limit = 25 }) {
-  const topAlbums = Object.values(topAlbumInfo)
-    .sort((a, b) => {
+  topItems.sort((a, b) => {
       if (by === `duration`) {
         return b.totalPlayDuration - a.totalPlayDuration
       } else if (by === `playCount`) {
@@ -203,23 +240,8 @@ export function generateTopAlbums(topAlbumInfo, { by = `duration`, limit = 25 })
         return b.lastPlayed - a.lastPlayed
       }
     })
-    .slice(0, limit)
-  return topAlbums
-}
-
-export function generateTopArtists(topArtistInfo, { by = `duration`, limit = 25 }) {
-  const topArtists = Object.values(topArtistInfo)
-    .sort((a, b) => {
-      if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
-      } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
-      } else if (by === `lastPlayed`) {
-        return b.lastPlayed - a.lastPlayed
-      }
-    })
-    .slice(0, limit)
-  return topArtists
+  // console.log(`topItems[0]:`, JSON.stringify(topItems[0]))
+  return topItems.slice(0, limit)
 }
 
 export function generateTotalPlaybackDurationByMonth(indexedPlaybackReport) {

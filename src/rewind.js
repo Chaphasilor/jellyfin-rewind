@@ -146,7 +146,7 @@ async function loadItemInfo(items) {
     'SortOrder': `Ascending`,
     'IncludeItemTypes': `Audio`,
     'Recursive': `true`,
-    'Fields': `AudioInfo,ParentId,Ak`,
+    'Fields': `AudioInfo,ParentId,Ak,Genres`,
     'EnableImageTypes': `Primary`,
     'Ids': [...new Set(items.map(item => item.ItemId))].join(','),
   }
@@ -173,7 +173,7 @@ async function loadArtistInfo(items) {
     // 'SortOrder': `Ascending`,
     // 'IncludeItemTypes': `Audio`,
     'Recursive': `true`,
-    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo`,
+    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo,Genres`,
     'EnableImageTypes': `Primary,Backdrop,Banner,Thumb`,
     'userId': auth.config.user.id,
     // 'Ids': items.map(item => item.id).join(','),
@@ -212,7 +212,7 @@ async function loadAlbumInfo() {
     // 'SortOrder': `Ascending`,
     'IncludeItemTypes': `MusicAlbum`,
     'Recursive': `true`,
-    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo`,
+    'Fields': `PrimaryImageAspectRatio,SortName,BasicSyncInfo,Genres`,
     'EnableImageTypes': `Primary,Backdrop,Banner,Thumb`,
     'userId': auth.config.user.id,
     // 'Ids': items.map(item => item.id).join(','),
@@ -277,11 +277,6 @@ async function generateRewindReport() {
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
 
-  let artistIds = allTopTrackInfo.reduce((acc, item) => {
-    acc = acc.concat(item.artistsBaseInfo)
-    return acc
-  }, [])
-  console.log(`artistIds:`, artistIds)
   const artistInfo = indexArtists(await loadArtistInfo())
   console.log(`artistInfo:`, artistInfo)
 
@@ -295,6 +290,7 @@ async function generateRewindReport() {
     tracks: {},
     albums: {},
     artists: {},
+    genres: {},
   }
 
   jellyfinRewindReport.generalStats[`totalPlays`] = totalStats.totalPlayCount.average
@@ -307,9 +303,9 @@ async function generateRewindReport() {
   jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`] = aggregate.generateTotalPlaybackDurationByMonth(indexedPlaybackReport)
   console.log(`jellyfinRewindReport.generalStats['totalPlaybackDurationByMonth']:`, jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`])
 
-  const topTracksByDuration = aggregate.generateTopTracks(allTopTrackInfo, { by: `duration`, limit: 25 })
-  const topTracksByPlayCount = aggregate.generateTopTracks(allTopTrackInfo, { by: `playCount`, limit: 25 })
-  const topTracksByLastPlayed = aggregate.generateTopTracks(allTopTrackInfo, { by: `lastPlayed`, limit: 25 })
+  const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20 })
+  const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20 })
+  const topTracksByLastPlayed = aggregate.getTopItems(allTopTrackInfo, { by: `lastPlayed`, limit: 20 })
   
   jellyfinRewindReport.tracks[`topTracksByDuration`] = topTracksByDuration
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
@@ -318,10 +314,10 @@ async function generateRewindReport() {
   jellyfinRewindReport.tracks[`topTracksByLastPlayed`] = topTracksByLastPlayed
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)
 
-  const topAlbumInfo = aggregate.generateTopAlbumInfo(allTopTrackInfo, albumInfo)
-  const topAlbumsByDuration = aggregate.generateTopAlbums(topAlbumInfo, { by: `duration`, limit: 25 })
-  const topAlbumsByPlayCount = aggregate.generateTopAlbums(topAlbumInfo, { by: `playCount`, limit: 25 })
-  const topAlbumsByLastPlayed = aggregate.generateTopAlbums(topAlbumInfo, { by: `lastPlayed`, limit: 25 })
+  const topAlbumInfo = aggregate.generateAlbumInfo(allTopTrackInfo, albumInfo)
+  const topAlbumsByDuration = aggregate.getTopItems(topAlbumInfo, { by: `duration`, limit: 20 })
+  const topAlbumsByPlayCount = aggregate.getTopItems(topAlbumInfo, { by: `playCount`, limit: 20 })
+  const topAlbumsByLastPlayed = aggregate.getTopItems(topAlbumInfo, { by: `lastPlayed`, limit: 20 })
 
   jellyfinRewindReport.albums[`topAlbumsByDuration`] = topAlbumsByDuration
   // .map(x => `${x.name} by ${x.albumArtist.name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
@@ -330,16 +326,28 @@ async function generateRewindReport() {
   jellyfinRewindReport.albums[`topAlbumsByLastPlayed`] = topAlbumsByLastPlayed
   // .map(x => `${x.name} by ${x.albumArtist.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
-  const topArtistInfo = aggregate.generateTopArtistInfo(allTopTrackInfo, artistInfo)
-  const topArtistsByDuration = aggregate.generateTopArtists(topArtistInfo, { by: `duration`, limit: 25 })
-  const topArtistsByPlayCount = aggregate.generateTopArtists(topArtistInfo, { by: `playCount`, limit: 25 })
-  const topArtistsByLastPlayed = aggregate.generateTopArtists(topArtistInfo, { by: `lastPlayed`, limit: 25 })
+  const topArtistInfo = aggregate.generateArtistInfo(allTopTrackInfo, artistInfo)
+  const topArtistsByDuration = aggregate.getTopItems(topArtistInfo, { by: `duration`, limit: 20 })
+  const topArtistsByPlayCount = aggregate.getTopItems(topArtistInfo, { by: `playCount`, limit: 20 })
+  const topArtistsByLastPlayed = aggregate.getTopItems(topArtistInfo, { by: `lastPlayed`, limit: 20 })
 
   jellyfinRewindReport.artists[`topArtistsByDuration`] = topArtistsByDuration
   // .map(x => `${x.name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
   jellyfinRewindReport.artists[`topArtistsByPlayCount`] = topArtistsByPlayCount
   // .map(x => `${x.name}: ${x.playCount.average} plays`).join(`\n`)
   jellyfinRewindReport.artists[`topArtistsByLastPlayed`] = topArtistsByLastPlayed
+  // .map(x => `${x.name}: last played on ${x.lastPlayed}`).join(`\n`)
+
+  const topGenreInfo = aggregate.generateGenreInfo(allTopTrackInfo)
+  const topGenresByDuration = aggregate.getTopItems(topGenreInfo, { by: `duration`, limit: 20 })
+  const topGenresByPlayCount = aggregate.getTopItems(topGenreInfo, { by: `playCount`, limit: 20 })
+  const topGenresByLastPlayed = aggregate.getTopItems(topGenreInfo, { by: `lastPlayed`, limit: 20 })
+
+  jellyfinRewindReport.genres[`topGenresByDuration`] = topGenresByDuration
+  // .map(x => `${x.name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
+  jellyfinRewindReport.genres[`topGenresByPlayCount`] = topGenresByPlayCount
+  // .map(x => `${x.name}: ${x.playCount.average} plays`).join(`\n`)
+  jellyfinRewindReport.genres[`topGenresByLastPlayed`] = topGenresByLastPlayed
   // .map(x => `${x.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
   console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
@@ -352,8 +360,27 @@ async function generateRewindReport() {
 
 function saveRewindReport() {
   if (rewindReport !== null) {
-    const rewindReportJSON = JSON.stringify(rewindReport)
-    localStorage.setItem(`rewindReport`, rewindReportJSON)
+    try {
+      const rewindReportJSON = JSON.stringify(rewindReport)
+      console.log(`Full report length:`, rewindReportJSON.length)
+      localStorage.setItem(`rewindReport`, rewindReportJSON)
+    } catch (err) {
+      console.warn(`Couldn't save full report to localStorage (maybe quota exceeded?). Saving a subset only`)
+      const reduceToSubsets = categoryEntry => Object.entries(categoryEntry).reduce((acc, [key, value]) => {
+        console.log(`key:`, key)
+        acc[key] = value.map(x => x.subsetOnly ? x.subsetOnly() : x)
+        return acc
+      }, {})
+      const rewindReportLightJSON = JSON.stringify({
+        generalStats: rewindReport.generalStats,
+        tracks: reduceToSubsets(rewindReport.tracks),
+        albums: reduceToSubsets(rewindReport.albums),
+        artists: reduceToSubsets(rewindReport.artists),
+        genres: reduceToSubsets(rewindReport.genres),
+      })
+      console.log(`Light report length:`, rewindReportLightJSON.length)
+      localStorage.setItem(`rewindReportLight`, rewindReportLightJSON)
+    }
   } else {
     console.warn(`No Rewind report to save!`)
   }
@@ -364,7 +391,14 @@ function restoreRewindReport() {
   if (rewindReportJSON !== null) {
     rewindReport = JSON.parse(rewindReportJSON)
   } else {
-    throw new Error(`No Rewind report to restore!`)
+    console.warn(`No full Rewind report to restore! Attempting to restore light report...`)
+
+    const rewindReportLightJSON = localStorage.getItem(`rewindReportLight`)
+    if (rewindReportLightJSON !== null) {
+      rewindReport = JSON.parse(rewindReportLightJSON)
+    } else {
+      throw new Error(`No Rewind report to restore!`)
+    }
   }
   return rewindReport
 }

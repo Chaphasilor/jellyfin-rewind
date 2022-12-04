@@ -178,19 +178,27 @@ function init() {
 
 async function generateRewindReport() {
 
+  let report
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    const report = await jellyfinRewind.generateRewindReport()
+    report = await jellyfinRewind.generateRewindReport()
     console.info(`Report generated successfully!`)
     loadingSpinner.classList.add(`hidden`)
-    jellyfinRewind.saveRewindReport()
     
-    return report    
   } catch (err) {
     console.error(`Error while generating the report:`, err)
   }
   
+  try {
+    jellyfinRewind.saveRewindReport()
+    console.info(`Report saved successfully!`)
+  } catch (err) {
+    console.error(`Couldn't save Rewind report:`, err)
+  }
+  
+  return report    
+
 }
 
 function showRewindReport(report) {

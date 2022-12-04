@@ -35,6 +35,8 @@ state.featureSideEffects = {
   6: {
     load: loadTopAlbumsMedia,
   },
+  7: {
+  },
 }
 
 state.features = [
@@ -43,7 +45,7 @@ state.features = [
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-16">Your Total Playtime<br>of 2022:</h2>
       
-      <div class="mt-28 -rotate-6 font-quicksand text-sky-500 text-5xl"><span class="font-quicksand-bold">${() => insertCommas(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
+      <div class="mt-28 -rotate-6 font-quicksand text-sky-500 text-5xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
 
       <div class="absolute bottom-16 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart"></canvas>
@@ -62,8 +64,8 @@ state.features = [
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => insertCommas(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
-        <div>Listened for <span class="font-semibold">${() => insertCommas(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration?.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -87,12 +89,12 @@ state.features = [
                   <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${insertCommas(track.playCount.average)}</span> streams</div>
+                <div><span class="font-semibold text-black">${showAsNumber(track.playCount.average)}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${insertCommas(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -116,12 +118,12 @@ state.features = [
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${insertCommas(track.playCount.average)}</span> streams</div>
+              <div><span class="font-semibold text-black">${showAsNumber(track.playCount.average)}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${insertCommas(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
+              <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -140,9 +142,8 @@ state.features = [
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => insertCommas(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
-        <!-- TODO show number of unique songs -->
-        <div>Listened to <span class="font-semibold">${() => insertCommas(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.uniqueTracks.length)}</span> unique songs for <span class="font-semibold">${() => insertCommas(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.totalPlayDuration.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
+        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.totalPlayDuration.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -165,17 +166,17 @@ state.features = [
                 </div>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${insertCommas(artist.playCount.average)}</span> streams</div>
+                <div><span class="font-semibold text-black">${showAsNumber(artist.playCount.average)}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${insertCommas(artist.uniqueTracks.length)}</span> songs</div>
+                <div><span class="font-semibold text-black">${showAsNumber(artist.uniqueTracks)}</span> songs</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${insertCommas(artist.totalPlayDuration.toFixed(0))}</span> min</div>
+                <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration.toFixed(0))}</span> min</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -198,12 +199,12 @@ state.features = [
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${insertCommas(artist.playCount.average)}</span> streams</div>
+              <div><span class="font-semibold text-black">${showAsNumber(artist.playCount.average)}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${insertCommas(artist.totalPlayDuration.toFixed(0))}</span> minutes</div>
+              <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration.toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -283,6 +284,67 @@ state.features = [
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
               <div><span class="font-semibold text-black">${album.totalPlayDuration.toFixed(0)}</span> minutes</div>
+            </div>
+            -->
+          </div>
+        </li>
+      `)}
+    </ol>
+  `),
+  // top generes of the year
+  createFeature(html`
+    <div class="text-center">
+      <h2 class="text-2xl font-medium mt-10">Your Top Genres<br>of the year</h2>
+      <ol class="flex flex-col gap-2 p-6">
+        ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5).map((genre, index) => html`
+          <li class="relative flex flex-row items-center bg-green-300 gap-4 overflow-hidden px-4 py-3 rounded-xl">
+
+            <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
+              <div class="flex flex-row gap-4 w-full justify-start items-center whitespace-nowrap">
+                <span class="font-semibold text-xl">${index + 1}.</span>
+                <div class="flex flex-col gap-0.5 items-start">
+
+                  <span class="font-quicksand-bold text-lg uppercase tracking-widest">${genre.name}</span>
+
+                  <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
+                    <div><span class="font-semibold text-black">${showAsNumber(genre.playCount.average)}</span> streams</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                    <div><span class="font-semibold text-black">${showAsNumber(genre.uniqueTracks)}</span> songs</div>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                    <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration.toFixed(0))}</span> min</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </li>
+        `)}
+      </ol>
+    </div>
+    <!-- continue as simple list -->
+    <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
+      ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(5, 20).map((genre, index) => html`
+        <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
+          <div class="flex flex-col gap-1 w-full">
+            <div class="flex flex-col gap-0.25 items-start">
+              <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
+                <span class="font-semibold mr-2">${index + 1 + 5}.</span>
+                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${genre.name}</span>
+              </div>
+            </div>
+            <!--
+            <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
+              <div><span class="font-semibold text-black">${showAsNumber(genre.playCount.average)}</span> streams</div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration.toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -552,6 +614,9 @@ function loadTopAlbumsMedia() {
   
 }
 
-function insertCommas(number) {
-  return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+function showAsNumber(numberOrArray) {
+  if (Array.isArray(numberOrArray)) {
+    numberOrArray = numberOrArray.length
+  }
+  return numberOrArray.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
