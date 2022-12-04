@@ -297,7 +297,7 @@ state.features = [
       <h2 class="text-2xl font-medium mt-10">Your Top Genres<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5).map((genre, index) => html`
-          <li class="relative flex flex-row items-center bg-green-300 gap-4 overflow-hidden px-4 py-3 rounded-xl">
+          <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
             <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
               <div class="flex flex-row gap-4 w-full justify-start items-center whitespace-nowrap">
@@ -619,4 +619,30 @@ function showAsNumber(numberOrArray) {
     numberOrArray = numberOrArray.length
   }
   return numberOrArray.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// function stringToColor(string) {
+//   var hash = 0;
+//   for (var i = 0; i < string.length; i++) {
+//       hash = string.charCodeAt(i) + ((hash << 5) - hash);
+//   }
+//   var color = `#`;
+//   for (var i = 0; i < 3; i++) {
+//       var value = (hash >> (i * 8)) & 0xFF;
+//       color += ('00' + value.toString(16)).substring(-2);
+//   }
+//   return color;
+// }
+
+function stringToColor(string) {
+  var hash = 0;
+  for (var i = 0; i < string.length; i++) {
+      hash = string.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  // var color = `#`;
+  // for (var i = 0; i < 3; i++) {
+  //     var value = (hash >> (i * 8)) & 0xFF;
+  //     color += ('00' + value.toString(16)).substring(-2);
+  // }
+  return `hsl(${Number(hash) % 256}, 100%, 80%)`;
 }
