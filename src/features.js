@@ -14,8 +14,8 @@ let state = reactive({
 
 state.featureSideEffects = {
   0: {
-    load: showPlaytimeByMonthChart,
-    unload: destroyPlayTimeByMonthChart,
+    enter: showPlaytimeByMonthChart,
+    leave: destroyPlayTimeByMonthChart,
   },
   1: {
     load: loadTopTrackMedia,
@@ -396,9 +396,9 @@ export function init(rewindReport, jellyHelper) {
 
   // autoAdvance()
 
-  document.querySelector(`#playtime-by-month-chart`).addEventListener(`load`, () => {
-    showPlaytimeByMonthChart()
-  })
+  // document.querySelector(`#playtime-by-month-chart`).addEventListener(`load`, () => {
+  //   showPlaytimeByMonthChart()
+  // })
 
 }
 
@@ -419,16 +419,26 @@ export function closeFeatures() {
 watch(() => state.featuresOpen, (value) => {
   if (value) {
     document.querySelector(`body`).classList.add(`overflow-hidden`)
+      // pre-load all features
+    setTimeout(() => {
+      Object.entries(state.featureSideEffects).forEach(([featureId, sideEffects]) => {
+        sideEffects.load?.()
+      })
+    }, 500)
   } else {
     document.querySelector(`body`).classList.remove(`overflow-hidden`)
+    // reset all features
+    Object.entries(state.featureSideEffects).forEach(([featureId, sideEffects]) => {
+      sideEffects.leave?.()
+    })
   }
 })
 
 watch(() => state.featuresOpen && state.currentFeature, () => {
   if (state.featuresOpen) {
     let index = state.currentFeature
-    state.featureSideEffects[index]?.load?.()
-    state.featureSideEffects[(index-1) % state.features.length]?.unload?.()
+    state.featureSideEffects[index]?.enter?.()
+    state.featureSideEffects[(index-1) % state.features.length]?.leave?.()
   }
 })
 
