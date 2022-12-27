@@ -11,9 +11,13 @@
 
     <div class="p-2">
 
-      <span>
-        <button class="hidden border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
-      </span>
+      <div class="flex flex-row hidden gap-4" id="logged-in-info">
+        <div class="flex flex-col">
+          <span>Signed in as '<span id="logged-in-user"></span>'</span>
+          <span>at Jellyfin Server '<span id="logged-in-server"></span>'</span>
+        </div>
+        <button class="border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
+      </div>
       
       <div id="server-config">
         <label for="serverUrl">Server URL:</label>
@@ -51,7 +55,7 @@
        </svg>
       </span>
     
-      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1" name="output" id="output" cols="80" rows="40"></textarea>
+      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1 hidden" name="output" id="output" cols="80" rows="40"></textarea>
   
     </div>
 

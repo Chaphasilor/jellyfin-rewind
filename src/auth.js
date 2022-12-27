@@ -108,6 +108,7 @@ export default class Auth {
     this.config.user = {
       token: json.AccessToken,
       id: json.User.Id,
+      name: json.User.Name,
       primaryImageTag: json.User.PrimaryImageTag,
       sessionId: json.SessionInfo.Id,
     };

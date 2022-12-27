@@ -43,7 +43,10 @@ const showReport = document.querySelector(`#show-report`)
 const generateReport = document.querySelector(`#generate-report`)
 const loadingSpinner = document.querySelector(`#loading-spinner`)
 const output = document.querySelector(`#output`)
+const loggedInInfo = document.querySelector(`#logged-in-info`)
 const logOutButton = document.querySelector(`#log-out`)
+const loggedInUserInfo = document.querySelector(`#logged-in-user`)
+const loggedInServerInfo = document.querySelector(`#logged-in-server`)
 
 let selectedUsername = ``
 let featuresInitialized = false
@@ -60,11 +63,14 @@ window.onload = () => {
 }
 
 function enableLogout() {
-  logOutButton.classList.remove(`hidden`)
+  loggedInInfo.classList.remove(`hidden`)
   logOutButton.addEventListener(`click`, () => {
     jellyfinRewind.auth.destroySession()
     window.location.reload()
   })
+
+  loggedInUserInfo.innerText = jellyfinRewind.auth.config.user.name
+  loggedInServerInfo.innerText = jellyfinRewind.auth.config.serverInfo.ServerName
 }
 
 connectToServerButton.addEventListener(`click`, connectToServer)
@@ -136,6 +142,7 @@ const login = (userId) => async (event) => {
     await jellyfinRewind.auth.authenticateUser(selectedUsername, password.value)
     console.info(`Successfully logged in as ${selectedUsername}`)
     jellyfinRewind.auth.saveSession()
+    enableLogout()
 
     userLogin.classList.add(`hidden`)
     init()
