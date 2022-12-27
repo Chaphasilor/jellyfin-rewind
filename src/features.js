@@ -20,7 +20,10 @@ let state = reactive({
 
 state.featureSideEffects = {
   0: {
-    enter: showPlaytimeByMonthChart,
+    enter: () => {
+      pausePlayback()
+      showPlaytimeByMonthChart()
+    },
     leave: destroyPlayTimeByMonthChart,
   },
   1: {
@@ -90,7 +93,10 @@ state.features = [
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5).map((track, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-tracks-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
+              <img id="${() => `top-tracks-image-${index}`}" class="w-full h-full" />
+              <div id="${() => `top-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center bg-black/30 hidden"></div>
+            </div>
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
@@ -501,6 +507,25 @@ export function init(rewindReport, jellyHelper) {
                       ],
                     }) }
                   </li>
+                  <li class="flex flex-row justify-between">
+                    ${() => buildOptionChooser({
+                      title: `Sound`,
+                      description: `Should fitting music be played while you view the report?`,
+                      settingsKey: `sound`,
+                      options: [
+                        {
+                          name: `On`,
+                          description: `Sound is on`,
+                          value: true,
+                        },
+                        {
+                          name: `Off`,
+                          description: `Sound is off. Nothing will play.`,
+                          value: false,
+                        },
+                      ],
+                    }) }
+                  </li>
                 </ul>
               </div>
             </div>
@@ -607,21 +632,32 @@ function next() {
   }
 }
 function previous() {
-  state.currentFeature = (state.currentFeature - 1) % state.features.length;
+  state.currentFeature = state.currentFeature - 1 < 0 ? state.features.length - 1 : state.currentFeature - 1;
 }
 
 function createFeature(featureName, content) {
   console.log(`feature created`)
   return (index) => html`
-    <li data-feature-name="${() => featureName}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
+    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
       <div>${content}</div>
-      <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
-        <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
-        <div @click="${() => previous()}" class="col-span-1 row-span-1"></div>
-        <div @click="${() => next()}" class="col-span-2 row-span-1"></div>
-      </div>
-    </li>
-  `
+      </li>
+      `
+      // <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
+      //   <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
+      //   <div @click="${() => previous()}" class="col-span-1 row-span-1"></div>
+      //   <div @click="${() => next()}" class="col-span-2 row-span-1"></div>
+      // </div>
+}
+
+function handleFeatureClick(event) {
+  // call `previous()` or `next()` depending on which side of the feature was clicked
+  console.log(event)
+
+  if (event.offsetX < event.target.offsetWidth / 3) {
+    previous()
+  } else {
+    next()
+  }
 }
 
 function showPlaytimeByMonthChart() {
@@ -802,10 +838,49 @@ function playTopTrack() {
 function playTopTracks() {
 
   const topSongs = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(1, 5) // first track excluded
-  const randomSong = topSongs[Math.floor(Math.random() * topSongs.length)]
+  const randomSongId = Math.floor(Math.random() * topSongs.length)
+  const randomSong = topSongs[randomSongId]
+  showPlaying(`#top-tracks-visualizer`, randomSongId+1, 5)
+
   console.log(`randomSong:`, randomSong)
   fadeToNextTrack(randomSong)
   
+}
+
+function showPlaying(itemQuery, itemId, idRange) {
+
+  for (let i = 0; i < idRange; i++) {
+    const itemOverlay = document.querySelector(`${itemQuery}-${i}`)
+    if (itemOverlay) {
+      itemOverlay.innerHTML = ``
+      itemOverlay.classList.add(`hidden`)
+    }
+  }
+  
+  const playingItemOverlay = document.querySelector(`${itemQuery}-${itemId}`)
+
+  // animated bars
+  if (playingItemOverlay) {
+    playingItemOverlay.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white icon icon-tabler icon-tabler-antenna-bars-5" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <line x1="6" y1="18" x2="6" y2="15">
+          <animate attributeName="y2" values="0;16;0" begin="0.0s" dur="0.7s" repeatCount="indefinite" />
+        </line>
+        <line x1="10" y1="18" x2="10" y2="12">
+          <animate attributeName="y2" values="0;16;0" begin="0.2s" dur="0.7s" repeatCount="indefinite" />
+        </line>
+        <line x1="14" y1="18" x2="14" y2="9">
+          <animate attributeName="y2" values="0;16;0" begin="0.3s" dur="0.7s" repeatCount="indefinite" />
+        </line>
+        <line x1="18" y1="18" x2="18" y2="6">
+          <animate attributeName="y2" values="0;16;0" begin="0.4s" dur="0.7s" repeatCount="indefinite" />
+        </line>
+      </svg>
+    `
+    playingItemOverlay.classList.remove(`hidden`)
+  }
+
 }
 
 // fade between two tracks over 1000ms
