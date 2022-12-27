@@ -9,6 +9,7 @@ let state = reactive({
   features: null,
   featureSideEffects: null,
   rewindReport: null,
+  dataSource: null,
   jellyHelper: null,
 })
 
@@ -43,29 +44,32 @@ state.features = [
   // total playtime
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-16">Your Total Playtime<br>of 2022:</h2>
+      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of 2022:</h2>
       
-      <div class="mt-28 -rotate-6 font-quicksand text-sky-500 text-5xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
+      <div class="mt-24 -rotate-6 font-quicksand text-sky-500 text-4xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes.toFixed(0))}</span> min</div>
 
       <div class="absolute bottom-16 w-full h-2/5 px-8">
-        <canvas id="playtime-by-month-chart"></canvas>
+        <canvas id="playtime-by-month-chart" class="${() => state.rewindReport.playbackReportAvailable ? `` : `opacity-30`}"></canvas>
+        ${() => state.rewindReport.playbackReportAvailable ? html`` : html`
+          <div class="absolute top-0 left-0 w-full h-full text-4xl rotate-12 grid content-center text-sky-900 tracking-wider font-semibold">Unavailable</div>
+        `}
       </div>
     </div>
   `),
   // top song
   createFeature(html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-10">Your Top Song<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Song<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
-        <img id="top-track-image" class="w-64 h-64 mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="-rotate-6 -ml-10 mt-10 text-5xl font-semibold">
+        <img id="top-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
+        <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
           <div class="">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0].artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)} -</div>
           <div class="mt-8 ml-10">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.name}</div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
-        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration?.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount[state.dataSource])}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration[state.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -75,26 +79,26 @@ state.features = [
   // top songs of the year
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-10">Your Top Songs<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-5">Your Top Songs<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5).map((track, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-tracks-image-${index}`}" class="w-20 h-20 rounded-md" />
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-20 w-full rounded-md">
+            <img id="${() => `top-tracks-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-lg mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-lg leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
+                  <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${track.name}</span>
                 </div>
                   <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${showAsNumber(track.playCount.average)}</span> streams</div>
+                <div><span class="font-semibold text-black">${showAsNumber(track.playCount[state.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration[state.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -112,18 +116,18 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${track.name}</span>
               </div>
                 <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${showAsNumber(track.playCount.average)}</span> streams</div>
+              <div><span class="font-semibold text-black">${showAsNumber(track.playCount[state.dataSource])}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration.toFixed(0))}</span> minutes</div>
+              <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration[state.dataSource].toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -134,16 +138,16 @@ state.features = [
   // top artist
   createFeature(html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-10">Your Top Artist<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Artist<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
-        <img id="top-artist-image" class="w-64 h-64 mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="-rotate-6 mt-16 text-5xl font-semibold">
+        <img id="top-artist-image" class="w-[30vh] h-[30vh] mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
+        <div class="-rotate-6 mt-16 text-4xl font-semibold">
           <div class="">${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.name}</div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.playCount.average)}</span> times.</div>
-        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.totalPlayDuration.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.playCount[state.dataSource])}</span> times.</div>
+        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.totalPlayDuration[state.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -153,20 +157,20 @@ state.features = [
   // top artists of the year
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-10">Your Top Artists<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-5">Your Top Artists<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(0, 5).map((artist, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-artists-image-${index}`}" class="w-20 h-20 rounded-md" />
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-20 w-full rounded-md">
+            <img id="${() => `top-artists-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-lg mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-lg leading-tight">${artist.name}</span>
+                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
+                  <span class="font-semibold text-base leading-tight">${artist.name}</span>
                 </div>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${showAsNumber(artist.playCount.average)}</span> streams</div>
+                <div><span class="font-semibold text-black">${showAsNumber(artist.playCount[state.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
@@ -176,7 +180,8 @@ state.features = [
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration.toFixed(0))}</span> min</div>
+                <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration[state.dataSource]
+                .toFixed(0))}</span> min</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -194,17 +199,17 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${artist.name}</span>
+                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${artist.name}</span>
               </div>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${showAsNumber(artist.playCount.average)}</span> streams</div>
+              <div><span class="font-semibold text-black">${showAsNumber(artist.playCount[state.dataSource])}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration.toFixed(0))}</span> minutes</div>
+              <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration[state.dataSource].toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -215,17 +220,17 @@ state.features = [
   // top album
   createFeature(html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-10">Your Top Album<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Album<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
-        <img id="top-album-image" class="w-64 h-64 mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
+        <img id="top-album-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
           <div class="text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0].name}</div>
           <div class="mt-8 ml-10">by ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.albumArtist.name}</div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.playCount.average}</span> times.</div>
-        <div>Listened for <span class="font-semibold">${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.totalPlayDuration?.toFixed(0)}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.playCount[state.dataSource])}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.totalPlayDuration[state.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -235,26 +240,26 @@ state.features = [
   // top albums of the year
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-10">Your Top Albums<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-5">Your Top Albums<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(0, 5).map((album, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-albums-image-${index}`}" class="w-20 h-20 rounded-md" />
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-20 w-full rounded-md">
+            <img id="${() => `top-albums-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-lg mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${album.name}</span>
+                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
+                  <span class="font-semibold text-babase leading-tight text-ellipsis overflow-hidden">${album.name}</span>
                 </div>
                   <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${album.albumArtist.name}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${album.playCount.average}</span> streams</div>
+                <div><span class="font-semibold text-black">${album.playCount[state.dataSource]}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${album.totalPlayDuration.toFixed(0)}</span> minutes</div>
+                <div><span class="font-semibold text-black">${album.totalPlayDuration[state.dataSource].toFixed(0)}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -272,18 +277,18 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${album.name}</span>
+                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${album.name}</span>
               </div>
                 <div class="ml-6 text-xs">by <span class="font-semibold">${album.albumArtist.name}</span>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${album.playCount.average}</span> streams</div>
+              <div><span class="font-semibold text-black">${album.playCount[state.dataSource]}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${album.totalPlayDuration.toFixed(0)}</span> minutes</div>
+              <div><span class="font-semibold text-black">${album.totalPlayDuration[state.dataSource].toFixed(0)}</span> minutes</div>
             </div>
             -->
           </div>
@@ -294,20 +299,20 @@ state.features = [
   // top generes of the year
   createFeature(html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-10">Your Top Genres<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-5">Your Top Genres<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5).map((genre, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
             <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
               <div class="flex flex-row gap-4 w-full justify-start items-center whitespace-nowrap">
-                <span class="font-semibold text-xl">${index + 1}.</span>
+                <span class="font-semibold basext-xl">${index + 1}.</span>
                 <div class="flex flex-col gap-0.5 items-start">
 
                   <span class="font-quicksand-bold text-lg uppercase tracking-widest">${genre.name}</span>
 
                   <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                    <div><span class="font-semibold text-black">${showAsNumber(genre.playCount.average)}</span> streams</div>
+                    <div><span class="font-semibold text-black">${showAsNumber(genre.playCount[state.dataSource])}</span> streams</div>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
@@ -317,7 +322,7 @@ state.features = [
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
                     </svg>
-                    <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration.toFixed(0))}</span> min</div>
+                    <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration[state.dataSource].toFixed(0))}</span> min</div>
                   </div>
                 </div>
               </div>
@@ -334,17 +339,17 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibold leading-tight text-ellipsis overflow-hidden">${genre.name}</span>
+                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${genre.name}</span>
               </div>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-              <div><span class="font-semibold text-black">${showAsNumber(genre.playCount.average)}</span> streams</div>
+              <div><span class="font-semibold text-black">${showAsNumber(genre.playCount[state.dataSource])}</span> streams</div>
               <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <circle cx="12" cy="12" r="4"></circle>
               </svg>
-              <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration.toFixed(0))}</span> minutes</div>
+              <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration[state.dataSource].toFixed(0))}</span> minutes</div>
             </div>
             -->
           </div>
@@ -363,6 +368,10 @@ export function init(rewindReport, jellyHelper) {
   state.rewindReport = rewindReport
   state.jellyHelper = jellyHelper
   console.log(`state.rewindReport:`, state.rewindReport)
+
+  state.dataSource = state.rewindReport.playbackReportAvailable ? (state.rewindReport.playbackReportComplete ? `playbackReport` : `average`) : `jellyfin`
+  console.log(`state.dataSource:`, state.dataSource)
+  console.log(`state.rewindReport.playbackReportAvailable:`, state.rewindReport.playbackReportAvailable)
 
   let content = html`
       ${() => {
@@ -405,15 +414,19 @@ export function init(rewindReport, jellyHelper) {
 function autoAdvance() {
   let intervalTimer = setInterval(() => {
     next()
-  }, 5000)
+  }, 1000 * 12)
 }
 
 export function openFeatures() {
   state.featuresOpen = true
+  // request fullscreen
+  document.querySelector(`body`).requestFullscreen()
 }
 export function closeFeatures() {
   mainElement.innerHTML = ``;
   state.featuresOpen = false
+  // exit fullscreen
+  document.exitFullscreen()
 }
 
 watch(() => state.featuresOpen, (value) => {
@@ -457,8 +470,13 @@ function previous() {
 function createFeature(content) {
   console.log(`feature created`)
   return (index) => html`
-    <li @click="${() => next()}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
-      ${content}
+    <li class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
+      <div>${content}</div>
+      <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
+        <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
+        <div @click="${() => previous()}" class="col-span-1 row-span-1"></div>
+        <div @click="${() => next()}" class="col-span-2 row-span-1"></div>
+      </div>
     </li>
   `
 }
@@ -531,7 +549,7 @@ function showPlaytimeByMonthChart() {
     labels: [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`],
     datasets: [{
       label: `Playtime by Month`,
-      data: monthData,
+      data: state.rewindReport.playbackReportAvailable ? monthData : [300, 600, 367, 763, 823, 285, 506, 583, 175, 286, 1204, 496],
     }]
   }
   

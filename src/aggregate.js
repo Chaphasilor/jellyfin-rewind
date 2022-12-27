@@ -36,9 +36,13 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         playbackReport: adjustedPlaybackReportPlayCount || 0,
         average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
-      plays: playbackReportItem.Plays || [],
+      plays: playbackReportItem?.Plays || [],
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
-      totalPlayDuration: Number(playbackReportItem?.TotalDuration) / 60, // convert to minutes
+      totalPlayDuration: {
+        jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
+        playbackReport: Number(playbackReportItem?.TotalDuration) / 60 || -1, // convert to minutes
+        average: Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2),
+      },
       isFavorite: item.UserData?.IsFavorite,
     })
 
@@ -83,7 +87,9 @@ export function generateAlbumInfo(topTrackInfo, albumInfo) {
       acc[albumId].playCount.average = Math.ceil(((acc[albumId]?.playCount?.jellyfin || 0) + (acc[albumId]?.playCount?.playbackReport || 0))/2)
       acc[albumId].plays.concat(cur.plays)
       acc[albumId].lastPlayed = (acc[albumId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[albumId]?.lastPlayed || 0) : cur.lastPlayed
-      acc[albumId].totalPlayDuration += cur.totalPlayDuration
+      acc[albumId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+      acc[albumId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+      acc[albumId].totalPlayDuration.average = Math.ceil(((acc[albumId]?.totalPlayDuration?.jellyfin || 0) + (acc[albumId]?.totalPlayDuration?.playbackReport || 0))/2)
     }
     return acc
   }, {})
@@ -134,7 +140,9 @@ export function generateArtistInfo(topTrackInfo, artistInfo) {
         acc[artistId].uniqueTracks.add({id: cur.id, name: cur.name})
         acc[artistId].plays.concat(cur.plays)
         acc[artistId].lastPlayed = (acc[artistId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[artistId]?.lastPlayed || 0) : cur.lastPlayed
-        acc[artistId].totalPlayDuration += cur.totalPlayDuration
+        acc[artistId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+        acc[artistId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+        acc[artistId].totalPlayDuration.average = Math.ceil(((acc[artistId]?.totalPlayDuration?.jellyfin || 0) + (acc[artistId]?.totalPlayDuration?.playbackReport || 0))/2)
       }
     })
     return acc
@@ -175,7 +183,9 @@ export function generateGenreInfo(topTrackInfo) {
         acc[genreId].uniqueTracks.add({id: cur.id, name: cur.name})
         acc[genreId].plays.concat(cur.plays)
         acc[genreId].lastPlayed = (acc[genreId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[genreId]?.lastPlayed || 0) : cur.lastPlayed
-        acc[genreId].totalPlayDuration += cur.totalPlayDuration
+        acc[genreId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+        acc[genreId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+        acc[genreId].totalPlayDuration.average = Math.ceil(((acc[genreId]?.totalPlayDuration?.jellyfin || 0) + (acc[genreId]?.totalPlayDuration?.playbackReport || 0))/2)
       }
     })
     return acc
@@ -193,7 +203,9 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     acc.totalPlayCount.jellyfin += cur.playCount?.jellyfin || 0
     acc.totalPlayCount.playbackReport += cur.playCount?.playbackReport || 0
     acc.totalPlayCount.average = Math.ceil((acc.totalPlayCount.jellyfin + acc.totalPlayCount.playbackReport)/2)
-    acc.totalPlayDuration += cur.totalPlayDuration
+    acc.totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+    acc.totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+    acc.totalPlayDuration.average = Math.ceil((acc.totalPlayDuration.jellyfin + acc.totalPlayDuration.playbackReport)/2)
     acc.uniqueTracks.add(cur.id)
     acc.uniqueAlbums.add(cur.albumBaseInfo?.id)
     acc.uniqueArtists.add(cur.artistsBaseInfo?.[0]?.id)
@@ -204,7 +216,10 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       playbackReport: 0,
       average: 0,
     },
-    totalPlayDuration: 0,
+    totalPlayDuration: {
+      jellyfin: 0,
+      playbackReport: 0,
+    },
     uniqueTracks: new Set(),
     uniqueAlbums: new Set(),
     uniqueArtists: new Set(),
@@ -215,13 +230,14 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   enhancedPlaybackReport.notFound.forEach((item) => {
     totalStats.totalPlayCount.playbackReport += 1
     totalStats.totalPlayCount.average = Math.ceil((totalStats.totalPlayCount.jellyfin + totalStats.totalPlayCount.playbackReport)/2)
-    totalStats.totalPlayDuration += Number(item.PlayDuration) / 60
+    totalStats.totalPlayDuration.playbackReport += Number(item.PlayDuration) / 60
+    totalStats.totalPlayDuration.average = Math.ceil((totalStats.totalPlayDuration.jellyfin + totalStats.totalPlayDuration.playbackReport)/2)
   })
   
   return totalStats
 }
 
-export function getTopItems(itemInfo, { by = `duration`, limit = 25 }) {
+export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource = `average` }) {
   console.log(`itemInfo:`, itemInfo)
   let topItems
   if (!Array.isArray(itemInfo)) {
@@ -233,9 +249,15 @@ export function getTopItems(itemInfo, { by = `duration`, limit = 25 }) {
 
   topItems.sort((a, b) => {
       if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
+        let aDuration = 0, bDuration = 0;
+        aDuration = a.totalPlayDuration[dataSource]
+        bDuration = b.totalPlayDuration[dataSource]
+        return bDuration - aDuration
       } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
+        let aPlayCount = 0, bPlayCount = 0;
+        aPlayCount = a.playCount[dataSource]
+        bPlayCount = b.playCount[dataSource]
+        return bPlayCount - aPlayCount
       } else if (by === `lastPlayed`) {
         return b.lastPlayed - a.lastPlayed
       }
