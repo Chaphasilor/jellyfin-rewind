@@ -14,6 +14,7 @@ let state = reactive({
   pollCanvas: false,
   settings: {
     dataSource: null,
+    sound: true,
   },
 })
 
@@ -24,9 +25,11 @@ state.featureSideEffects = {
   },
   1: {
     load: loadTopTrackMedia,
+    enter: playTopTrack,
   },
   2: {
     load: loadTopTracksMedia,
+    enter: playTopTracks,
   },
   3: {
     load: loadTopArtistMedia,
@@ -427,6 +430,27 @@ export function init(rewindReport, jellyHelper) {
                   })
                 }}
               </ul>
+              <button class="px-1 z-[150]" @click="${() => toggleMute()}" type="button">
+                ${() => state.settings.sound ?
+                  html`
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M15 8a5 5 0 0 1 0 8"></path>
+                    <path d="M17.7 5a9 9 0 0 1 0 14"></path>
+                    <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+                  </svg>
+                  ` :
+                  html`
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"></path>
+                    <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"></path>
+                    <path d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"></path>
+                    <path d="M3 3l18 18"></path>
+                  </svg>
+                  `
+                }
+              </button>
               <button class="px-1 z-[150]" @click="${() => toggleSettings()}" type="button">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -483,7 +507,10 @@ export function init(rewindReport, jellyHelper) {
             ` :
             html`<br>`
           }
-        </div>`
+        </div>
+        <audio id="audio-player-1"></audio>
+        <audio id="audio-player-2"></audio>
+        `
         :
         html`<br>`
       }}
@@ -531,6 +558,10 @@ export function toggleSettings() {
   state.settingsOpen = !state.settingsOpen
 }
 
+export function toggleMute() {
+  state.settings.sound = !state.settings.sound
+}
+
 watch(() => state.featuresOpen, (value) => {
   if (value) {
     document.querySelector(`body`).classList.add(`overflow-hidden`)
@@ -557,6 +588,16 @@ watch(() => state.featuresOpen && state.currentFeature, () => {
   }
 })
 
+watch(() => {
+  if (state.featuresOpen) {
+    if (state.settings.sound) {
+      resumePlayback()
+    } else {
+      pausePlayback()
+    }
+  }
+})
+
 function next() {
   if (state.currentFeature >= state.features.length - 1) {
     state.currentFeature = 0
@@ -572,7 +613,7 @@ function previous() {
 function createFeature(featureName, content) {
   console.log(`feature created`)
   return (index) => html`
-    <li x-feature-name="${() => featureName}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
+    <li data-feature-name="${() => featureName}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
       <div>${content}</div>
       <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
         <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
@@ -746,6 +787,171 @@ function loadTopAlbumsMedia() {
     state.jellyHelper.loadImage([albumPrimaryImage, albumBackgroundImage], album.image, `album`)
   })
   
+}
+
+
+function playTopTrack() {
+
+  const topSongByDuration = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
+  console.log(`topSongByDuration:`, topSongByDuration)
+  fadeToNextTrack(topSongByDuration)
+
+}
+
+// plays a random track from the top 5 tracks (excluding the top track)
+function playTopTracks() {
+
+  const topSongs = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(1, 5) // first track excluded
+  const randomSong = topSongs[Math.floor(Math.random() * topSongs.length)]
+  console.log(`randomSong:`, randomSong)
+  fadeToNextTrack(randomSong)
+  
+}
+
+// fade between two tracks over 1000ms
+async function fadeToNextTrack(trackInfo) {
+
+  const player1 = document.querySelector(`#audio-player-1`)
+  const player2 = document.querySelector(`#audio-player-2`)
+  console.log(`player1:`, player1)
+  console.log(`player2:`, player2)
+
+  if (!player1 || !player2) {
+    return
+  }
+
+  // mark the currently active player as inactive, and the other as active
+  let activePlayer, inactivePlayer
+  if (player1.paused) {
+    activePlayer = player2
+    inactivePlayer = player1
+  } else {
+    activePlayer = player1
+    inactivePlayer = player2
+  }
+  activePlayer.setAttribute(`data-active`, false)
+  inactivePlayer.setAttribute(`data-active`, true)
+
+  await state.jellyHelper.loadAudio(inactivePlayer, trackInfo)
+
+  if (state.settings.sound) {
+    inactivePlayer.volume = 0
+    activePlayer.volume = 1
+    inactivePlayer.play()
+  
+    // fade
+    let fadeInterval = setInterval(() => {
+      try {
+        if (inactivePlayer.volume + 0.1 <= 1) {
+          inactivePlayer.volume += 0.1
+          activePlayer.volume -= 0.1
+        } else {
+          clearInterval(fadeInterval)
+    
+          // stop the active player
+          activePlayer.pause()
+          activePlayer.currentTime = 0
+        }
+      } catch (err) {
+        console.error(`Error while fading tracks:`, err)
+        clearInterval(fadeInterval)
+        inactivePlayer.volume = 1
+        activePlayer.volume = 0
+        activePlayer.pause()
+      }
+    }, 100)
+  }
+
+}
+
+// fade both tracks out over 1000ms
+function pausePlayback() {
+  const player1 = document.querySelector(`#audio-player-1`)
+  const player2 = document.querySelector(`#audio-player-2`)
+  console.log(`player1:`, player1)
+  console.log(`player2:`, player2)
+
+  if (!player1 || !player2) {
+    return
+  }
+
+  // mark the currently active player for later
+  let activePlayer, inactivePlayer
+  if (player1.paused) {
+    activePlayer = player2
+    inactivePlayer = player1
+  } else {
+    activePlayer = player1
+    inactivePlayer = player2
+  }
+  activePlayer.setAttribute(`data-active`, true)
+  inactivePlayer.setAttribute(`data-active`, false)
+  
+  player1.volume = 1
+  player2.volume = 1
+
+  // fade
+  let fadeInterval = setInterval(() => {
+    try {
+      if (player1.volume - 0.1 >= 0) {
+        player1.volume -= 0.1
+        player2.volume -= 0.1
+      } else {
+        clearInterval(fadeInterval)
+        
+        // stop the active player
+        player1.pause()
+        player2.pause()
+        //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+      }
+    } catch (err) {
+      console.error(`Error while fading tracks:`, err)
+      clearInterval(fadeInterval)
+      player1.volume = 0
+      player2.volume = 0
+      player1.pause()
+      player2.pause()
+    }
+  }, 100)
+  
+}
+
+// uses the tag data to determine the previously active player and resumes playback by fading it in
+function resumePlayback() {
+  const player1 = document.querySelector(`#audio-player-1`)
+  const player2 = document.querySelector(`#audio-player-2`)
+  console.log(`player1:`, player1)
+  console.log(`player2:`, player2)
+
+  if (!player1 || !player2) {
+    return
+  }
+
+  let activePlayer
+  if (player1.getAttribute(`data-active`) === `true`) {
+    activePlayer = player1
+  } else {
+    activePlayer = player2
+  }
+
+  activePlayer.volume = 0
+  activePlayer.play()
+
+  // fade
+  let fadeInterval = setInterval(() => {
+    try {
+      if (activePlayer.volume + 0.1 <= 1) {
+        activePlayer.volume += 0.1
+      } else {
+        clearInterval(fadeInterval)
+      }
+    } catch (err) {
+      console.error(`Error while fading tracks:`, err)
+      clearInterval(fadeInterval)
+      activePlayer.volume = 1
+    }
+  }, 100)
+
 }
 
 function showAsNumber(numberOrArray) {

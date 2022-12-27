@@ -86,6 +86,30 @@ export default class JellyHelper {
     
   }
 
+  async loadAudio(element, audioInfo) {
+
+    // check if audio element is already loaded/playing
+    if (element.src) {
+      element.pause()
+      element.removeAttribute(`src`)
+    }
+
+    const params = {
+      'UserId': this.auth.config.user.id,
+      'DeviceId': this.auth.config.user.deviceId,
+      'api_key': this.auth.config.user.token,
+      'Container': `opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg`,
+      'TranscodingContainer': `ts`,
+      'TranscodingProtocol': `hls`,
+      'AudioCodec': `aac`,
+      'EnableRedirection': `true`,
+      'EnableRemoteMedia': `true`,
+    }
+
+    element.src = `${this.auth.config.baseUrl}/Audio/${audioInfo.id}/universal?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join(`&`)}`
+    await element.load()
+  } 
+
 }
 
 function blurhashToDataURI(blurhash) {
