@@ -108,7 +108,45 @@ export default class JellyHelper {
 
     element.src = `${this.auth.config.baseUrl}/Audio/${audioInfo.id}/universal?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join(`&`)}`
     await element.load()
-  } 
+  }
+
+  // a "group" is something that doesn't reference a specific track, e.g. an album, artist, playlist, genre, etc.
+  loadTracksForGroup(groupId, groupType) {
+
+    let url = ``
+    
+    switch (groupType) {
+      case `artist`:
+        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ArtistIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        break;
+      case `album`:
+        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        break;
+      case `genre`:
+        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?GenreIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        break;
+      case `playlist`:
+        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        break;
+    
+      default:
+        break;
+    }
+    return fetch(url, {
+      method: `GET`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.json()
+      }
+    })
+    .then(json => {
+      return json.Items
+    })
+  }
 
 }
 

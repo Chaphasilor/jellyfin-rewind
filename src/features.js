@@ -36,17 +36,22 @@ state.featureSideEffects = {
   },
   3: {
     load: loadTopArtistMedia,
+    enter: playTopArtist,
   },
   4: {
     load: loadTopArtistsMedia,
+    enter: playTopArtists,
   },
   5: {
     load: loadTopAlbumMedia,
+    enter: playTopAlbum,
   },
   6: {
     load: loadTopAlbumsMedia,
+    enter: playTopAlbums,
   },
   7: {
+    enter: playTopGenres,
   },
 }
 
@@ -95,7 +100,7 @@ state.features = [
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-tracks-image-${index}`}" class="w-full h-full" />
-              <div id="${() => `top-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center bg-black/30 hidden"></div>
+              <div id="${() => `top-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
             </div>
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
@@ -129,7 +134,7 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${track.name}</span>
               </div>
                 <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
             </div>
@@ -174,7 +179,10 @@ state.features = [
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(0, 5).map((artist, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-artists-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
+              <img id="${() => `top-artists-image-${index}`}" class="w-full h-full" />
+              <div id="${() => `top-artists-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
+            </div>
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
@@ -212,7 +220,7 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${artist.name}</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${artist.name}</span>
               </div>
             </div>
             <!--
@@ -257,7 +265,10 @@ state.features = [
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(0, 5).map((album, index) => html`
           <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
-            <img id="${() => `top-albums-image-${index}`}" class="w-[8vh] h-[8vh] rounded-md" />
+            <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
+              <img id="${() => `top-albums-image-${index}`}" class="w-full h-full" />
+              <div id="${() => `top-albums-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
+            </div>
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
@@ -290,7 +301,7 @@ state.features = [
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
                 <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-semibobase leading-tight text-ellipsis overflow-hidden">${album.name}</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${album.name}</span>
               </div>
                 <div class="ml-6 text-xs">by <span class="font-semibold">${album.albumArtist.name}</span>
             </div>
@@ -338,6 +349,7 @@ state.features = [
                     <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> min</div>
                   </div>
                 </div>
+                <div id="${() => `top-genres-visualizer-${index}`}" class="absolute top-0 right-0 w-[8vh] h-full grid place-content-center text-black hidden"></div>
               </div>
             </div>
           </li>
@@ -847,6 +859,88 @@ function playTopTracks() {
   
 }
 
+async function playTopArtist() {
+
+  const topArtistByDuration = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0] //TODO adhere to settings for ranking
+  console.log(`topArtistByDuration:`, topArtistByDuration)
+
+  let artistsTracks = await state.jellyHelper.loadTracksForGroup(topArtistByDuration.id, `artist`)
+  let randomTrackId = Math.floor(Math.random() * artistsTracks.length)
+  let randomTrack = artistsTracks[randomTrackId]
+  console.log(`randomTrack:`, randomTrack)
+
+  fadeToNextTrack({ id: randomTrack.Id })
+
+}
+
+// plays a random track from the top 5 artists (excluding the top artist)
+async function playTopArtists() {
+
+  const topArtists = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(1, 5) // first artist excluded
+  const randomArtistId = Math.floor(Math.random() * topArtists.length)
+  const randomArtist = topArtists[randomArtistId]
+  console.log(`randomArtist:`, randomArtist)
+  showPlaying(`#top-artists-visualizer`, randomArtistId+1, 5)
+
+  let artistsTracks = await state.jellyHelper.loadTracksForGroup(randomArtist.id, `artist`)
+  let randomTrackId = Math.floor(Math.random() * artistsTracks.length)
+  let randomTrack = artistsTracks[randomTrackId]
+  console.log(`randomTrack:`, randomTrack)
+
+  fadeToNextTrack({ id: randomTrack.Id })
+  
+}
+
+async function playTopAlbum() {
+
+  const topAlbumByDuration = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0] //TODO adhere to settings for ranking
+  console.log(`topAlbumByDuration:`, topAlbumByDuration)
+
+  let albumsTracks = await state.jellyHelper.loadTracksForGroup(topAlbumByDuration.id, `album`)
+  let randomTrackId = Math.floor(Math.random() * albumsTracks.length)
+  let randomTrack = albumsTracks[randomTrackId]
+  console.log(`randomTrack:`, randomTrack)
+
+  fadeToNextTrack({ id: randomTrack.Id })
+
+}
+
+// plays a random track from the top 5 albums (excluding the top album)
+async function playTopAlbums() {
+
+  const topAlbums = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(1, 5) // first album excluded
+  const randomAlbumId = Math.floor(Math.random() * topAlbums.length)
+  const randomAlbum = topAlbums[randomAlbumId]
+  console.log(`randomAlbum:`, randomAlbum)
+  showPlaying(`#top-albums-visualizer`, randomAlbumId+1, 5)
+
+  let albumsTracks = await state.jellyHelper.loadTracksForGroup(randomAlbum.id, `album`)
+  let randomTrackId = Math.floor(Math.random() * albumsTracks.length)
+  let randomTrack = albumsTracks[randomTrackId]
+  console.log(`randomTrack:`, randomTrack)
+
+  fadeToNextTrack({ id: randomTrack.Id })
+  
+}
+
+// plays a random track from the top 5 genres
+async function playTopGenres() {
+
+  const topGenres = state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5) // first genre excluded
+  const randomGenreId = Math.floor(Math.random() * topGenres.length)
+  const randomGenre = topGenres[randomGenreId]
+  console.log(`randomGenre:`, randomGenre)
+  showPlaying(`#top-genres-visualizer`, randomGenreId, 5)
+
+  let genresTracks = await state.jellyHelper.loadTracksForGroup(randomGenre.id, `genre`)
+  let randomTrackId = Math.floor(Math.random() * genresTracks.length)
+  let randomTrack = genresTracks[randomTrackId]
+  console.log(`randomTrack:`, randomTrack)
+
+  fadeToNextTrack({ id: randomTrack.Id })
+  
+}
+
 function showPlaying(itemQuery, itemId, idRange) {
 
   for (let i = 0; i < idRange; i++) {
@@ -862,7 +956,7 @@ function showPlaying(itemQuery, itemId, idRange) {
   // animated bars
   if (playingItemOverlay) {
     playingItemOverlay.innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-10 h-10 text-white icon icon-tabler icon-tabler-antenna-bars-5" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 icon icon-tabler icon-tabler-antenna-bars-5" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
         <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
         <line x1="6" y1="18" x2="6" y2="15">
           <animate attributeName="y2" values="0;16;0" begin="0.0s" dur="0.7s" repeatCount="indefinite" />
