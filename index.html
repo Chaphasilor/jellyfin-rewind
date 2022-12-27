@@ -42,7 +42,7 @@
         <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
       </div>
     
-      <span class="flex flex-row place-items-center">
+      <div class="flex flex-row place-items-center">
         <div class="flex flex-row gap-2">
           <button id="show-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">Show My Rewind</button>
           <button id="generate-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">(Re-)Generate Rewind</button>
@@ -53,7 +53,9 @@
           <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
           <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
        </svg>
-      </span>
+      </div>
+
+      <span id="info"></span>
     
       <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1 hidden" name="output" id="output" cols="80" rows="40"></textarea>
   

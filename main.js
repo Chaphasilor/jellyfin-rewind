@@ -47,11 +47,15 @@ const loggedInInfo = document.querySelector(`#logged-in-info`)
 const logOutButton = document.querySelector(`#log-out`)
 const loggedInUserInfo = document.querySelector(`#logged-in-user`)
 const loggedInServerInfo = document.querySelector(`#logged-in-server`)
+const infoOutput = document.querySelector(`#info`)
 
 let selectedUsername = ``
 let featuresInitialized = false
+let staleReport = false
 
 window.onload = () => {
+
+  console.log(`commit hash:`, __COMMITHASH__)
 
   if (jellyfinRewind.auth.restoreSession()) {
     console.info(`Session restored!`)
@@ -158,11 +162,20 @@ function init() {
     try {
       loadingSpinner.classList.remove(`hidden`)
       rewindReport = jellyfinRewind.restoreRewindReport()
+
+      if (rewindReport.commit !== __COMMITHASH__) {
+        staleReport = true
+      }
+      
       loadingSpinner.classList.add(`hidden`)
     } catch (err) {
       console.warn(`Couldn't restore Rewind report:`, err)
       console.info(`Generating new report...`)
       rewindReport = await generateRewindReport()
+    }
+
+    if (staleReport) {
+      infoOutput.innerText = `The stored rewind report is stale. Please re-generate it for the best experience.`
     }
 
     // showRewindReport(rewindReport)

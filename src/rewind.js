@@ -304,6 +304,7 @@ async function generateRewindReport() {
   const totalStats = aggregate.generateTotalStats(allTopTrackInfo, enhancedPlaybackReportJSON)
 
   const jellyfinRewindReport = {
+    commit: __COMMITHASH__,
     playbackReportAvailable,
     generalStats: {},
     tracks: {},
@@ -448,6 +449,11 @@ function restoreRewindReport() {
       throw new Error(`No Rewind report to restore!`)
     }
   }
+
+  if (rewindReport.commit !== __COMMITHASH__) {
+    console.warn(`Rewind report was generated with a different version of the app!`)
+  }
+  
   return rewindReport
 }
 
