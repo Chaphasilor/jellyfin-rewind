@@ -329,8 +329,16 @@ async function generateRewindReport() {
   const dataSource = playbackReportAvailable ? (playbackReportComplete ? `playbackReport` : `average`) : `jellyfin`
 
   jellyfinRewindReport.generalStats[`totalPlays`] = totalStats.totalPlayCount.average
-  jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = Number((totalStats.totalPlayDuration[dataSource]).toFixed(1))
-  jellyfinRewindReport.generalStats[`totalPlaybackDurationHours`] = Number((totalStats.totalPlayDuration[dataSource] / 60).toFixed(1))
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = {
+    playbackReport: Number((totalStats.totalPlayDuration[`playbackReport`]).toFixed(1)),
+    average: Number((totalStats.totalPlayDuration[`average`]).toFixed(1)),
+    jellyfin: Number((totalStats.totalPlayDuration[`jellyfin`]).toFixed(1)),
+  }
+  jellyfinRewindReport.generalStats[`totalPlaybackDurationHours`] = {
+    playbackReport: Number((totalStats.totalPlayDuration[`playbackReport`] / 60).toFixed(1)),
+    average: Number((totalStats.totalPlayDuration[`average`] / 60).toFixed(1)),
+    jellyfin: Number((totalStats.totalPlayDuration[`jellyfin`] / 60).toFixed(1)),
+  }
   jellyfinRewindReport.generalStats[`uniqueTracksPlayed`] = totalStats.uniqueTracks.size
   jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums.size
   jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists.size
