@@ -31,3 +31,11 @@ SELECT ROWID, SUM(PlayDuration) AS TotalDuration, ItemId, ItemName
   WHERE ItemType="Audio"
     AND UserId="13c597ac83f74af9a2d26235a1c23524"
   GROUP BY ItemId
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+  AND UserId="13c597ac83f74af9a2d26235a1c23524"
+  AND datetime(DateCreated) >= datetime('2022-01-01') AND datetime(DateCreated) <= datetime('2022-12-31')
+ORDER BY DateCreated ASC
+LIMIT 30

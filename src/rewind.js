@@ -7,11 +7,12 @@ let rewindReport = null
 
 const auth = new Auth()
 
-const playbackReportQuery = () => {
+const playbackReportQuery = (year) => {
   return `
   SELECT ROWID, *
   FROM PlaybackActivity
   WHERE ItemType="Audio"
+    AND datetime(DateCreated) >= datetime('${year}-01-01') AND datetime(DateCreated) <= datetime('${year}-12-31')
     AND UserId="${auth.config.user.id}"
 `
 }
@@ -20,7 +21,7 @@ const playbackReportQuery = () => {
 
 //TODO implement batched requests to not exceed maximum URL length
 
-async function loadPlaybackReport() {
+async function loadPlaybackReport(year) {
 
   const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {
     method: 'POST',
@@ -29,7 +30,7 @@ async function loadPlaybackReport() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      "CustomQueryString": playbackReportQuery(),
+      "CustomQueryString": playbackReportQuery(year),
     })
   })
   const json = await response.json()
@@ -257,14 +258,17 @@ function chunkedArray(array, chunkSize) {
   return chunks
 }
 
-async function generateRewindReport() {
+async function generateRewindReport(year) {
+
+  console.info(`Generating Rewind Report for ${year}...`)
 
   let playbackReportAvailable = true
   let playbackReportComplete = true
+  let playbackReportDataMissing = false
 
   let playbackReportInfo
   try {
-    playbackReportInfo = await loadPlaybackReport()
+    playbackReportInfo = await loadPlaybackReport(year)
   } catch (err) {
     console.warn(`Playback Reporting not available!`)
     playbackReportInfo = null
@@ -273,6 +277,9 @@ async function generateRewindReport() {
 
   const playbackReportJSON = generateJSONFromPlaybackReport(playbackReportInfo)
   console.log(`playbackReportJSON:`, playbackReportJSON)
+  if (playbackReportJSON.items.length === 0) {
+    playbackReportDataMissing = true
+  }
 
   // const allItemInfo = []
 
@@ -306,6 +313,7 @@ async function generateRewindReport() {
   const jellyfinRewindReport = {
     commit: __COMMITHASH__,
     playbackReportAvailable,
+    playbackReportDataMissing,
     generalStats: {},
     tracks: {},
     albums: {},
@@ -421,6 +429,7 @@ function saveRewindReport() {
       const rewindReportLightJSON = JSON.stringify({
         generalStats: rewindReport.generalStats,
         playbackReportAvailable: rewindReport.playbackReportAvailable,
+        playbackReportDataMissing: rewindReport.playbackReportDataMissing,
         playbackReportComplete: rewindReport.playbackReportComplete,
         tracks: reduceToSubsets(rewindReport.tracks),
         albums: reduceToSubsets(rewindReport.albums),

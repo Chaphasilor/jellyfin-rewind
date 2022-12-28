@@ -202,7 +202,7 @@ async function generateRewindReport() {
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    report = await jellyfinRewind.generateRewindReport()
+    report = await jellyfinRewind.generateRewindReport(import.meta.env.VITE_TARGET_YEAR)
     console.info(`Report generated successfully!`)
     loadingSpinner.classList.add(`hidden`)
     
