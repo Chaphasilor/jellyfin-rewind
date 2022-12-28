@@ -158,7 +158,8 @@ state.features = [
               <img id="${() => `top-tracks-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `)}
+        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        )}
       </ol>
     </div>
     <!-- continue as simple list -->
@@ -185,7 +186,8 @@ state.features = [
             -->
           </div>
         </li>
-      `)}
+      `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+      )}
     </ol>
   `, `bg-sky-100`),
   // top artist
@@ -244,7 +246,8 @@ state.features = [
               <img id="${() => `top-artists-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `)}
+        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        )}
       </ol>
     </div>
     <!-- continue as simple list -->
@@ -270,7 +273,8 @@ state.features = [
             -->
           </div>
         </li>
-      `)}
+      `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+      )}
     </ol>
   `, `bg-sky-100`),
   // top album
@@ -313,19 +317,20 @@ state.features = [
                   <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${album.albumArtist.name}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${album.playCount[state.settings.dataSource]}</span> streams</div>
+                <div><span class="font-semibold text-black">${showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${album.totalPlayDuration[state.settings.dataSource].toFixed(0)}</span> minutes</div>
+                <div><span class="font-semibold text-black">${showAsNumber(album.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
               <img id="${() => `top-albums-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `)}
+        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        )}
       </ol>
     </div>
     <!-- continue as simple list -->
@@ -352,7 +357,8 @@ state.features = [
             -->
           </div>
         </li>
-      `)}
+      `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+      )}
     </ol>
   `, `bg-sky-100`),
   // top generes of the year
@@ -585,13 +591,18 @@ watch(() => state.settings.rankingMetric, () => {
   }
   if (state.previousRankingMetric && state.previousRankingMetric === state.settings.rankingMetric) {
     return
+  } else if (state.previousRankingMetric === null) {
+    state.previousRankingMetric = state.settings.rankingMetric
+    return
   }
   console.log(`state.settings.rankingMetric:`, state.settings.rankingMetric)
   state.previousRankingMetric = state.settings.rankingMetric
-  // re-load the current feature
-  state.featureSideEffects?.[state.currentFeature]?.load?.()
-  state.featureSideEffects?.[state.currentFeature]?.enter?.()
-  // re-load all other features after a short delay
+  // re-load the current feature after a short delay (to wait for rendering to finish)
+  setTimeout(() => {
+    state.featureSideEffects?.[state.currentFeature]?.load?.()
+    state.featureSideEffects?.[state.currentFeature]?.enter?.()
+  }, 250)
+  // re-load all other features after another short delay
   setTimeout(() => {
     Object.values(state.featureSideEffects).forEach((feature, index) => {
       if (index !== state.currentFeature) {
@@ -807,7 +818,7 @@ function previous() {
 function buildFeature(featureName, content, classes) {
   console.log(`feature '${featureName}' created`)
   return (index) => html`
-    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
+    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full overflow-auto pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
       <div>${content}</div>
       </li>
       `
