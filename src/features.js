@@ -12,6 +12,9 @@ let state = reactive({
   rewindReport: null,
   jellyHelper: null,
   pollCanvas: false,
+  extraFeatures: {
+    totalPlaytimeGraph: true
+  },
   settings: {
     dataSource: null,
     sound: true,
@@ -64,9 +67,28 @@ state.features = [
       <div class="mt-24 -rotate-6 font-quicksand text-sky-500 text-4xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> min</div>
 
       <div class="absolute bottom-16 w-full h-2/5 px-8">
-        <canvas id="playtime-by-month-chart" class="${() => state.rewindReport.playbackReportAvailable ? `` : `opacity-30`}"></canvas>
-        ${() => state.rewindReport.playbackReportAvailable ? html`` : html`
-          <div class="absolute top-0 left-0 w-full h-full text-4xl rotate-12 grid content-center text-sky-900 tracking-wider font-semibold">Unavailable</div>
+        <canvas id="playtime-by-month-chart" class="${() => state.extraFeatures.totalPlaytimeGraph ? `` : `opacity-30`}"></canvas>
+        ${() => state.extraFeatures.totalPlaytimeGraph ? html`` : html`
+          <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
+            <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable ${() => state.settings.dataSource}</span>
+            <button @click="${stopPropagation(() => showOverlay({
+              title: `Why is this feature unavailable?`,
+              content: html`
+                <div class="text-center">
+                  <p class="text-lg">This feature is currently unavailable for ${() => state.settings.dataSource}.</p>
+                  <p class="text-lg">This is due to the fact that ${() => state.settings.dataSource} does not provide the required data.</p>
+                </div>
+              `,
+            }))}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white/80">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M12 8h.01"></path>
+                <path d="M11 12h1v4h1"></path>
+                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+              </svg>
+              <span>Learn why</span>
+            </button>
+          </div>
         `}
       </div>
     </div>
@@ -399,8 +421,8 @@ function buildOptionChooser({ title, description, settingsKey, options}) {
       <div class="w-full flex flex-row justify-around overflow-hidden border-4 border-gray-200 items-center text-sm rounded-full bg-gray-200">
         ${() => options.map((option, index) => html`
           <button
-            class="w-full h-full rounded-md ${selectedOptionIndex === index ? `bg-gray-100` : ``}"
-            @click="${() => updateSetting(settingsKey, option.value)}"
+            class="w-full h-full rounded-md ${option.disabled ? `opacity-50` : selectedOptionIndex === index ? `bg-gray-100` : ``}"
+            @click="${(e) => !option.disabled ? updateSetting(settingsKey, option.value) : e.preventDefault()}"
           >
             <span class="">${option.name}</span>
           </button>
@@ -431,9 +453,23 @@ export function init(rewindReport, jellyHelper) {
   console.log(`state.rewindReport:`, state.rewindReport)
 
   // determine which data source is the best
-  state.settings.dataSource = state.rewindReport.playbackReportAvailable ? (state.rewindReport.playbackReportComplete ? `playbackReport` : `average`) : `jellyfin`
-  console.log(`state.settings.dataSource:`, state.settings.dataSource)
-  console.log(`state.rewindReport.playbackReportAvailable:`, state.rewindReport.playbackReportAvailable)
+  if (state.rewindReport.playbackReportAvailable) {
+    if (!state.rewindReport.playbackReportDataMissing) {
+      if (state.rewindReport.playbackReportComplete) {
+        state.settings.dataSource = `playbackReport`
+      } else {
+        state.settings.dataSource = `average`
+      }
+    } else {
+      state.settings.dataSource = `jellyfin`
+    }
+  } else {
+    state.settings.dataSource = `jellyfin`
+  }
+
+  state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable && !state.rewindReport.playbackReportDataMissing
+
+  console.log(`dataSource:`, state.settings.dataSource)
 
   let content = html`
       ${() => {
@@ -740,7 +776,7 @@ function showPlaytimeByMonthChart() {
     labels: [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`],
     datasets: [{
       label: `Playtime by Month`,
-      data: state.rewindReport.playbackReportAvailable ? monthData : [300, 600, 367, 763, 823, 285, 506, 583, 175, 286, 1204, 496],
+      data: state.extraFeatures.totalPlaytimeGraph ? monthData : [300, 600, 367, 763, 823, 285, 506, 583, 175, 286, 1204, 496],
     }]
   }
   

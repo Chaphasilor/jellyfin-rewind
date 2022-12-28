@@ -40,7 +40,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: {
         jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
-        playbackReport: Number(playbackReportItem?.TotalDuration) / 60 || -1, // convert to minutes
+        playbackReport: Number(playbackReportItem?.TotalDuration) / 60 || 0, // convert to minutes
         average: Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2),
       },
       isFavorite: item.UserData?.IsFavorite,
