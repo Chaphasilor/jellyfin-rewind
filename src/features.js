@@ -17,8 +17,10 @@ let state = reactive({
   },
   settings: {
     dataSource: null,
+    rankingMetric: null,
     sound: false, //FIXME: change to true
   },
+  previousRankingMetric: null,
   overlays: [],
 })
 window.state = state
@@ -108,14 +110,16 @@ state.features = [
       <h2 class="text-2xl mt-5">Your Top Song<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
-          <div class="">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0].artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)} -</div>
-          <div class="mt-8 ml-10">${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.name}</div>
+        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+          <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
+            <div class="">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0].artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)} -</div>
+            <div class="mt-8 ml-10">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.name}</div>
+          </div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
-        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -127,7 +131,7 @@ state.features = [
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Songs<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
-        ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5).map((track, index) => html`
+        ${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5).map((track, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-tracks-image-${index}`}" class="w-full h-full" />
@@ -159,7 +163,7 @@ state.features = [
     </div>
     <!-- continue as simple list -->
     <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
-      ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(5, 20).map((track, index) => html`
+      ${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(5, 20).map((track, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
@@ -191,12 +195,12 @@ state.features = [
       <div class="flex mt-10 flex-col">
         <img id="top-artist-image" class="w-[30vh] h-[30vh] mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="-rotate-6 mt-16 text-4xl font-semibold">
-          <div class="">${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.name}</div>
+          <div class="">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
-        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
+        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -208,7 +212,7 @@ state.features = [
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Artists<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
-        ${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(0, 5).map((artist, index) => html`
+        ${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(0, 5).map((artist, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-artists-image-${index}`}" class="w-full h-full" />
@@ -245,7 +249,7 @@ state.features = [
     </div>
     <!-- continue as simple list -->
     <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
-      ${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(5, 20).map((artist, index) => html`
+      ${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(5, 20).map((artist, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
@@ -276,13 +280,13 @@ state.features = [
       <div class="flex mt-10 flex-col items-center">
         <img id="top-album-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="-rotate-6 mt-10 text-4xl font-semibold">
-          <div class="-ml-4 text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0].name}</div>
-          <div class="ml-4 mt-8">by ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.albumArtist.name}</div>
+          <div class="-ml-4 text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0].name}</div>
+          <div class="ml-4 mt-8">by ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.albumArtist.name}</div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
-        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
+        <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
+        <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -294,7 +298,7 @@ state.features = [
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Albums<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
-        ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(0, 5).map((album, index) => html`
+        ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(0, 5).map((album, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-albums-image-${index}`}" class="w-full h-full" />
@@ -326,7 +330,7 @@ state.features = [
     </div>
     <!-- continue as simple list -->
     <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
-      ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(5, 20).map((album, index) => html`
+      ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(5, 20).map((album, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
@@ -356,7 +360,7 @@ state.features = [
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Genres<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
-        ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5).map((genre, index) => html`
+        ${() => state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(0, 5).map((genre, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
             <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
@@ -389,7 +393,7 @@ state.features = [
     </div>
     <!-- continue as simple list -->
     <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
-      ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(5, 20).map((genre, index) => html`
+      ${() => state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(5, 20).map((genre, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
@@ -419,6 +423,25 @@ const settings = html`
 <ul class="flex flex-col gap-4">
   <li class="flex flex-row justify-between">
     ${() => buildOptionChooser({
+      title: `Sound`,
+      description: `Should fitting music be played while you view the report?`,
+      settingsKey: `sound`,
+      options: [
+        {
+          name: `On`,
+          description: `Sound is on`,
+          value: true,
+        },
+        {
+          name: `Off`,
+          description: `Sound is off. Nothing will play.`,
+          value: false,
+        },
+      ],
+    }) }
+  </li>
+  <li class="flex flex-row justify-between">
+    ${() => buildOptionChooser({
       title: `Main data source`,
       description: `Choose the main data source for the report`,
       settingsKey: `dataSource`,
@@ -444,20 +467,20 @@ const settings = html`
     }) }
   </li>
   <li class="flex flex-row justify-between">
-    ${() => buildOptionChooser({
-      title: `Sound`,
-      description: `Should fitting music be played while you view the report?`,
-      settingsKey: `sound`,
+  ${() => buildOptionChooser({
+      title: `Rank by...`,
+      description: `Choose which metric should be used for ranking the top songs, artists, albums, genres, etc.`,
+      settingsKey: `rankingMetric`,
       options: [
         {
-          name: `On`,
-          description: `Sound is on`,
-          value: true,
+          name: `Duration`,
+          description: `Use the actual duration (preferred)`,
+          value: `duration`,
         },
         {
-          name: `Off`,
-          description: `Sound is off. Nothing will play.`,
-          value: false,
+          name: `Play Count`,
+          description: `Only use the number of times an item was played, disregarding the duration of each play`,
+          value: `playCount`,
         },
       ],
     }) }
@@ -504,7 +527,7 @@ function closeOverlay(overlayId) {
 function buildOverlay({ title, content, overlayId, onClose }) {
 
   return html`
-  <div class="absolute top-0 left-0 w-full h-full px-6 py-16">
+  <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
       <div class="w-full h-full bg-white/75 backdrop-blur rounded-xl p-3">
         <h3 class="w-full text-center text-lg mb-4">${() => title}</h3>
@@ -556,6 +579,28 @@ watch(() => {
   console.log(`featuresOpen:`, state.featuresOpen)
 })
 
+watch(() => state.settings.rankingMetric, () => {
+  if (!state.rewindReport) {
+    return
+  }
+  if (state.previousRankingMetric && state.previousRankingMetric === state.settings.rankingMetric) {
+    return
+  }
+  console.log(`state.settings.rankingMetric:`, state.settings.rankingMetric)
+  state.previousRankingMetric = state.settings.rankingMetric
+  // re-load the current feature
+  state.featureSideEffects?.[state.currentFeature]?.load?.()
+  state.featureSideEffects?.[state.currentFeature]?.enter?.()
+  // re-load all other features after a short delay
+  setTimeout(() => {
+    Object.values(state.featureSideEffects).forEach((feature, index) => {
+      if (index !== state.currentFeature) {
+        feature.load?.()
+      }
+    })
+  }, 1000)
+})
+
 export function init(rewindReport, jellyHelper) {
 
   state.rewindReport = rewindReport
@@ -580,6 +625,12 @@ export function init(rewindReport, jellyHelper) {
   state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable && !state.rewindReport.playbackReportDataMissing
 
   console.log(`dataSource:`, state.settings.dataSource)
+
+  if (state.settings.dataSource === `playbackReport`) {
+    state.settings.rankingMetric = `duration`
+  } else {
+    state.settings.rankingMetric = `playCount`
+  }
 
   let content = html`
       ${() => {
@@ -862,7 +913,11 @@ function showPlaytimeByMonthChart() {
     if (canvas === null) {
       setTimeout(pollCanvas, 100);
     } else {
-      initializeChart();
+      try {
+        initializeChart();
+      } catch (err) {
+        console.warn(`Error initializing chart:`, err)
+      }
     }
   }
   pollCanvas()
@@ -878,7 +933,7 @@ function loadTopTrackMedia() {
   const topSongPrimaryImage = document.querySelector(`#top-track-image`);
   const topSongBackgroundImage = document.querySelector(`#top-track-background-image`);
   console.log(`img:`, topSongPrimaryImage)
-  const topSongByDuration = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
+  const topSongByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
   console.log(`topSongByDuration:`, topSongByDuration)
   state.jellyHelper.loadImage([topSongPrimaryImage, topSongBackgroundImage], topSongByDuration.image, `track`)
 
@@ -886,7 +941,7 @@ function loadTopTrackMedia() {
 
 function loadTopTracksMedia() {
 
-  const topSongs = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5)
+  const topSongs = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5)
 
   topSongs.forEach((song, index) => {
     const songPrimaryImage = document.querySelector(`#top-tracks-image-${index}`);
@@ -902,7 +957,7 @@ function loadTopArtistMedia() {
   const topArtistPrimaryImage = document.querySelector(`#top-artist-image`);
   const topArtistBackgroundImage = document.querySelector(`#top-artist-background-image`);
   console.log(`img:`, topArtistPrimaryImage)
-  const topSongByDuration = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0]
+  const topSongByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
   console.log(`topSongByDuration:`, topSongByDuration)
   state.jellyHelper.loadImage([topArtistPrimaryImage, topArtistBackgroundImage], topSongByDuration.images.primary, `artist`)
 
@@ -910,7 +965,7 @@ function loadTopArtistMedia() {
 
 function loadTopArtistsMedia() {
 
-  const topArtists = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(0, 5)
+  const topArtists = state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(0, 5)
 
   topArtists.forEach((artist, index) => {
     const artistPrimaryImage = document.querySelector(`#top-artists-image-${index}`);
@@ -926,7 +981,7 @@ function loadTopAlbumMedia() {
   const topAlbumPrimaryImage = document.querySelector(`#top-album-image`);
   const topAlbumBackgroundImage = document.querySelector(`#top-album-background-image`);
   console.log(`img:`, topAlbumPrimaryImage)
-  const topAlbumByDuration = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0]
+  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]
   console.log(`topAlbumByDuration:`, topAlbumByDuration)
   state.jellyHelper.loadImage([topAlbumPrimaryImage, topAlbumBackgroundImage], topAlbumByDuration.image, `album`)
 
@@ -934,7 +989,7 @@ function loadTopAlbumMedia() {
 
 function loadTopAlbumsMedia() {
 
-  const topAlbums = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(0, 5)
+  const topAlbums = state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(0, 5)
 
   topAlbums.forEach((album, index) => {
     const albumPrimaryImage = document.querySelector(`#top-albums-image-${index}`);
@@ -948,7 +1003,7 @@ function loadTopAlbumsMedia() {
 
 function playTopTrack() {
 
-  const topSongByDuration = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
+  const topSongByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
   console.log(`topSongByDuration:`, topSongByDuration)
   fadeToNextTrack(topSongByDuration)
 
@@ -957,7 +1012,7 @@ function playTopTrack() {
 // plays a random track from the top 5 tracks (excluding the top track)
 function playTopTracks() {
 
-  const topSongs = state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(1, 5) // first track excluded
+  const topSongs = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(1, 5) // first track excluded
   const randomSongId = Math.floor(Math.random() * topSongs.length)
   const randomSong = topSongs[randomSongId]
   showPlaying(`#top-tracks-visualizer`, randomSongId+1, 5)
@@ -969,7 +1024,7 @@ function playTopTracks() {
 
 async function playTopArtist() {
 
-  const topArtistByDuration = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.[0] //TODO adhere to settings for ranking
+  const topArtistByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
   console.log(`topArtistByDuration:`, topArtistByDuration)
 
   let artistsTracks = await state.jellyHelper.loadTracksForGroup(topArtistByDuration.id, `artist`)
@@ -984,7 +1039,7 @@ async function playTopArtist() {
 // plays a random track from the top 5 artists (excluding the top artist)
 async function playTopArtists() {
 
-  const topArtists = state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(1, 5) // first artist excluded
+  const topArtists = state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(1, 5) // first artist excluded
   const randomArtistId = Math.floor(Math.random() * topArtists.length)
   const randomArtist = topArtists[randomArtistId]
   console.log(`randomArtist:`, randomArtist)
@@ -1001,7 +1056,7 @@ async function playTopArtists() {
 
 async function playTopAlbum() {
 
-  const topAlbumByDuration = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.[0] //TODO adhere to settings for ranking
+  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
   console.log(`topAlbumByDuration:`, topAlbumByDuration)
 
   let albumsTracks = await state.jellyHelper.loadTracksForGroup(topAlbumByDuration.id, `album`)
@@ -1016,7 +1071,7 @@ async function playTopAlbum() {
 // plays a random track from the top 5 albums (excluding the top album)
 async function playTopAlbums() {
 
-  const topAlbums = state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(1, 5) // first album excluded
+  const topAlbums = state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(1, 5) // first album excluded
   const randomAlbumId = Math.floor(Math.random() * topAlbums.length)
   const randomAlbum = topAlbums[randomAlbumId]
   console.log(`randomAlbum:`, randomAlbum)
@@ -1034,7 +1089,7 @@ async function playTopAlbums() {
 // plays a random track from the top 5 genres
 async function playTopGenres() {
 
-  const topGenres = state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5) // first genre excluded
+  const topGenres = state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(0, 5) // first genre excluded
   const randomGenreId = Math.floor(Math.random() * topGenres.length)
   const randomGenre = topGenres[randomGenreId]
   console.log(`randomGenre:`, randomGenre)
