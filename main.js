@@ -253,7 +253,7 @@ function initializeFeatureStory(report) {
   Features.openFeatures()
 
   if (!featuresInitialized) {
-    Features.init(report, helper)
+    Features.init(report, helper, jellyfinRewind.auth)
     featuresInitialized = true
   }
 

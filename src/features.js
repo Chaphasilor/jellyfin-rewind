@@ -11,6 +11,7 @@ let state = reactive({
   featureSideEffects: null,
   rewindReport: null,
   jellyHelper: null,
+  auth: null,
   pollCanvas: false,
   extraFeatures: {
     totalPlaytimeGraph: true
@@ -66,9 +67,32 @@ state.features = [
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of 2022:</h2>
+      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${import.meta.env.VITE_TARGET_YEAR}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
+        title: `About the accuracy of this data`,
+        content: html`
+          <div class="flex flex-col items-start gap-2">
+            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${import.meta.env.VITE_TARGET_YEAR} only!<span></p>
+            <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This will results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
+            <p>Alternatively, an even better solution would be to install the Playback Reporting plugin into your Jellyfin server. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
+            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a> 
+            <p>So, please treat all of this information with a grain of salt. You can take a look at the settings in order to choose which data will be used, but any information that needs to be interpolated will have a negative influence on the quality of these stats.</p>
+            <p>I will try to offer a way to import this year's Rewind data into next year's Jellyfin Rewind, so that more information can be used and the used data can be properly limited to the current year only. Because of this, please <span class="font-semibold">make sure to download a copy of your Rewind data at the end and store it until next year!</span></p>
+            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-blue-500" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+          </div>
+        `,
+      }))}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-asterisk" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M12 12l8 -4.5"></path>
+          <path d="M12 12v9"></path>
+          <path d="M12 12l-8 -4.5"></path>
+          <path d="M12 12l8 4.5"></path>
+          <path d="M12 3v9"></path>
+          <path d="M12 12l-8 4.5"></path>
+        </svg>
+      </span>:</h2>
       
-      <div class="mt-24 -rotate-6 font-quicksand text-sky-500 text-4xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> min</div>
+      <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> min</div>
 
       <div class="mt-12 w-full flex flex-col items-center gap-0.5 text-sm">
         <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`totalPlays`]?.[state.settings.dataSource])}</span> total streams.</div>
@@ -422,6 +446,7 @@ state.features = [
         </li>
       `)}
     </ol>
+    <!-- TODO add pie chart with percentages -->
   `, `bg-sky-100`),
 ]
 
@@ -535,7 +560,7 @@ function buildOverlay({ title, content, overlayId, onClose }) {
   return html`
   <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
-      <div class="w-full h-full bg-white/75 backdrop-blur rounded-xl p-3">
+      <div class="w-full h-full overflow-x-auto bg-white/75 pb-20 backdrop-blur rounded-xl p-4">
         <h3 class="w-full text-center text-lg mb-4">${() => title}</h3>
         ${() => content}
       </div>
@@ -612,10 +637,11 @@ watch(() => state.settings.rankingMetric, () => {
   }, 1000)
 })
 
-export function init(rewindReport, jellyHelper) {
+export function init(rewindReport, jellyHelper, auth) {
 
   state.rewindReport = rewindReport
   state.jellyHelper = jellyHelper
+  state.auth = auth
   console.log(`state.rewindReport:`, state.rewindReport)
 
   // determine which data source is the best
@@ -818,7 +844,7 @@ function previous() {
 function buildFeature(featureName, content, classes) {
   console.log(`feature '${featureName}' created`)
   return (index) => html`
-    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full overflow-auto pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
+    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full overflow-auto pt-8 pb-4 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
       <div>${content}</div>
       </li>
       `
