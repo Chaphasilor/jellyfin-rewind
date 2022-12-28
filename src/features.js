@@ -17,9 +17,11 @@ let state = reactive({
   },
   settings: {
     dataSource: null,
-    sound: true,
+    sound: false, //FIXME: change to true
   },
+  overlays: [],
 })
+window.state = state
 
 state.featureSideEffects = {
   0: {
@@ -406,6 +408,107 @@ state.features = [
   `),
 ]
 
+const settings = html`
+<ul class="flex flex-col gap-4">
+  <li class="flex flex-row justify-between">
+    ${() => buildOptionChooser({
+      title: `Main data source`,
+      description: `Choose the main data source for the report`,
+      settingsKey: `dataSource`,
+      options: [
+        {
+          name: `Playback Reporting`,
+          description: `Use the Playback Reporting Plugin (most accurate)`,
+          value: `playbackReport`,
+          disabled: state.rewindReport.playbackReportDataMissing,
+        },
+        {
+          name: `Combined`,
+          description: `Use the average of Jellyfin's built-in play count tracking and the Playback Reporting Plugin`,
+          value: `average`,
+          disabled: state.rewindReport.playbackReportDataMissing
+        },
+        {
+          name: `Jellyfin`,
+          description: `Use Jellyfin's built-in play count tracking (least accurate)`,
+          value: `jellyfin`,
+        },
+      ],
+    }) }
+  </li>
+  <li class="flex flex-row justify-between">
+    ${() => buildOptionChooser({
+      title: `Sound`,
+      description: `Should fitting music be played while you view the report?`,
+      settingsKey: `sound`,
+      options: [
+        {
+          name: `On`,
+          description: `Sound is on`,
+          value: true,
+        },
+        {
+          name: `Off`,
+          description: `Sound is off. Nothing will play.`,
+          value: false,
+        },
+      ],
+    }) }
+  </li>
+</ul>
+`
+
+function stopPropagation(f) {
+  return (e) => {
+    e.stopPropagation()
+    f(e)
+  }
+}
+
+function showOverlay({ title, key, content, onClose }) {
+
+  let overlayId = `overlay-${Math.random().toString(36).substring(2, 9)}`
+  if (key) {
+    overlayId = `overlay-${key}`
+  }
+  let overlay = buildOverlay({ title, content, overlayId, onClose: () => {
+    console.log(`overlayId:`, overlayId)
+    closeOverlay(overlayId)
+    console.log(`state.overlays:`, state.overlays)
+    
+  } })
+  state.overlays.push(reactive({
+    overlayId,
+    overlay,
+    onClose,
+  }))
+
+  return overlayId
+
+}
+
+function closeOverlay(overlayId) {
+  let index = state.overlays.findIndex(x => x.overlayId === overlayId)
+  console.log(`index, overlayId:`, index, overlayId)
+  state.overlays[index].onClose?.()
+  state.overlays.splice(index, 1)
+}
+
+function buildOverlay({ title, content, overlayId, onClose }) {
+
+  return html`
+  <div class="absolute top-0 left-0 w-full h-full px-6 py-16">
+    <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+      <div class="w-full h-full bg-white/75 backdrop-blur rounded-xl p-3">
+        <h3 class="w-full text-center text-lg mb-4">${() => title}</h3>
+        ${() => content}
+      </div>
+    </div>
+  </div>
+  `.key(overlayId)
+  
+}
+
 function buildOptionChooser({ title, description, settingsKey, options}) {
 
   let selectedValue = state.settings[settingsKey]
@@ -523,63 +626,7 @@ export function init(rewindReport, jellyHelper) {
           <ul class="absolute top-0 left-0 w-full h-full">
             ${() => state.features.map((feature, index) => feature(index))}
           </ul>
-          ${() => state.settingsOpen ?
-            html`
-            <div class="absolute top-0 left-0 w-full h-full px-6 py-16">
-              <div @click="${() => toggleSettings()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
-              <div class="w-full h-full bg-white/75 backdrop-blur rounded-xl p-3">
-                <h3 class="w-full text-center text-lg mb-4">Settings</h3>
-                
-                <ul class="flex flex-col gap-4">
-                  <li class="flex flex-row justify-between">
-                    ${() => buildOptionChooser({
-                      title: `Main data source`,
-                      description: `Choose the main data source for the report`,
-                      settingsKey: `dataSource`,
-                      options: [
-                        {
-                          name: `Playback Reporting`,
-                          description: `Use the Playback Reporting Plugin (most accurate)`,
-                          value: `playbackReport`,
-                        },
-                        {
-                          name: `Combined`,
-                          description: `Use the average of Jellyfin's built-in play count tracking and the Playback Reporting Plugin`,
-                          value: `average`,
-                        },
-                        {
-                          name: `Jellyfin`,
-                          description: `Use Jellyfin's built-in play count tracking (least accurate)`,
-                          value: `jellyfin`,
-                        },
-                      ],
-                    }) }
-                  </li>
-                  <li class="flex flex-row justify-between">
-                    ${() => buildOptionChooser({
-                      title: `Sound`,
-                      description: `Should fitting music be played while you view the report?`,
-                      settingsKey: `sound`,
-                      options: [
-                        {
-                          name: `On`,
-                          description: `Sound is on`,
-                          value: true,
-                        },
-                        {
-                          name: `Off`,
-                          description: `Sound is off. Nothing will play.`,
-                          value: false,
-                        },
-                      ],
-                    }) }
-                  </li>
-                </ul>
-              </div>
-            </div>
-            ` :
-            html`<br>`
-          }
+          ${() => Object.values(state.overlays).map(x => x.overlay)}
         </div>
         <audio id="audio-player-1"></audio>
         <audio id="audio-player-2"></audio>
@@ -613,8 +660,8 @@ export function openFeatures() {
 }
 export function closeFeatures() {
 
-  if (state.settingsOpen) {
-    toggleSettings()
+  if (state.overlays.length > 0) {
+    closeOverlay(state.overlays.slice(-1)[0].overlayId)
     return
   }
   
@@ -628,7 +675,23 @@ export function closeFeatures() {
 }
 
 export function toggleSettings() {
-  state.settingsOpen = !state.settingsOpen
+
+  if (!state.settingsOpen) {
+    showOverlay({
+      title: `Settings`,
+      key: `settings`,
+      content: settings,
+      onClose: () => {
+        console.log(`settings onClose`)
+        state.settingsOpen = false
+      }
+    })
+    state.settingsOpen = true
+
+  } else {
+    closeOverlay(`overlay-settings`)
+  }
+  
 }
 
 export function toggleMute() {
@@ -684,9 +747,9 @@ function previous() {
 }
 
 function createFeature(featureName, content) {
-  console.log(`feature created`)
+  console.log(`feature '${featureName}' created`)
   return (index) => html`
-    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `cursor-pointer absolute top-0 left-0 w-full h-full pt-8 ${state.currentFeature === index ? `opacity-100` : `opacity-0`}`}">
+    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
       <div>${content}</div>
       </li>
       `
@@ -700,8 +763,10 @@ function createFeature(featureName, content) {
 function handleFeatureClick(event) {
   // call `previous()` or `next()` depending on which side of the feature was clicked
   console.log(event)
+  let featureElement = event.target.closest(`[data-feature-name]`)
+  console.log(`featureElement:`, featureElement)
 
-  if (event.offsetX < event.target.offsetWidth / 3) {
+  if (event.clientX < featureElement.offsetWidth / 3) {
     previous()
   } else {
     next()
@@ -986,7 +1051,7 @@ function showPlaying(itemQuery, itemId, idRange) {
       itemOverlay.classList.add(`hidden`)
     }
   }
-  
+
   const playingItemOverlay = document.querySelector(`${itemQuery}-${itemId}`)
 
   // animated bars
@@ -1036,10 +1101,10 @@ async function fadeToNextTrack(trackInfo) {
   }
   activePlayer.setAttribute(`data-active`, false)
   inactivePlayer.setAttribute(`data-active`, true)
-
   await state.jellyHelper.loadAudio(inactivePlayer, trackInfo)
 
   if (state.settings.sound) {
+  
     inactivePlayer.volume = 0
     activePlayer.volume = 1
     inactivePlayer.play()
