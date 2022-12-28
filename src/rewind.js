@@ -312,6 +312,8 @@ async function generateRewindReport(year) {
 
   const jellyfinRewindReport = {
     commit: __COMMITHASH__,
+    year,
+    timestamp: new Date().toISOString(),
     playbackReportAvailable,
     playbackReportDataMissing,
     generalStats: {},
@@ -337,7 +339,11 @@ async function generateRewindReport(year) {
   console.log(`playbackReportComplete:`, playbackReportComplete)
   const dataSource = playbackReportAvailable ? (playbackReportComplete ? `playbackReport` : `average`) : `jellyfin`
 
-  jellyfinRewindReport.generalStats[`totalPlays`] = totalStats.totalPlayCount.average
+  jellyfinRewindReport.generalStats[`totalPlays`] = {
+    playbackReport: totalStats.totalPlayCount[`playbackReport`],
+    average: totalStats.totalPlayCount[`average`],
+    jellyfin: totalStats.totalPlayCount[`jellyfin`],
+  }
   jellyfinRewindReport.generalStats[`totalPlaybackDurationMinutes`] = {
     playbackReport: Number((totalStats.totalPlayDuration[`playbackReport`]).toFixed(1)),
     average: Number((totalStats.totalPlayDuration[`average`]).toFixed(1)),
@@ -427,10 +433,7 @@ function saveRewindReport() {
         return acc
       }, {})
       const rewindReportLightJSON = JSON.stringify({
-        generalStats: rewindReport.generalStats,
-        playbackReportAvailable: rewindReport.playbackReportAvailable,
-        playbackReportDataMissing: rewindReport.playbackReportDataMissing,
-        playbackReportComplete: rewindReport.playbackReportComplete,
+        ...rewindReport,
         tracks: reduceToSubsets(rewindReport.tracks),
         albums: reduceToSubsets(rewindReport.albums),
         artists: reduceToSubsets(rewindReport.artists),
@@ -461,6 +464,9 @@ function restoreRewindReport() {
 
   if (rewindReport.commit !== __COMMITHASH__) {
     console.warn(`Rewind report was generated with a different version of the app!`)
+  }
+  if (rewindReport.year !== new Date().getFullYear()) {
+    console.warn(`Rewind report was generated for a different year (${rewindReport.year})!`)
   }
   
   return rewindReport

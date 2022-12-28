@@ -166,6 +166,10 @@ function init() {
       if (rewindReport.commit !== __COMMITHASH__) {
         staleReport = true
       }
+      // check if the report is for the previous year and it's after February
+      if (rewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+        staleReport = true
+      }
       
       loadingSpinner.classList.add(`hidden`)
     } catch (err) {
@@ -202,7 +206,7 @@ async function generateRewindReport() {
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    report = await jellyfinRewind.generateRewindReport(import.meta.env.VITE_TARGET_YEAR)
+    report = await jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
     console.info(`Report generated successfully!`)
     loadingSpinner.classList.add(`hidden`)
     
