@@ -62,17 +62,24 @@ state.featureSideEffects = {
 
 state.features = [
   // total playtime
-  createFeature(`total playtime`, html`
+  buildFeature(`total playtime`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of 2022:</h2>
       
       <div class="mt-24 -rotate-6 font-quicksand text-sky-500 text-4xl"><span class="font-quicksand-bold">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> min</div>
 
+      <div class="mt-12 w-full flex flex-col items-center gap-0.5 text-sm">
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`totalPlays`]?.[state.settings.dataSource])}</span> total streams.</div>
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueTracksPlayed`])}</span> unique tracks.</div>
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueAlbumsPlayed`])}</span> unique artists.</div>
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueArtistsPlayed`])}</span> unique albums.</div>
+      </div>
+
       <div class="absolute bottom-16 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart" class="${() => state.extraFeatures.totalPlaytimeGraph ? `` : `opacity-30`}"></canvas>
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
-            <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable ${() => state.settings.dataSource}</span>
+            <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable</span>
             <button @click="${stopPropagation(() => showOverlay({
               title: `Why is this feature unavailable?`,
               content: html`
@@ -94,9 +101,9 @@ state.features = [
         `}
       </div>
     </div>
-  `),
+  `, `bg-sky-100`),
   // top song
-  createFeature(`top song`, html`
+  buildFeature(`top song`, html`
     <div class="text-center text-white">
       <h2 class="text-2xl mt-5">Your Top Song<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
@@ -116,12 +123,12 @@ state.features = [
     </div>
   `),
   // top songs of the year
-  createFeature(`top songs of the year`, html`
+  buildFeature(`top songs of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Songs<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[`topTracksByPlayCount`]?.slice(0, 5).map((track, index) => html`
-          <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-tracks-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
@@ -176,9 +183,9 @@ state.features = [
         </li>
       `)}
     </ol>
-  `),
+  `, `bg-sky-100`),
   // top artist
-  createFeature(`top artist`, html`
+  buildFeature(`top artist`, html`
     <div class="text-center text-white">
       <h2 class="text-2xl mt-5">Your Top Artist<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
@@ -197,12 +204,12 @@ state.features = [
     </div>
   `),
   // top artists of the year
-  createFeature(`top artists of the year`, html`
+  buildFeature(`top artists of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Artists<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.artists?.[`topArtistsByPlayCount`]?.slice(0, 5).map((artist, index) => html`
-          <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-artists-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-artists-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
@@ -261,9 +268,9 @@ state.features = [
         </li>
       `)}
     </ol>
-  `),
+  `, `bg-sky-100`),
   // top album
-  createFeature(`top album`, html`
+  buildFeature(`top album`, html`
     <div class="text-center text-white">
       <h2 class="text-2xl mt-5">Your Top Album<br>of 2022:</h2>
       <div class="flex mt-10 flex-col items-center">
@@ -283,12 +290,12 @@ state.features = [
     </div>
   `),
   // top albums of the year
-  createFeature(`top albums of the year`, html`
+  buildFeature(`top albums of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Albums<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.albums?.[`topAlbumsByPlayCount`]?.slice(0, 5).map((album, index) => html`
-          <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-albums-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-albums-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
@@ -343,14 +350,14 @@ state.features = [
         </li>
       `)}
     </ol>
-  `),
+  `, `bg-sky-100`),
   // top generes of the year
-  createFeature(`top generes of the year`, html`
+  buildFeature(`top generes of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Genres<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.genres?.[`topGenresByPlayCount`]?.slice(0, 5).map((genre, index) => html`
-          <li class="relative flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
+          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
             <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
               <div class="flex flex-row gap-4 w-full justify-start items-center whitespace-nowrap">
@@ -405,7 +412,7 @@ state.features = [
         </li>
       `)}
     </ol>
-  `),
+  `, `bg-sky-100`),
 ]
 
 const settings = html`
@@ -578,8 +585,8 @@ export function init(rewindReport, jellyHelper) {
       ${() => {
         return state.featuresOpen ?
           html`
-          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white border-red-500">
-            <div class="absolute top-0 left-0 w-[100vw] h-10 flex flex-row justify-between bg-gray-700/30">
+          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white">
+            <div class="absolute top-0 left-0 z-[5] w-[100vw] h-10 flex flex-row justify-between bg-gray-700/30">
               <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
                 ${() => {
                   return state.features.map((feature, index) => {
@@ -701,7 +708,7 @@ export function toggleMute() {
 watch(() => state.featuresOpen, (value) => {
   if (value) {
     document.querySelector(`body`).classList.add(`overflow-hidden`)
-      // pre-load all features
+    // pre-load all features
     setTimeout(() => {
       Object.entries(state.featureSideEffects).forEach(([featureId, sideEffects]) => {
         sideEffects.load?.()
@@ -746,10 +753,10 @@ function previous() {
   state.currentFeature = state.currentFeature - 1 < 0 ? state.features.length - 1 : state.currentFeature - 1;
 }
 
-function createFeature(featureName, content) {
+function buildFeature(featureName, content, classes) {
   console.log(`feature '${featureName}' created`)
   return (index) => html`
-    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
+    <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full pt-8 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
       <div>${content}</div>
       </li>
       `
