@@ -16,11 +16,11 @@ let state = reactive({
   extraFeatures: {
     totalPlaytimeGraph: true
   },
-  settings: {
+  settings: reactive({
     dataSource: null,
     rankingMetric: null,
     sound: false, //FIXME: change to true
-  },
+  }),
   previousRankingMetric: null,
   overlays: [],
 })
@@ -71,7 +71,7 @@ state.features = [
     <div class="p-4">
 
       <div class="mt-10 w-full flex flex-col items-center">
-        <img class="h-24" src="../public/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
+        <img class="h-24" src="/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
         <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
       </div>
 
@@ -198,25 +198,26 @@ state.features = [
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+                  <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
+                  <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() => track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(track.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(track.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
               <img id="${() => `top-tracks-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        `.key(track.id)
+        // .key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
         )}
       </ol>
     </div>
@@ -227,10 +228,10 @@ state.features = [
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
-                <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-base leading-tight text-ellipsis overflow-hidden">${track.name}</span>
+                <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+                <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() => track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
@@ -281,22 +282,22 @@ state.features = [
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-base leading-tight">${artist.name}</span>
+                  <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
+                  <span class="font-semibold text-base leading-tight">${() => artist.name}</span>
                 </div>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${showAsNumber(artist.playCount[state.settings.dataSource])}</span> streams</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(artist.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(artist.uniqueTracks)}</span> songs</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(artist.uniqueTracks)}</span> songs</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(artist.totalPlayDuration[state.settings.dataSource]
+                <div><span class="font-semibold text-black">${() => showAsNumber(artist.totalPlayDuration[state.settings.dataSource]
                 .toFixed(0))}</span> min</div>
               </div>
             </div>
@@ -304,7 +305,8 @@ state.features = [
               <img id="${() => `top-artists-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        `.key(artist.id)
+        // .key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
         )}
       </ol>
     </div>
@@ -315,8 +317,8 @@ state.features = [
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
-                <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-base leading-tight text-ellipsis overflow-hidden">${artist.name}</span>
+                <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => artist.name}</span>
               </div>
             </div>
             <!--
@@ -369,25 +371,26 @@ state.features = [
             <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
-                  <span class="font-semibold text-base mr-2">${index + 1}.</span>
-                  <span class="font-semibold text-babase leading-tight text-ellipsis overflow-hidden">${album.name}</span>
+                  <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
+                  <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${album.albumArtist.name}</span>
+                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() => album.albumArtist.name}</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${showAsNumber(album.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black">${() => showAsNumber(album.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
               <img id="${() => `top-albums-background-image-${index}`}" class="w-full h-full" />
             </div>
           </li>
-        `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+        `.key(album.id)
+        // .key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
         )}
       </ol>
     </div>
@@ -398,10 +401,10 @@ state.features = [
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
               <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
-                <span class="font-semibold mr-2">${index + 1 + 5}.</span>
-                <span class="font-base leading-tight text-ellipsis overflow-hidden">${album.name}</span>
+                <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold">${album.albumArtist.name}</span>
+                <div class="ml-6 text-xs">by <span class="font-semibold">${() => album.albumArtist.name}</span>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
@@ -429,23 +432,23 @@ state.features = [
 
             <div class="flex flex-col gap-1 overflow-hidden h-full w-full rounded-md">
               <div class="flex flex-row gap-4 w-full justify-start items-center whitespace-nowrap">
-                <span class="font-semibold basext-xl">${index + 1}.</span>
+                <span class="font-semibold basext-xl">${() => index + 1}.</span>
                 <div class="flex flex-col gap-0.5 items-start">
 
-                  <span class="font-quicksand-bold text-lg uppercase tracking-widest">${genre.name}</span>
+                  <span class="font-quicksand-bold text-lg uppercase tracking-widest">${() => genre.name}</span>
 
                   <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                    <div><span class="font-semibold text-black">${showAsNumber(genre.playCount[state.settings.dataSource])}</span> streams</div>
+                    <div><span class="font-semibold text-black">${() => showAsNumber(genre.playCount[state.settings.dataSource])}</span> streams</div>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
                     </svg>
-                    <div><span class="font-semibold text-black">${showAsNumber(genre.uniqueTracks)}</span> songs</div>
+                    <div><span class="font-semibold text-black">${() => showAsNumber(genre.uniqueTracks)}</span> songs</div>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
                     </svg>
-                    <div><span class="font-semibold text-black">${showAsNumber(genre.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> min</div>
+                    <div><span class="font-semibold text-black">${() => showAsNumber(genre.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> min</div>
                   </div>
                 </div>
                 <div id="${() => `top-genres-visualizer-${index}`}" class="absolute top-0 right-0 w-[8vh] h-full grid place-content-center text-black hidden"></div>
@@ -1014,6 +1017,8 @@ function loadTopTrackMedia() {
 }
 
 function loadTopTracksMedia() {
+
+  console.log(`topTracksMedia`)
 
   const topSongs = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5)
 
