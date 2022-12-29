@@ -314,6 +314,7 @@ async function generateRewindReport(year) {
     commit: __COMMITHASH__,
     year,
     timestamp: new Date().toISOString(),
+    type: `full`,
     playbackReportAvailable,
     playbackReportDataMissing,
     generalStats: {},
@@ -434,6 +435,7 @@ function saveRewindReport() {
       }, {})
       const rewindReportLightJSON = JSON.stringify({
         ...rewindReport,
+        type: `light`,
         tracks: reduceToSubsets(rewindReport.tracks),
         albums: reduceToSubsets(rewindReport.albums),
         artists: reduceToSubsets(rewindReport.artists),

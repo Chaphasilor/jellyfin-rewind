@@ -28,42 +28,76 @@ window.state = state
 
 state.featureSideEffects = {
   0: {
+
+  },
+  1: {
     enter: () => {
       pausePlayback()
       showPlaytimeByMonthChart()
     },
     leave: destroyPlayTimeByMonthChart,
   },
-  1: {
+  2: {
     load: loadTopTrackMedia,
     enter: playTopTrack,
   },
-  2: {
+  3: {
     load: loadTopTracksMedia,
     enter: playTopTracks,
   },
-  3: {
+  4: {
     load: loadTopArtistMedia,
     enter: playTopArtist,
   },
-  4: {
+  5: {
     load: loadTopArtistsMedia,
     enter: playTopArtists,
   },
-  5: {
+  6: {
     load: loadTopAlbumMedia,
     enter: playTopAlbum,
   },
-  6: {
+  7: {
     load: loadTopAlbumsMedia,
     enter: playTopAlbums,
   },
-  7: {
+  8: {
     enter: playTopGenres,
   },
 }
 
 state.features = [
+  buildFeature(`intro`, html`
+    <div class="p-4">
+
+      <div class="mt-10 w-full flex flex-col items-center">
+        <img class="h-24" src="../public/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
+        <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+      </div>
+
+
+      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800">Welcome to<br>Jellyfin Rewind ${import.meta.env.VITE_TARGET_YEAR}!</h2>
+
+      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
+        <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
+
+        <p class="">Feel free to share your Rewind on social media, I'd love to see your <span class="text-[#00A4DC]" @click="${stopPropagation()}">#JellyfinRewind</span> posts! If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>.</p>
+      </div>
+
+      <button
+        class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
+        @click="${stopPropagation(() => next())}"
+      >
+        <span>Let's Go!</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
+        </svg>
+      </button>
+
+    </div>
+
+  `),
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
@@ -520,6 +554,9 @@ const settings = html`
 `
 
 function stopPropagation(f) {
+  if (!f || typeof f !== `function`) {
+    f = () => {}
+  }
   return (e) => {
     e.stopPropagation()
     f(e)
@@ -558,7 +595,7 @@ function closeOverlay(overlayId) {
 function buildOverlay({ title, content, overlayId, onClose }) {
 
   return html`
-  <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16">
+  <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
       <div class="w-full h-full overflow-x-auto bg-white/75 pb-20 backdrop-blur rounded-xl p-4">
         <h3 class="w-full text-center text-lg mb-4">${() => title}</h3>
@@ -838,7 +875,7 @@ function next() {
   }
 }
 function previous() {
-  state.currentFeature = state.currentFeature - 1 < 0 ? state.features.length - 1 : state.currentFeature - 1;
+  state.currentFeature = state.currentFeature - 1 < 0 ? 0 : state.currentFeature - 1;
 }
 
 function buildFeature(featureName, content, classes) {
@@ -935,7 +972,7 @@ function showPlaytimeByMonthChart() {
   let data = {
     labels: [`January`, `February`, `March`, `April`, `May`, `June`, `July`, `August`, `September`, `October`, `November`, `December`],
     datasets: [{
-      label: `Playtime by Month`,
+      label: `Playtime in minutes`,
       data: state.extraFeatures.totalPlaytimeGraph ? monthData : [300, 600, 367, 763, 823, 285, 506, 583, 175, 286, 1204, 496],
     }]
   }
