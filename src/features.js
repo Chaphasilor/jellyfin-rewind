@@ -3,7 +3,7 @@ import Chart from 'chart.js/auto';
 
 const mainElement = document.querySelector('main');
 
-let state = reactive({
+export const state = reactive({
   featuresOpen: false,
   settingsOpen: false,
   currentFeature: -1,
@@ -14,13 +14,16 @@ let state = reactive({
   auth: null,
   pollCanvas: false,
   extraFeatures: {
-    totalPlaytimeGraph: true
+    totalPlaytimeGraph: true,
+    fullReport: true,
   },
-  settings: reactive({
-    dataSource: null,
-    rankingMetric: null,
+  settings: {
+    dataSource: `jellyfin`,
+    rankingMetric: `playCount`,
+    useAlbumArtists: true,
     sound: false, //FIXME: change to true
-  }),
+  },
+  disabledSettings: [],
   previousRankingMetric: null,
   overlays: [],
 })
@@ -76,7 +79,7 @@ state.features = [
       </div>
 
 
-      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800">Welcome to<br>Jellyfin Rewind ${import.meta.env.VITE_TARGET_YEAR}!</h2>
+      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport.year}!</h2>
 
       <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
         <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
@@ -101,17 +104,17 @@ state.features = [
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${import.meta.env.VITE_TARGET_YEAR}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
+      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
         title: `About the accuracy of this data`,
         content: html`
           <div class="flex flex-col items-start gap-2">
-            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${import.meta.env.VITE_TARGET_YEAR} only!<span></p>
+            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport.year} only!<span></p>
             <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This will results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
             <p>Alternatively, an even better solution would be to install the Playback Reporting plugin into your Jellyfin server. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a> 
             <p>So, please treat all of this information with a grain of salt. You can take a look at the settings in order to choose which data will be used, but any information that needs to be interpolated will have a negative influence on the quality of these stats.</p>
             <p>I will try to offer a way to import this year's Rewind data into next year's Jellyfin Rewind, so that more information can be used and the used data can be properly limited to the current year only. Because of this, please <span class="font-semibold">make sure to download a copy of your Rewind data at the end and store it until next year!</span></p>
-            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-blue-500" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
           </div>
         `,
       }))}">
@@ -137,7 +140,7 @@ state.features = [
 
       <div class="absolute bottom-16 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart" class="${() => state.extraFeatures.totalPlaytimeGraph ? `` : `opacity-30`}"></canvas>
-        ${() => state.extraFeatures.totalPlaytimeGraph ? html`` : html`
+        ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable</span>
             <button @click="${stopPropagation(() => showOverlay({
@@ -168,9 +171,14 @@ state.features = [
       <h2 class="text-2xl mt-5">Your Top Song<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
           <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
-            <div class="">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0].artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)} -</div>
+            <div class="">${() =>
+              state.settings.useAlbumArtists ?
+                state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0].albumBaseInfo.albumArtistBaseInfo.name :
+                state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0].artistsBaseInfo
+                  .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+            } -</div>
             <div class="mt-8 ml-10">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.name}</div>
           </div>
         </div>
@@ -201,7 +209,12 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() => track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                    state.settings.useAlbumArtists ?
+                      track.albumBaseInfo.albumArtistBaseInfo.name :
+                      track.artistsBaseInfo
+                        .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                  }</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
                 <div><span class="font-semibold text-black">${() => showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
@@ -231,7 +244,13 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() => track.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+              <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
+                state.settings.useAlbumArtists ?
+                  track.albumBaseInfo.albumArtistBaseInfo.name :
+                  track.artistsBaseInfo
+                    .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                }</span>
+              </div>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
@@ -256,7 +275,7 @@ state.features = [
       <h2 class="text-2xl mt-5">Your Top Artist<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-artist-image" class="w-[30vh] h-[30vh] mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
           <div class="-rotate-6 mt-16 text-5xl font-semibold">
             <div class="">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</div>
           </div>
@@ -346,10 +365,15 @@ state.features = [
       <h2 class="text-2xl mt-5">Your Top Album<br>of 2022:</h2>
       <div class="flex mt-10 flex-col items-center">
         <img id="top-album-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
           <div class="-rotate-6 mt-10 text-4xl font-semibold">
-            <div class="-ml-4 text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0].name}</div>
-            <div class="ml-4 mt-8">by ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.albumArtist.name}</div>
+            <div class="-ml-4">${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0].name}</div>
+            <div class="ml-4 mt-8 max-h-[3.5em]">by ${() =>
+              state.settings.useAlbumArtists ?
+                state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.albumArtist.name :
+                state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.artists
+                  .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+            }</div>
           </div>
         </div>
       </div>
@@ -379,7 +403,12 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() => album.albumArtist.name}</span>
+                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                    state.settings.useAlbumArtists ?
+                      album.albumArtist.name :
+                      album.artists
+                        .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                  }</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
                 <div><span class="font-semibold text-black">${() => showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
@@ -409,7 +438,12 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold">${() => album.albumArtist.name}</span>
+                <div class="ml-6 text-xs">by <span class="font-semibold">${() =>
+                  state.settings.useAlbumArtists ?
+                    album.albumArtist.name :
+                    album.artists
+                      .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                }</span>
             </div>
             <!--
             <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
@@ -493,6 +527,19 @@ state.features = [
 ]
 
 const settings = html`
+${() =>
+  !state.extraFeatures.fullReport ? html`
+    <p class="text-sm text-gray-500">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
+    <p class="text-sm mt-1 mb-3 text-gray-500">To access all settings, please <button @click="${() => {
+      closeFeatures() // close settings
+      closeFeatures() // close features
+      closeFeatures() // for good measure, in case an overlay is open
+      window.generateRewindReport().then((rewindReport) => {
+        window.initializeFeatureStory(rewindReport)
+      })
+    }}" class="text-[#00A4DC]">re-generate the Rewind report</button> and make sure you have enough free storage left on your device!</p>
+  ` : html`<br>`
+}
 <ul class="flex flex-col gap-4">
   <li class="flex flex-row justify-between">
     ${() => buildOptionChooser({
@@ -558,6 +605,25 @@ const settings = html`
       ],
     }) }
   </li>
+  <li class="flex flex-row justify-between">
+    ${() => buildOptionChooser({
+      title: `Artist Type`,
+      description: `Toggle between (song) artists and album artists`,
+      settingsKey: `useAlbumArtists`,
+      options: [
+        {
+          name: `(Song) Artists`,
+          description: `Using (song) artists`,
+          value: false,
+        },
+        {
+          name: `Album Artists`,
+          description: `Using album artists`,
+          value: true,
+        },
+      ],
+    }) }
+  </li>
 </ul>
 `
 
@@ -606,7 +672,7 @@ function buildOverlay({ title, content, overlayId, onClose }) {
   <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
       <div class="w-full h-full overflow-x-auto bg-white/75 pb-20 backdrop-blur rounded-xl p-4">
-        <h3 class="w-full text-center text-lg mb-4">${() => title}</h3>
+        <h3 class="w-full text-center text-lg font-quicksand font-medium text-[#00A4DC] mb-4">${() => title}</h3>
         ${() => content}
       </div>
     </div>
@@ -628,14 +694,18 @@ function buildOptionChooser({ title, description, settingsKey, options}) {
         <span class="text-xs text-gray-600">${description}</span>
       </div>
       <div class="w-full flex flex-row justify-around overflow-hidden border-4 border-gray-200 items-center text-sm rounded-full bg-gray-200">
-        ${() => options.map((option, index) => html`
+        ${() => options.map((option, index) => {
+          const optionDisabled = state.disabledSettings.includes(settingsKey) || option.disabled
+
+          return html`
           <button
-            class="w-full h-full rounded-md ${option.disabled ? `opacity-50` : selectedOptionIndex === index ? `bg-gray-100` : ``}"
-            @click="${(e) => !option.disabled ? updateSetting(settingsKey, option.value) : e.preventDefault()}"
+            class="w-full h-full rounded-md ${selectedOptionIndex === index ? `bg-gray-100` : optionDisabled ? `opacity-50`  : ``}"
+            @click="${(e) => !optionDisabled ? updateSetting(settingsKey, option.value) : e.preventDefault()}"
           >
             <span class="">${option.name}</span>
           </button>
-        `)}
+          `
+        })}
       </div>
       <p class="w-full text-center text-xs px-4 text-gray-600">${selectedOption.description}</p>
     </div>
@@ -644,7 +714,9 @@ function buildOptionChooser({ title, description, settingsKey, options}) {
 }
 
 function updateSetting(key, value) {
-  state.settings[key] = value
+  if (!state.disabledSettings.includes(key)) {
+    state.settings[key] = value
+  }
 }
 
 watch(() => {
@@ -688,6 +760,18 @@ export function init(rewindReport, jellyHelper, auth) {
   state.jellyHelper = jellyHelper
   state.auth = auth
   console.log(`state.rewindReport:`, state.rewindReport)
+  console.log(`state.rewindReport.type:`, state.rewindReport.type)
+  console.log(`state.rewindReport.type !== 'full':`, state.rewindReport.type !== 'full')
+
+  
+  if (state.rewindReport.type !== `full`) {
+    state.extraFeatures.fullReport = false
+    state.settings.useAlbumArtists = true
+    !state.disabledSettings.includes(`useAlbumArtists`) ? state.disabledSettings.push(`useAlbumArtists`) : null
+  } else {
+    state.extraFeatures.fullReport = true
+    state.disabledSettings = state.disabledSettings.filter((setting) => setting !== `useAlbumArtists`)
+  }
 
   // determine which data source is the best
   if (state.rewindReport.playbackReportAvailable) {
@@ -714,6 +798,14 @@ export function init(rewindReport, jellyHelper, auth) {
     state.settings.rankingMetric = `playCount`
   }
 
+  console.log(`init finished`)
+
+}
+
+export function render() {
+
+  console.info(`Rendering...`)
+  
   let content = html`
       ${() => {
         return state.featuresOpen ?
@@ -784,7 +876,7 @@ export function init(rewindReport, jellyHelper, auth) {
   // document.querySelector(`#playtime-by-month-chart`).addEventListener(`load`, () => {
   //   showPlaytimeByMonthChart()
   // })
-
+  
 }
 
 function autoAdvance() {

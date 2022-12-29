@@ -224,6 +224,7 @@ async function generateRewindReport() {
   return report    
 
 }
+window.generateRewindReport = generateRewindReport
 
 function showRewindReport(report) {
 
@@ -251,10 +252,12 @@ function showRewindReport(report) {
 function initializeFeatureStory(report) {
 
   Features.openFeatures()
-
+  
+  Features.init(report, helper, jellyfinRewind.auth)
   if (!featuresInitialized) {
-    Features.init(report, helper, jellyfinRewind.auth)
+    Features.render()
     featuresInitialized = true
   }
 
 }
+window.initializeFeatureStory = initializeFeatureStory

@@ -13,7 +13,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
     const track = new Track({
       name: item.Name,
       id: item.Id,
-      artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name})),
+      artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name || `Unknown Artist`})),
       albumBaseInfo: {
         id: item.AlbumId, 
         name: item.Album,
