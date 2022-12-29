@@ -92,11 +92,28 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
 }
 
 function indexPlaybackReport(playbackReportJSON) {
+
+  const convertPlaybackMethod = (playbackMethod) => {
+    switch (playbackMethod) {
+      case `DirectPlay`:
+        return `directPlay`
+      case `Transcode`:
+        return `transcode`
+      case `DirectStream`:
+        return `directStream`
+      default:
+        return playbackMethod
+    }
+  }
+  
   const items = {}
   for (const item of playbackReportJSON.items) {
     const playInfo = {
       date: new Date(item.DateCreated),
       duration: Number(item.PlayDuration),
+      client: item.ClientName,
+      device: item.DeviceName,
+      method: convertPlaybackMethod(item.PlaybackMethod),
     }
     if (!items[item.ItemId]) {
       items[item.ItemId] = {
@@ -359,7 +376,8 @@ async function generateRewindReport(year) {
   jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums.size
   jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists.size
 
-  //TODO save data for all data sources
+  jellyfinRewindReport.generalStats[`playbackMethods`] = totalStats.playbackMethods
+  jellyfinRewindReport.generalStats[`locations`] = totalStats.locations
 
   const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
   const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })

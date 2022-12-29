@@ -249,14 +249,17 @@ state.features = [
       )}
     </ol>
   `, `bg-sky-100`),
+  //TODO add playlist intermezzo
   // top artist
   buildFeature(`top artist`, html`
     <div class="text-center text-white">
       <h2 class="text-2xl mt-5">Your Top Artist<br>of 2022:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-artist-image" class="w-[30vh] h-[30vh] mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="-rotate-6 mt-16 text-4xl font-semibold">
-          <div class="">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</div>
+        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+          <div class="-rotate-6 mt-16 text-5xl font-semibold">
+            <div class="">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</div>
+          </div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
@@ -343,9 +346,11 @@ state.features = [
       <h2 class="text-2xl mt-5">Your Top Album<br>of 2022:</h2>
       <div class="flex mt-10 flex-col items-center">
         <img id="top-album-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
-        <div class="-rotate-6 mt-10 text-4xl font-semibold">
-          <div class="-ml-4 text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0].name}</div>
-          <div class="ml-4 mt-8">by ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.albumArtist.name}</div>
+        <div class="px-4 py-4 overflow-hidden break-all whitespace-wrap">
+          <div class="-rotate-6 mt-10 text-4xl font-semibold">
+            <div class="-ml-4 text-ellipsis overflow-hidden">${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0].name}</div>
+            <div class="ml-4 mt-8">by ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.albumArtist.name}</div>
+          </div>
         </div>
       </div>
       <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">

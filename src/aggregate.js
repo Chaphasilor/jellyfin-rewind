@@ -209,6 +209,24 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     acc.uniqueTracks.add(cur.id)
     acc.uniqueAlbums.add(cur.albumBaseInfo?.id)
     acc.uniqueArtists.add(cur.artistsBaseInfo?.[0]?.id)
+
+    cur.plays.forEach(play => {
+      acc.playbackMethods.playCount[play.method] += 1
+      acc.playbackMethods.duration[play.method] += play.duration / 60 // convert to minutes
+
+      acc.locations.devices[play.device] = acc.locations.devices[play.device] ? acc.locations.devices[play.device] + 1 : 1
+      acc.locations.clients[play.client] = acc.locations.clients[play.client] ? acc.locations.clients[play.client] + 1 : 1
+      if (!acc.locations.combinations[`${play.device} - ${play.client}`]) {
+        acc.locations.combinations[`${play.device} - ${play.client}`] = {
+          device: play.device,
+          client: play.client,
+          playCount: 1,
+        }
+      } else {
+        acc.locations.combinations[`${play.device} - ${play.client}`].playCount += 1
+      }
+    })
+    
     return acc
   }, {
     totalPlayCount: {
@@ -223,6 +241,23 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     uniqueTracks: new Set(),
     uniqueAlbums: new Set(),
     uniqueArtists: new Set(),
+    playbackMethods: {
+      playCount: {
+        directPlay: 0,
+        directStream: 0,
+        transcode: 0,
+      },
+      duration: {
+        directPlay: 0,
+        directStream: 0,
+        transcode: 0,
+      },
+    },
+    locations: {
+      devices: {},
+      clients: {},
+      combinations: {},
+    }
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
