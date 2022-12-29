@@ -14,6 +14,7 @@ const playbackReportQuery = (year) => {
   WHERE ItemType="Audio"
     AND datetime(DateCreated) >= datetime('${year}-01-01') AND datetime(DateCreated) <= datetime('${year}-12-31')
     AND UserId="${auth.config.user.id}"
+  ORDER BY DateCreated ASC
 `
 }
   // GROUP BY ItemId -- don't group so that we can filter out wrong durations
@@ -106,6 +107,12 @@ function indexPlaybackReport(playbackReportJSON) {
     }
   }
   
+  let currentSuccessivePlays = {
+    count: 0,
+    totalDuration: 0,
+    itemId: null,
+  }
+  
   const items = {}
   for (const item of playbackReportJSON.items) {
     const playInfo = {
@@ -128,8 +135,24 @@ function indexPlaybackReport(playbackReportJSON) {
       items[item.ItemId].TotalPlayCount += 1
       items[item.ItemId].Plays.push(playInfo)
     }
+
+    if (!currentSuccessivePlays.itemId || currentSuccessivePlays.itemId !== item.ItemId) {
+      if (currentSuccessivePlays.itemId) {
+        items[currentSuccessivePlays.itemId].MostSuccessivePlays = {
+          playCount: currentSuccessivePlays.count,
+          totalDuration: currentSuccessivePlays.totalDuration,
+        }
+      }
+      currentSuccessivePlays.itemId = item.ItemId
+      currentSuccessivePlays.count = 1
+      currentSuccessivePlays.totalDuration = Number(item.PlayDuration)
+    } else {
+      currentSuccessivePlays.count += 1
+      currentSuccessivePlays.totalDuration += Number(item.PlayDuration)
+    }
       
   }
+
   return items
 }
 
@@ -315,7 +338,7 @@ async function generateRewindReport(year) {
   const enhancedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
   const indexedPlaybackReport = indexPlaybackReport(enhancedPlaybackReportJSON)
   console.log(`indexedPlaybackReport:`, indexedPlaybackReport)
-  
+
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
 
@@ -378,6 +401,8 @@ async function generateRewindReport(year) {
 
   jellyfinRewindReport.generalStats[`playbackMethods`] = totalStats.playbackMethods
   jellyfinRewindReport.generalStats[`locations`] = totalStats.locations
+
+  jellyfinRewindReport.generalStats[`mostSuccessivePlays`] = totalStats.mostSuccessivePlays
 
   const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
   const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })

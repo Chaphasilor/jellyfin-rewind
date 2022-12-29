@@ -90,7 +90,7 @@ export class Album {
 }
 
 export class Track {
-  constructor({ name, id, artistsBaseInfo, albumBaseInfo, genreBaseInfo, image, year, duration, playCount, plays, lastPlayed, totalPlayDuration, isFavorite }) {
+  constructor({ name, id, artistsBaseInfo, albumBaseInfo, genreBaseInfo, image, year, duration, playCount, plays, mostSuccessivePlays, lastPlayed, totalPlayDuration, isFavorite }) {
     this.name = name
     this.id = id
     this.artistsBaseInfo = artistsBaseInfo
@@ -101,6 +101,7 @@ export class Track {
     this.duration = duration
     this.playCount = playCount
     this.plays = plays
+    this.mostSuccessivePlays = mostSuccessivePlays
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration
     this.isFavorite = isFavorite

@@ -67,6 +67,10 @@ state.featureSideEffects = {
   8: {
     enter: playTopGenres,
   },
+  9: {
+    load: loadMostSuccessivePlaysTrackMedia,
+    enter: playMostSuccessivePlaysTrack,
+  },
 }
 
 state.features = [
@@ -524,6 +528,33 @@ state.features = [
     </ol>
     <!-- TODO add pie chart with percentages -->
   `, `bg-sky-100`),
+   // most successive streams
+   buildFeature(`most successive streams`, html`
+   <div class="text-center text-white">
+     <h2 class="text-2xl mt-5">On Repeat:<br>Most successive streams</h2>
+     <div class="flex mt-10 flex-col">
+       <img id="most-successive-streams-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
+       <div class="px-4 py-4 overflow-hidden whitespace-wrap">
+         <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
+           <div class="">${() =>
+             state.settings.useAlbumArtists ?
+               state.rewindReport.generalStats.mostSuccessivePlays.track.albumBaseInfo.albumArtistBaseInfo.name :
+               state.rewindReport.generalStats.mostSuccessivePlays.track.artistsBaseInfo
+                 .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+           } -</div>
+           <div class="mt-8 ml-10">${() => state.rewindReport.generalStats.mostSuccessivePlays.track.name}</div>
+         </div>
+       </div>
+     </div>
+     <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+       <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.playCount)}</span> successive streams.</div>
+       <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration)}</span> minutes.</div>
+     </div>
+   </div>
+   <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+     <img id="most-successive-streams-track-background-image" class="w-full h-full" />
+   </div>
+ `),
 ]
 
 const settings = html`
@@ -1176,6 +1207,17 @@ function loadTopAlbumsMedia() {
   
 }
 
+function loadMostSuccessivePlaysTrackMedia() {
+
+  const mostSuccessivePlaysTrackPrimaryImage = document.querySelector(`#most-successive-streams-track-image`);
+  const mostSuccessivePlaysTrackBackgroundImage = document.querySelector(`#most-successive-streams-track-background-image`);
+  console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage)
+  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
+  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], mostSuccessivePlaysTrack.image, `track`)
+
+}
+
 
 function playTopTrack() {
 
@@ -1278,6 +1320,14 @@ async function playTopGenres() {
 
   fadeToNextTrack({ id: randomTrack.Id })
   
+}
+
+function playMostSuccessivePlaysTrack() {
+
+  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
+  console.log(`topSongByDuration:`, mostSuccessivePlaysTrack)
+  fadeToNextTrack(mostSuccessivePlaysTrack)
+
 }
 
 function showPlaying(itemQuery, itemId, idRange) {

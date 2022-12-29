@@ -37,6 +37,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
       plays: playbackReportItem?.Plays || [],
+      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || [],
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: {
         jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
@@ -226,6 +227,12 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
         acc.locations.combinations[`${play.device} - ${play.client}`].playCount += 1
       }
     })
+
+    if (cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount) {
+      acc.mostSuccessivePlays.track = cur
+      acc.mostSuccessivePlays.playCount = cur.mostSuccessivePlays.playCount
+      acc.mostSuccessivePlays.totalDuration = cur.mostSuccessivePlays.totalDuration / 60 // convert to minutes
+    }
     
     return acc
   }, {
@@ -257,7 +264,12 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       devices: {},
       clients: {},
       combinations: {},
-    }
+    },
+    mostSuccessivePlays: {
+      track: null,
+      playCount: 0,
+      totalDuration: 0,
+    },
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
