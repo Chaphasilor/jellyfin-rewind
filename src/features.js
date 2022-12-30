@@ -194,7 +194,7 @@ state.features = [
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-track-background-image" class="w-full h-full" />
     </div>
   `),
@@ -292,7 +292,7 @@ state.features = [
         <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-artist-background-image" class="w-full h-full" />
     </div>
   `),
@@ -388,7 +388,7 @@ state.features = [
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-album-background-image" class="w-full h-full" />
     </div>
   `),
@@ -553,7 +553,7 @@ state.features = [
        <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration.toFixed(1))}</span> minutes.</div>
      </div>
    </div>
-   <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+   <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
      <img id="most-successive-streams-track-background-image" class="w-full h-full" />
    </div>
  `), //TODO build fallback
@@ -1051,58 +1051,60 @@ export function render() {
       ${() => {
         return state.featuresOpen ?
           html`
-          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white">
-            <div class="absolute top-0 left-0 z-[5] w-[100vw] h-10 flex flex-row justify-between bg-gray-700/30">
-              <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
-                ${() => {
-                  return state.features.map((feature, index) => {
-                    return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature >= index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
-                  })
-                }}
-              </ul>
-              <button class="px-1 z-[150]" @click="${() => toggleMute()}" type="button">
-                ${() => state.settings.sound ?
-                  html`
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white flex flex-row justify-center">
+            <div class="absolute w-full md:max-w-4xl h-full">
+              <div class="absolute top-0 left-0 z-[5] w-full h-10 flex flex-row justify-between bg-gray-700/30">
+                <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
+                  ${() => {
+                    return state.features.map((feature, index) => {
+                      return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature >= index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
+                    })
+                  }}
+                </ul>
+                <button class="px-1 z-[150]" @click="${() => toggleMute()}" type="button">
+                  ${() => state.settings.sound ?
+                    html`
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M15 8a5 5 0 0 1 0 8"></path>
+                      <path d="M17.7 5a9 9 0 0 1 0 14"></path>
+                      <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+                    </svg>
+                    ` :
+                    html`
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"></path>
+                      <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"></path>
+                      <path d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"></path>
+                      <path d="M3 3l18 18"></path>
+                    </svg>
+                    `
+                  }
+                </button>
+                <button class="px-1 z-[150]" @click="${() => toggleSettings()}" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M15 8a5 5 0 0 1 0 8"></path>
-                    <path d="M17.7 5a9 9 0 0 1 0 14"></path>
-                    <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+                    <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
                   </svg>
-                  ` :
-                  html`
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                </button>
+                <button class="px-1 z-[150]" @click="${() => closeFeatures()}" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"></path>
-                    <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"></path>
-                    <path d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"></path>
-                    <path d="M3 3l18 18"></path>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  `
-                }
-              </button>
-              <button class="px-1 z-[150]" @click="${() => toggleSettings()}" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-              <button class="px-1 z-[150]" @click="${() => closeFeatures()}" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-          <ul class="absolute top-0 left-0 w-full h-full">
-            ${() => state.features.map((feature, index) => feature(index))}
-          </ul>
-          ${() => Object.values(state.overlays).map(x => x.overlay)}
+                </button>
+              </div>
+            <ul class="absolute top-0 left-0 w-full h-full">
+              ${() => state.features.map((feature, index) => feature(index))}
+            </ul>
+            ${() => Object.values(state.overlays).map(x => x.overlay)}
+          </div>
+          <audio id="audio-player-1" loop></audio>
+          <audio id="audio-player-2" loop></audio>
         </div>
-        <audio id="audio-player-1" loop></audio>
-        <audio id="audio-player-2" loop></audio>
         `
         :
         html`<br>`
@@ -1113,10 +1115,6 @@ export function render() {
   state.currentFeature = 0
 
   // autoAdvance()
-
-  // document.querySelector(`#playtime-by-month-chart`).addEventListener(`load`, () => {
-  //   showPlaytimeByMonthChart()
-  // })
   
 }
 
@@ -1243,8 +1241,11 @@ function handleFeatureClick(event) {
   console.log(event)
   let featureElement = event.target.closest(`[data-feature-name]`)
   console.log(`featureElement:`, featureElement)
+  console.log(`event.clientX:`, event.clientX)
+  console.log(`featureElement.offsetLeft:`, featureElement.offsetLeft)
+  console.log(`featureElement.getBoundingClientRect().x:`, featureElement.getBoundingClientRect().x)
 
-  if (event.clientX < featureElement.offsetWidth / 3) {
+  if ((event.clientX - featureElement.getBoundingClientRect().x) < featureElement.offsetWidth / 3) {
     previous()
   } else {
     next()
