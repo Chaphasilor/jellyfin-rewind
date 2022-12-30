@@ -6,8 +6,10 @@ export default class JellyHelper {
     this.auth = auth;
   }
   
-  loadImage(elements, imageInfo, type = `track`) {
+  loadImage(elements, imageInfo, type = `track`, isDarkMode = false) {
 
+    console.log(`isDarkMode:`, isDarkMode)
+    
     if (!Array.isArray(elements)) {
       elements = [elements];
     }
@@ -26,13 +28,13 @@ export default class JellyHelper {
       elements.forEach(element => {
         switch (type) {
           case `track`:
-            element.src = `/media/TrackPlaceholder.png`
+            element.src = `/media/TrackPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
           case `artist`:
-            element.src = `/media/ArtistPlaceholder.png`
+            element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
             case `album`:
-              element.src = `/media/AlbumPlaceholder.png`
+              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
         
           default:
@@ -69,13 +71,13 @@ export default class JellyHelper {
       elements.forEach(element => {
         switch (type) {
           case `track`:
-            element.src = `/media/TrackPlaceholder.png`
+            element.src = `/media/TrackPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
           case `artist`:
-            element.src = `/media/ArtistPlaceholder.png`
+            element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
             case `album`:
-              element.src = `/media/AlbumPlaceholder.png`
+              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
         
           default:

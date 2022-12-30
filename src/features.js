@@ -24,6 +24,7 @@ export const state = reactive({
     rankingMetric: `playCount`,
     useAlbumArtists: true,
     sound: false, //FIXME: change to true
+    darkMode: false,
   },
   disabledSettings: [],
   previousRankingMetric: null,
@@ -80,14 +81,14 @@ state.features = [
     <div class="p-4">
 
       <div class="mt-10 w-full flex flex-col items-center">
-        <img class="h-24" src="/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
+        <img class="h-24" src="${() =>  state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
         <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
       </div>
 
 
-      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport.year}!</h2>
+      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport.year}!</h2>
 
-      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
+      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
         <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
 
         <p class="">Feel free to share your Rewind on social media, I'd love to see your <span class="text-[#00A4DC]" @click="${stopPropagation()}">#JellyfinRewind</span> posts! If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>.</p>
@@ -105,7 +106,7 @@ state.features = [
       </button>
 
     </div>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
@@ -169,7 +170,7 @@ state.features = [
         `}
       </div>
     </div>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top song
   buildFeature(`top song`, html`
     <div class="text-center text-white">
@@ -203,12 +204,12 @@ state.features = [
       <h2 class="text-2xl font-medium mt-5">Your Top Songs<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5).map((track, index) => html`
-          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-tracks-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
             </div>
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
+            <div class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
@@ -221,13 +222,13 @@ state.features = [
                         .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
                   }</span>
               </div>
-              <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${() => showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
+              <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${() => showAsNumber(track.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(track.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -272,7 +273,7 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   //TODO add playlist intermezzo
   // top artist
   buildFeature(`top artist`, html`
@@ -301,30 +302,30 @@ state.features = [
       <h2 class="text-2xl font-medium mt-5">Your Top Artists<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(0, 5).map((artist, index) => html`
-          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-artists-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-artists-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
             </div>
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
+            <div class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight">${() => artist.name}</span>
                 </div>
               </div>
-              <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${() => showAsNumber(artist.playCount[state.settings.dataSource])}</span> streams</div>
+              <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(artist.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${() => showAsNumber(artist.uniqueTracks)}</span> songs</div>
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(artist.uniqueTracks)}</span> songs</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${() => showAsNumber(artist.totalPlayDuration[state.settings.dataSource]
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(artist.totalPlayDuration[state.settings.dataSource]
                 .toFixed(0))}</span> min</div>
               </div>
             </div>
@@ -363,7 +364,7 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top album
   buildFeature(`top album`, html`
     <div class="text-center text-white">
@@ -397,12 +398,12 @@ state.features = [
       <h2 class="text-2xl font-medium mt-5">Your Top Albums<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(0, 5).map((album, index) => html`
-          <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
               <img id="${() => `top-albums-image-${index}`}" class="w-full h-full" />
               <div id="${() => `top-albums-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
             </div>
-            <div class="flex flex-col gap-1 bg-white/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
+            <div class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
               <div class="flex flex-col gap-0.25 items-start">
                 <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
@@ -415,13 +416,13 @@ state.features = [
                         .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
                   }</span>
               </div>
-              <div class="flex flex-row justify-start font-medium text-gray-800 gap-0.5 items-center text-xs">
-                <div><span class="font-semibold text-black">${() => showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
+              <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(album.playCount[state.settings.dataSource])}</span> streams</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black">${() => showAsNumber(album.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(album.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
               </div>
             </div>
             <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
@@ -465,12 +466,12 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top generes of the year
   buildFeature(`top generes of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Genres<br>of the year</h2>
-      <ol class="flex flex-col gap-2 p-6">
+      <ol class="flex flex-col gap-2 p-6 dark:text-black">
         ${() => state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(0, 5).map((genre, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
@@ -528,7 +529,7 @@ state.features = [
       `)}
     </ol>
     <!-- TODO add pie chart with percentages -->
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
    // most successive streams
    buildFeature(`most successive streams`, html`
    <div class="text-center text-white">
@@ -560,14 +561,14 @@ state.features = [
  buildFeature(`outro`, html`
   <div class="p-4">
     
-    <h2 class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-800">That's the end<br>of this year's</h2>
+    <h2 class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-800 dark:text-gray-100">That's the end<br>of this year's</h2>
 
     <div class="mt-4 w-full flex flex-col items-center">
-      <img class="h-16" src="/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
+      <img class="h-16" src="${() =>  state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
       <h3 class="-rotate-6 ml-4 -mt-2 text-3xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
     </div>
 
-    <div class="flex flex-col gap-3 text-lg font-medium leading-6 text-gray-500 mt-8 w-5/6 mx-auto">
+    <div class="flex flex-col gap-3 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-8 w-5/6 mx-auto">
       <p class="">Thank you so much for checking it out, I hope you had fun and saw some interesting stats!</p>
       <p class="">Please make sure to</p>
     </div>
@@ -593,7 +594,7 @@ state.features = [
       </svg>
     </button>
 
-    <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-3 w-5/6 mx-auto">
+    <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 text-gray-400 mt-3 w-5/6 mx-auto">
       <p class="">and <span class="font-bold">store it until next year</span> because it might help to show you even more insights next time around!<br>Also, it could help to generate more accurate data in case you still don't have the Playback Reporting plugin installed next year.</p>
       <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
       <p class="relative">Thanks for using Jellyfin Rewind. See you next year &lt;3 <span class="absolute italic right-0 bottom-0">- Chaphasilor</span></p>
@@ -662,7 +663,7 @@ state.features = [
       </button>
 
   </div>
-`, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
+`, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
 ]
 
 function showIncompleteReportOverlay(onClose = () => {}) {
@@ -729,8 +730,8 @@ function showIncompleteReportOverlay(onClose = () => {}) {
 const settings = html`
 ${() =>
   !state.extraFeatures.fullReport ? html`
-    <p class="text-sm text-gray-500">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
-    <p class="text-sm mt-1 mb-3 text-gray-500">To access all settings, please <button @click="${() => {
+    <p class="text-sm text-gray-500 dark:text-gray-400">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
+    <p class="text-sm mt-1 mb-3 text-gray-500 dark:text-gray-400">To access all settings, please <button @click="${() => {
       closeFeatures() // close settings
       closeFeatures() // close features
       closeFeatures() // for good measure, in case an overlay is open
@@ -877,7 +878,7 @@ function buildOverlay({ title, content, overlayId, onClose }) {
   return html`
   <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
-      <div class="w-full h-full bg-white/80 pb-20 backdrop-blur rounded-xl">
+      <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
         <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
           <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">${() => title}</h3>
           <button @click="${() => onClose()}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
@@ -908,15 +909,15 @@ function buildOptionChooser({ title, description, settingsKey, options}) {
     <div class="w-full flex flex-col gap-2 items-center">
       <div class="flex flex-col gap-0.5 items-start place-self-start">
         <span class="text-base font-semibold">${title}</span>
-        <span class="text-xs text-gray-600">${description}</span>
+        <span class="text-xs text-gray-600 dark:text-gray-300">${description}</span>
       </div>
-      <div class="w-full flex flex-row justify-around overflow-hidden border-4 border-gray-200 items-center text-sm rounded-full bg-gray-200">
+      <div class="w-full flex flex-row justify-around overflow-hidden border-4 border-gray-200 dark:border-gray-900 items-center text-sm rounded-full bg-gray-200 dark:bg-gray-900">
         ${() => options.map((option, index) => {
           const optionDisabled = state.disabledSettings.includes(settingsKey) || option.disabled
 
           return html`
           <button
-            class="w-full h-full rounded-md ${selectedOptionIndex === index ? `bg-gray-100` : optionDisabled ? `opacity-50`  : ``}"
+            class="w-full h-full rounded-md ${selectedOptionIndex === index ? `bg-gray-100 dark:bg-gray-800` : optionDisabled ? `opacity-50`  : ``}"
             @click="${(e) => !optionDisabled ? updateSetting(settingsKey, option.value) : e.preventDefault()}"
           >
             <span class="">${option.name}</span>
@@ -924,7 +925,7 @@ function buildOptionChooser({ title, description, settingsKey, options}) {
           `
         })}
       </div>
-      <p class="w-full text-center text-xs px-4 text-gray-600">${selectedOption.description}</p>
+      <p class="w-full text-center text-xs px-4 text-gray-600 dark:text-gray-300">${selectedOption.description}</p>
     </div>
   `
   
@@ -1023,6 +1024,20 @@ export function init(rewindReportData, jellyHelper, auth) {
   } else {
     state.settings.rankingMetric = `playCount`
   }
+
+  // MediaQueryList
+  const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
+
+  // recommended method for newer browsers: specify event-type as first argument
+  darkModePreference.addEventListener(`change`, e => {
+    if (e.matches) {
+      state.settings.darkMode = true 
+    } else {
+      state.settings.darkMode = false
+    }
+  });
+
+  state.settings.darkMode = darkModePreference.matches
 
   console.log(`init finished`)
 
@@ -1336,7 +1351,7 @@ function loadTopTrackMedia() {
   console.log(`img:`, topSongPrimaryImage)
   const topSongByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
   console.log(`topSongByDuration:`, topSongByDuration)
-  state.jellyHelper.loadImage([topSongPrimaryImage, topSongBackgroundImage], topSongByDuration.image, `track`)
+  state.jellyHelper.loadImage([topSongPrimaryImage, topSongBackgroundImage], topSongByDuration.image, `track`, state.settings.darkMode)
 
 }
 
@@ -1350,7 +1365,7 @@ function loadTopTracksMedia() {
     const songPrimaryImage = document.querySelector(`#top-tracks-image-${index}`);
     const songBackgroundImage = document.querySelector(`#top-tracks-background-image-${index}`);
     console.log(`img:`, songPrimaryImage)
-    state.jellyHelper.loadImage([songPrimaryImage, songBackgroundImage], song.image, `track`)
+    state.jellyHelper.loadImage([songPrimaryImage, songBackgroundImage], song.image, `track`, state.settings.darkMode)
   })
   
 }
@@ -1362,7 +1377,7 @@ function loadTopArtistMedia() {
   console.log(`img:`, topArtistPrimaryImage)
   const topSongByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
   console.log(`topSongByDuration:`, topSongByDuration)
-  state.jellyHelper.loadImage([topArtistPrimaryImage, topArtistBackgroundImage], topSongByDuration.images.primary, `artist`)
+  state.jellyHelper.loadImage([topArtistPrimaryImage, topArtistBackgroundImage], topSongByDuration.images.primary, `artist`, state.settings.darkMode)
 
 }
 
@@ -1374,7 +1389,7 @@ function loadTopArtistsMedia() {
     const artistPrimaryImage = document.querySelector(`#top-artists-image-${index}`);
     const artistBackgroundImage = document.querySelector(`#top-artists-background-image-${index}`);
     console.log(`img:`, artistPrimaryImage)
-    state.jellyHelper.loadImage([artistPrimaryImage, artistBackgroundImage], artist.images.primary, `artist`)
+    state.jellyHelper.loadImage([artistPrimaryImage, artistBackgroundImage], artist.images.primary, `artist`, state.settings.darkMode)
   })
   
 }
@@ -1386,7 +1401,7 @@ function loadTopAlbumMedia() {
   console.log(`img:`, topAlbumPrimaryImage)
   const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]
   console.log(`topAlbumByDuration:`, topAlbumByDuration)
-  state.jellyHelper.loadImage([topAlbumPrimaryImage, topAlbumBackgroundImage], topAlbumByDuration.image, `album`)
+  state.jellyHelper.loadImage([topAlbumPrimaryImage, topAlbumBackgroundImage], topAlbumByDuration.image, `album`, state.settings.darkMode)
 
 }
 
@@ -1398,7 +1413,7 @@ function loadTopAlbumsMedia() {
     const albumPrimaryImage = document.querySelector(`#top-albums-image-${index}`);
     const albumBackgroundImage = document.querySelector(`#top-albums-background-image-${index}`);
     console.log(`img:`, albumPrimaryImage)
-    state.jellyHelper.loadImage([albumPrimaryImage, albumBackgroundImage], album.image, `album`)
+    state.jellyHelper.loadImage([albumPrimaryImage, albumBackgroundImage], album.image, `album`, state.settings.darkMode)
   })
   
 }
@@ -1410,7 +1425,7 @@ function loadMostSuccessivePlaysTrackMedia() {
   console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage)
   const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
   console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
-  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], mostSuccessivePlaysTrack.image, `track`)
+  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], mostSuccessivePlaysTrack.image, `track`, state.settings.darkMode)
 
 }
 
