@@ -7,7 +7,7 @@
     <title>Jellyfin Rewind</title>
 
   </head>
-  <body>
+  <body class="w-full h-full bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white">
     <div id="app"></div>
 
     <div class="p-2">
@@ -22,23 +22,29 @@
       
       <div id="server-config">
         <label for="serverUrl">Server URL:</label>
-        <input class="border border-gray-500 p-1 rounded" type="text" name="serverUrl" id="serverUrl">
+        <input class="border border-gray-500 text-black p-1 rounded" type="text" name="serverUrl" id="serverUrl">
         <button class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" id="connectToServer" type="button">Connect!</button>
       </div>
     
       <ul id="user-select" class="hidden flex flex-col p-2 gap-3">
-        <li id="manual-user" class="rounded-md p-2 italic cursor-pointer hover:bg-blue-200">Manual User Input</li>
       </ul>
     
       <div id="user-login" class="hidden">
   
         <span id="username-input" class="hidden">
           <label for="username">Username:</label>
-          <input class="border border-gray-500 p-1 rounded" type="text" name="username" id="username">
+          <input class="border border-gray-500 text-black p-1 rounded" type="text" name="username" id="username">
         </span>
   
-        <label for="password">Password:</label>
-        <input class="border border-gray-500 p-1 rounded" type="password" name="password" id="password">
+        <span id="password-input" class="hidden">
+          <label for="password">Password:</label>
+          <input class="border border-gray-500 text-black p-1 rounded" type="password" name="password" id="password">
+        </span>
+      
+        <span id="auth-token-input" class="hidden">
+          <label for="auth-token">Auth Token:</label>
+          <input class="border border-gray-500 text-black p-1 rounded" type="text" name="auth-token" id="auth-token">
+        </span>
       
         <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
       </div>

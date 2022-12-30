@@ -117,6 +117,37 @@ export default class Auth {
 
   }
 
+  async authenticateUserViaToken(token) {
+
+    this.setDefaultHeaders(token)
+    
+    console.log(`this.config.defaultHeaders:`, this.config.defaultHeaders)
+    
+    const response = await fetch(`${this.config.baseUrl}/Users/Me`, {
+      method: 'GET',
+      headers: {
+        ...this.config.defaultHeaders,
+      },
+    })
+
+    const json = await response.json()
+    
+    if (response.status !== 200) {
+      throw new Error(`Authentication failed: ${response.json()}`);
+    }
+    
+    this.config.user = {
+      token: token,
+      id: json.Id,
+      name: json.Name,
+      primaryImageTag: json.PrimaryImageTag,
+      sessionId: null,
+    };
+
+    this.setDefaultHeaders(this.config.user.token);
+
+  }
+
   saveSession() {
     localStorage.setItem('session', JSON.stringify(this.config));
   }

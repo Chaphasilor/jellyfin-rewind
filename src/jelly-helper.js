@@ -31,9 +31,9 @@ export default class JellyHelper {
           case `artist`:
             element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
-            case `album`:
-              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
-            break;
+          case `album`:
+            element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
         
           default:
             break;
@@ -41,8 +41,12 @@ export default class JellyHelper {
       })
     }
   
-    if (primaryTag && parentItemId) {
-      fetch(`${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`, {
+    if (primaryTag && (parentItemId || type === `user`)) {
+      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      if (type === `user`) {
+        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      }
+      fetch(url, {
         method: `GET`,
         headers: {
           ...this.auth.config.defaultHeaders,
@@ -74,9 +78,12 @@ export default class JellyHelper {
           case `artist`:
             element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
-            case `album`:
-              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
-            break;
+          case `album`:
+            element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
+          case `user`:
+            element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
         
           default:
             break;

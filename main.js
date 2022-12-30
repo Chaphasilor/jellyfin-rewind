@@ -1,8 +1,7 @@
 import './style.css'
 
-import { reactive, html } from '@arrow-js/core'
+import { reactive, watch, html, } from '@arrow-js/core'
 
-import javascriptLogo from './javascript.svg'
 import * as jellyfinRewind from './src/rewind.js'
 import JellyHelper from './src/jelly-helper.js'
 
@@ -34,10 +33,12 @@ const serverUrl = document.querySelector(`#serverUrl`)
 const serverConfig = document.querySelector(`#server-config`)
 const userSelect = document.querySelector(`#user-select`)
 const userLogin = document.querySelector(`#user-login`)
-const manualUser = document.querySelector(`#manual-user`)
 const usernameInput = document.querySelector(`#username-input`)
+const authTokenInput = document.querySelector(`#auth-token-input`)
+const passwordInput = document.querySelector(`#password-input`)
 const username = document.querySelector(`#username`)
 const password = document.querySelector(`#password`)
+const authToken = document.querySelector(`#auth-token`)
 const authenticateUser = document.querySelector(`#authenticateUser`)
 const showReport = document.querySelector(`#show-report`)
 const generateReport = document.querySelector(`#generate-report`)
@@ -62,7 +63,7 @@ window.onload = () => {
     enableLogout()
     serverConfig.classList.add(`hidden`)
     init()
-    showReport.click() //FIXME remove this
+    // showReport.click() //FIXME remove this
   }
   
 }
@@ -102,39 +103,107 @@ async function connectToServer() {
 function showUsers() {
 
   userSelect.classList.remove(`hidden`)
+
+  html`
+    ${() => userInfo.map(user => html`
+      <li>
+        <button
+          class="rounded-xl p-2 w-full flex flex-row items-center justify-start gap-4 bg-white dark:bg-[#00A4DC] cursor-pointer focus:bg-[#0085B2] hover:bg-[#0085B2]"
+          data-user-id=${user.Id}
+          @click="${() => {
+            selectedUsername = user.Name
+            console.info(`User selected:`, user)
+            password.removeEventListener(`keydown`, login(user.Id))
+            password.addEventListener(`keydown`, login(user.Id))
+            authenticateUser.removeEventListener(`click`, login(user.Id))
+            authenticateUser.addEventListener(`click`, login(user.Id))
+            userLogin.classList.remove(`hidden`)
+            passwordInput.classList.remove(`hidden`)
+            userSelect.classList.add(`hidden`)
+          }}"
+        >
+          <img class="w-12 h-12 rounded-md" src="${() => user.PrimaryImageTag ? `${jellyfinRewind.auth.config.baseUrl}/Users/${user.Id}/Images/Primary?tag=${user.PrimaryImageTag}` : `/media/ArtistPlaceholder.png`}" />
+          <span class="text-lg">${user.Name}</span>
+        </button>
+      </li>
+      `)}
+
+    <li>
+      <button
+        class="rounded-xl p-2 w-full flex flex-row items-center justify-center gap-4 bg-white dark:bg-[#00A4DC] cursor-pointer focus:bg-[#0085B2] hover:bg-[#0085B2]"
+        @click="${() => {
+          userLogin.classList.remove(`hidden`)
+          usernameInput.classList.remove(`hidden`)
+          passwordInput.classList.remove(`hidden`)
+          userSelect.classList.add(`hidden`)
+          username.addEventListener(`keyup`, () => {
+            if (username.value.length > 0) {
+              authenticateUser.classList.remove(`hidden`)
+              selectedUsername = username.value
+            } else {
+              authenticateUser.classList.add(`hidden`)
+            }
+          })
+          password.removeEventListener(`keydown`, login(``))
+          password.addEventListener(`keydown`, login(``))
+          authenticateUser.removeEventListener(`click`, login(``))
+          authenticateUser.addEventListener(`click`, login(``))
+        }}"
+        >
+        <span class="italic">Manually enter username</span>
+      </button>
+    </li>
+
+    <li>
+      <button
+        class="rounded-xl p-2 w-full flex flex-row items-center justify-center gap-4 bg-white dark:bg-[#00A4DC] cursor-pointer focus:bg-[#0085B2] hover:bg-[#0085B2]"
+        @click="${() => {
+          userLogin.classList.remove(`hidden`)
+          authTokenInput.classList.remove(`hidden`)
+          userSelect.classList.add(`hidden`)
+          authToken.removeEventListener(`keydown`, loginWithAuthToken())
+          authToken.addEventListener(`keydown`, loginWithAuthToken())
+          authenticateUser.removeEventListener(`click`, loginWithAuthToken())
+          authenticateUser.addEventListener(`click`, loginWithAuthToken())
+        }}"
+        >
+        <span class="italic">Log in via auth token</span>
+      </button>
+    </li>
+  `(userSelect)
   
-  manualUser.addEventListener(`click`, () => {
-    userLogin.classList.remove(`hidden`)
-    usernameInput.classList.remove(`hidden`)
-    userSelect.classList.add(`hidden`)
-    username.addEventListener(`keyup`, () => {
-      selectedUsername = username.value
-    })
-    authenticateUser.removeEventListener(`click`, login(``))
-    authenticateUser.addEventListener(`click`, login(``))
-    password.removeEventListener(`keydown`, login(``))
-    password.addEventListener(`keydown`, login(``))
-  })
+  // manualUser.addEventListener(`click`, () => {
+  //   userLogin.classList.remove(`hidden`)
+  //   usernameInput.classList.remove(`hidden`)
+  //   userSelect.classList.add(`hidden`)
+  //   username.addEventListener(`keyup`, () => {
+  //     selectedUsername = username.value
+  //   })
+  //   authenticateUser.removeEventListener(`click`, login(``))
+  //   authenticateUser.addEventListener(`click`, login(``))
+  //   password.removeEventListener(`keydown`, login(``))
+  //   password.addEventListener(`keydown`, login(``))
+  // })
   
-  userInfo.forEach(user => {
-    const li = document.createElement(`li`)
-    const button = document.createElement(`button`)
-    button.textContent = user.Name
-    button.setAttribute(`data-user-id`, user.Id)
-    button.classList.add(`rounded-md`, `p-2`, `cursor-pointer`, `focus:bg-blue-200`, `hover:bg-blue-200`)
-    button.addEventListener(`click`, () => {
-      userLogin.classList.remove(`hidden`)
-      selectedUsername = user.Name
-      console.info(`User selected:`, user)
-      userSelect.classList.add(`hidden`)
-      authenticateUser.removeEventListener(`click`, login(user.Id))
-      authenticateUser.addEventListener(`click`, login(user.Id))
-      password.removeEventListener(`keydown`, login(user.Id))
-      password.addEventListener(`keydown`, login(user.Id))
-    })
-    li.appendChild(button)
-    userSelect.appendChild(li)
-  })
+  // userInfo.forEach(user => {
+  //   const li = document.createElement(`li`)
+  //   const button = document.createElement(`button`)
+  //   button.textContent = user.Name
+  //   button.setAttribute(`data-user-id`, user.Id)
+  //   button.classList.add(`rounded-md`, `p-2`, `cursor-pointer`, `focus:bg-blue-200`, `hover:bg-blue-200`)
+  //   button.addEventListener(`click`, () => {
+  //     userLogin.classList.remove(`hidden`)
+  //     selectedUsername = user.Name
+  //     console.info(`User selected:`, user)
+  //     userSelect.classList.add(`hidden`)
+  //     authenticateUser.removeEventListener(`click`, login(user.Id))
+  //     authenticateUser.addEventListener(`click`, login(user.Id))
+  //     password.removeEventListener(`keydown`, login(user.Id))
+  //     password.addEventListener(`keydown`, login(user.Id))
+  //   })
+  //   li.appendChild(button)
+  //   userSelect.appendChild(li)
+  // })
 }
 
 const login = (userId) => async (event) => {
@@ -147,6 +216,27 @@ const login = (userId) => async (event) => {
 
     await jellyfinRewind.auth.authenticateUser(selectedUsername, password.value)
     console.info(`Successfully logged in as ${selectedUsername}`)
+    jellyfinRewind.auth.saveSession()
+    enableLogout()
+
+    userLogin.classList.add(`hidden`)
+    init()
+    
+  } catch (err) {
+    console.error(`Error while logging in:`, err)
+  }
+}
+
+const loginWithAuthToken = () => async (event) => {
+
+  if (event.type !== `click` && event.key !== `Enter`) {
+    return
+  } 
+  
+  try {
+
+    await jellyfinRewind.auth.authenticateUserViaToken(authToken.value)
+    console.info(`Successfully logged in as ${jellyfinRewind.auth.config.name}`)
     jellyfinRewind.auth.saveSession()
     enableLogout()
 

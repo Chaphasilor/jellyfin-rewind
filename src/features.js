@@ -1,4 +1,4 @@
-import { reactive, watch, html, } from '@arrow-js/core' 
+import { reactive, watch, html, } from '@arrow-js/core'
 import Chart from 'chart.js/auto';
 
 const mainElement = document.querySelector('main');
