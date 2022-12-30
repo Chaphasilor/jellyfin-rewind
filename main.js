@@ -43,11 +43,19 @@ const showReport = document.querySelector(`#show-report`)
 const generateReport = document.querySelector(`#generate-report`)
 const loadingSpinner = document.querySelector(`#loading-spinner`)
 const output = document.querySelector(`#output`)
+const loggedInInfo = document.querySelector(`#logged-in-info`)
 const logOutButton = document.querySelector(`#log-out`)
+const loggedInUserInfo = document.querySelector(`#logged-in-user`)
+const loggedInServerInfo = document.querySelector(`#logged-in-server`)
+const infoOutput = document.querySelector(`#info`)
 
 let selectedUsername = ``
+let featuresInitialized = false
+let staleReport = false
 
 window.onload = () => {
+
+  console.log(`commit hash:`, __COMMITHASH__)
 
   if (jellyfinRewind.auth.restoreSession()) {
     console.info(`Session restored!`)
@@ -59,11 +67,14 @@ window.onload = () => {
 }
 
 function enableLogout() {
-  logOutButton.classList.remove(`hidden`)
+  loggedInInfo.classList.remove(`hidden`)
   logOutButton.addEventListener(`click`, () => {
     jellyfinRewind.auth.destroySession()
     window.location.reload()
   })
+
+  loggedInUserInfo.innerText = jellyfinRewind.auth.config.user.name
+  loggedInServerInfo.innerText = jellyfinRewind.auth.config.serverInfo.ServerName
 }
 
 connectToServerButton.addEventListener(`click`, connectToServer)
@@ -83,6 +94,7 @@ async function connectToServer() {
     showUsers()
   } catch (err) {
     console.error(`Error while connecting to the server:`, err)
+    infoOutput.innerText = `Error while connecting to the server. Make sure your using the same protocol (https or http) as your server is using. Make sure you're not using a local IP address or mDNS hostname. For example, you could use your server's Tailscale IP address, if you use Tailscale as your VPN.`
   }
 }
 
@@ -135,6 +147,7 @@ const login = (userId) => async (event) => {
     await jellyfinRewind.auth.authenticateUser(selectedUsername, password.value)
     console.info(`Successfully logged in as ${selectedUsername}`)
     jellyfinRewind.auth.saveSession()
+    enableLogout()
 
     userLogin.classList.add(`hidden`)
     init()
@@ -146,25 +159,43 @@ const login = (userId) => async (event) => {
 
 function init() {
   showReport.addEventListener(`click`, async () => {
-    let rewindReport = null
+    let rewindReportData = null
     try {
-      rewindReport = jellyfinRewind.restoreRewindReport()
+      loadingSpinner.classList.remove(`hidden`)
+      rewindReportData = {
+        jellyfinRewindReport: jellyfinRewind.restoreRewindReport()
+      }
+
+      if (rewindReportData.jellyfinRewindReport.commit !== __COMMITHASH__) {
+        staleReport = true
+      }
+      // check if the report is for the previous year and it's after February
+      if (rewindReportData.jellyfinRewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+        staleReport = true
+      }
+      
+      loadingSpinner.classList.add(`hidden`)
     } catch (err) {
       console.warn(`Couldn't restore Rewind report:`, err)
       console.info(`Generating new report...`)
-      rewindReport = await generateRewindReport()
+      rewindReportData = await generateRewindReport()
     }
 
-    showRewindReport(rewindReport)
-    initializeFeatureStory(rewindReport)
+    if (staleReport) {
+      infoOutput.innerText = `The stored rewind report is stale. Please re-generate it for the best experience.`
+    }
+
+    // showRewindReport(rewindReport)
+    initializeFeatureStory(rewindReportData)
 
   })
   generateReport.addEventListener(`click`, async () => {
     console.info(`Generating new report...`)
-    let rewindReport = await generateRewindReport()
+    featuresInitialized = false // reset features
+    let rewindReportData = await generateRewindReport()
 
-    showRewindReport(rewindReport)
-    initializeFeatureStory(rewindReport)
+    // showRewindReport(rewindReport)
+    initializeFeatureStory(rewindReportData)
 
   })
   generateReport.classList.remove(`hidden`)
@@ -174,46 +205,76 @@ function init() {
 
 async function generateRewindReport() {
 
+  let reportData
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    const report = await jellyfinRewind.generateRewindReport()
+    reportData = await jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
     console.info(`Report generated successfully!`)
-    jellyfinRewind.saveRewindReport()
+    loadingSpinner.classList.add(`hidden`)
     
-    return report    
   } catch (err) {
     console.error(`Error while generating the report:`, err)
   }
   
-}
+  try {
+    jellyfinRewind.saveRewindReport()
+    console.info(`Report saved successfully!`)
+  } catch (err) {
+    console.error(`Couldn't save Rewind report:`, err)
+  }
+  
+  return reportData    
 
-function showRewindReport(report) {
+}
+window.generateRewindReport = generateRewindReport
+
+function testShowRewindReport(report) {
 
   output.value = JSON.stringify(report, null, 2)
-    loadingSpinner.classList.add(`hidden`)
 
-    const topSongByDuration = report.tracks?.[`topTracksByPlayCount`]?.[0]
+  const topSongByDuration = report.jellyfinRewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
 
-    if (topSongByDuration) {
-      document.querySelector('#app').innerHTML += `
-        <div class="m-4 text-gray-800">
-          <h3 class="text-xl">Your Top Song of the Year</h3>
-          <div class="flex mt-4 flex-col">
-            <img id="test-image" class="w-64 h-auto rounded-md" />
-            <span class="font-semibold mt-2">${topSongByDuration?.name}</span>
-            <span class="italic pl-3 mt-1">by ${topSongByDuration.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
-          </div>
+  if (topSongByDuration) {
+    document.querySelector('#app').innerHTML += `
+      <div class="m-4 text-gray-800">
+        <h3 class="text-xl">Your Top Song of the Year</h3>
+        <div class="flex mt-4 flex-col">
+          <img id="test-image" class="w-64 h-auto rounded-md" />
+          <span class="font-semibold mt-2">${topSongByDuration?.name}</span>
+          <span class="italic pl-3 mt-1">by ${topSongByDuration.artistsBaseInfo.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
         </div>
-      `
-      const testImage = document.querySelector(`#test-image`)
-      helper.loadImage(testImage, topSongByDuration.image)
-    }
+      </div>
+    `
+    const testImage = document.querySelector(`#test-image`)
+    helper.loadImage(testImage, topSongByDuration.image)
+  }
   
 }
 
 function initializeFeatureStory(report) {
 
-  Features.init(report, helper)
+  Features.openFeatures()
+  
+  Features.init(report, helper, jellyfinRewind.auth)
+  if (!featuresInitialized) {
+    Features.render()
+    featuresInitialized = true
+  }
 
 }
+window.initializeFeatureStory = initializeFeatureStory
+
+function downloadRewindReportData(reportData, skipVerification) {
+  if (reportData.rawData || skipVerification || confirm(`The report you're about to download is incomplete and missing some data. Please re-generate and download the report without reloading the page in-between. Do you want to download the incomplete report anyway?`)) {
+    const reportDataString = JSON.stringify(reportData, null, 2)
+    const blob = new Blob([reportDataString], {type: `application/json`})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement(`a`)
+    a.href = url
+    a.download = `jellyfin-rewind-report-${reportData.jellyfinRewindReport.year}_for-${jellyfinRewind.auth.config.user.name}-at-${jellyfinRewind.auth.config.serverInfo.name}_${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+  }
+
+}
+window.downloadRewindReportData = downloadRewindReportData

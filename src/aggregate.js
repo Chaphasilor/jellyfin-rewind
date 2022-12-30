@@ -1,37 +1,49 @@
-import { PrimaryImage, Artist, Album, Track } from './types.js'
+import { PrimaryImage, BackdropImage, Artist, Album, Track } from './types.js'
 
 export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   const topTrackInfo = Object.values(itemInfo).map(item => {
 
     const playbackReportItem = playbackReportJSON[item.Id]
+    const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
 
+    if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
+      console.log(`item.ArtistItems:`, item.ArtistItems)
+      // TODO figure out how to consolidate artists with the same name but different IDs
+    }
     const track = new Track({
       name: item.Name,
       id: item.Id,
-      artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name})),
+      artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name || `Unknown Artist`})),
       albumBaseInfo: {
         id: item.AlbumId, 
         name: item.Album,
         albumArtistBaseInfo: {
-          id: item.AlbumArtists[0]?.Id || ``,
-          name: item.AlbumArtists[0]?.Name || `Unknown Artist`,
+          id: item.AlbumArtists?.[0]?.Id || ``,
+          name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
         },
       },
+      genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
       image: new PrimaryImage({
         parentItemId: item.Id,
         primaryTag: item.ImageTags?.Primary,
-        blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags.Primary],
+        blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags?.Primary],
       }),
       year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
       duration: Math.round(item.RunTimeTicks / 10000000),
       playCount: {
         jellyfin: item.UserData?.PlayCount || 0,
-        playbackReport: Number(playbackReportItem?.TotalPlayCount || 0),
-        average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(playbackReportItem?.TotalPlayCount || 0))/2),
+        // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
+        playbackReport: adjustedPlaybackReportPlayCount || 0,
+        average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
-      plays: item.Plays,
+      plays: playbackReportItem?.Plays || [],
+      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || [],
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
-      totalPlayDuration: Number(playbackReportItem?.TotalDuration),
+      totalPlayDuration: {
+        jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
+        playbackReport: Number(playbackReportItem?.TotalDuration) / 60 || 0, // convert to minutes
+        average: Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2),
+      },
       isFavorite: item.UserData?.IsFavorite,
     })
 
@@ -42,89 +54,186 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   return topTrackInfo
 }
 
-export function generateTopAlbumInfo(topTrackInfo) {
+export function generateAlbumInfo(topTrackInfo, albumInfo) {
   const topAlbumInfo = topTrackInfo.reduce((acc, cur) => {
     const albumId = cur.albumBaseInfo?.id
+    const currentAlbumInfo = albumInfo[albumId]
     if (!acc[albumId]) {
       acc[albumId] = new Album({
         id: cur.albumBaseInfo?.id,
         name: cur.albumBaseInfo?.name,
-        artists: new Set([cur.artistsBaseInfo?.[0]]),
+        artists: new Set(cur.artistsBaseInfo),
         albumArtist: cur.albumArtist,
         tracks: [cur],
-        year: cur.year, //TODO replace with actual year from jellyfin
+        year: currentAlbumInfo?.PremiereDate ? new Date (currentAlbumInfo.PremiereDate) : cur.year,
         image: new PrimaryImage({
           parentItemId: albumId,
-          primaryTag: cur.image?.primaryTag,
-          blurhash: cur.image?.blurhash,
+          primaryTag: currentAlbumInfo?.ImageTags?.Primary,
+          blurhash: currentAlbumInfo?.ImageBlurHashes?.Primary?.[currentAlbumInfo?.ImageTags?.Primary],
         }),
         playCount: {
-          jellyfin: cur.playCount.jellyfin,
-          playbackReport: cur.playCount.playbackReport,
-          average: cur.playCount.average,
+          jellyfin: cur.playCount?.jellyfin,
+          playbackReport: cur.playCount?.playbackReport,
+          average: cur.playCount?.average,
         },
+        plays: cur.plays,
         lastPlayed: cur.lastPlayed,
         totalPlayDuration: cur.totalPlayDuration,
       })
     } else {
       acc[albumId].tracks.push(cur)
-      acc[albumId].artists.add(cur.artistsBaseInfo?.[0])
-      acc[albumId].playCount.jellyfin += cur.playCount.jellyfin
-      acc[albumId].playCount.playbackReport += cur.playCount.playbackReport
+      cur.artistsBaseInfo.forEach(artistInfo => acc[albumId].artists.add(artistInfo))
+      acc[albumId].playCount.jellyfin += cur.playCount?.jellyfin
+      acc[albumId].playCount.playbackReport += cur.playCount?.playbackReport
       acc[albumId].playCount.average = Math.ceil(((acc[albumId]?.playCount?.jellyfin || 0) + (acc[albumId]?.playCount?.playbackReport || 0))/2)
+      acc[albumId].plays.concat(cur.plays)
       acc[albumId].lastPlayed = (acc[albumId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[albumId]?.lastPlayed || 0) : cur.lastPlayed
-      acc[albumId].totalPlayDuration += cur.totalPlayDuration
+      acc[albumId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+      acc[albumId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+      acc[albumId].totalPlayDuration.average = Math.ceil(((acc[albumId]?.totalPlayDuration?.jellyfin || 0) + (acc[albumId]?.totalPlayDuration?.playbackReport || 0))/2)
     }
     return acc
   }, {})
+  Object.entries(topAlbumInfo).forEach(([albumId, album]) => {
+    album.artists = Array.from(album.artists)
+  })
   return topAlbumInfo
 }
 
-export function generateTopArtistInfo(topTrackInfo) {
+export function generateArtistInfo(topTrackInfo, artistInfo) {
   const topArtistInfo = topTrackInfo.reduce((acc, cur) => {
     cur.artistsBaseInfo.forEach(artist => {
       const artistId = artist.id
+      const currentArtistInfo = artistInfo[artistId]
       if (!acc[artistId]) {
         acc[artistId] = new Artist({
           id: artist.id,
           name: artist.name,
           tracks: [cur],
-          image: new PrimaryImage({
-            parentItemId: artistId,
-            primaryTag: null,
-            blurhash: null,
-          }),
-          playCount: {
-            jellyfin: cur.playCount.jellyfin,
-            playbackReport: cur.playCount.playbackReport,
-            average: cur.playCount.average,
+          images: {
+            primary: new PrimaryImage({
+              parentItemId: artistId,
+              primaryTag: currentArtistInfo?.ImageTags?.Primary,
+              blurhash: currentArtistInfo?.ImageBlurHashes?.Primary?.[currentArtistInfo.ImageTags.Primary],
+            }),
+            backdrop: new BackdropImage({
+              id: 0,
+              parentItemId: artistId,
+              backgroundTag: currentArtistInfo?.BackdropImageTags?.[0],
+              blurhash: currentArtistInfo?.ImageBlurHashes?.Backdrop?.[currentArtistInfo.BackdropImageTags?.[0]],
+            }),
           },
+          playCount: {
+            jellyfin: cur.playCount?.jellyfin,
+            playbackReport: cur.playCount?.playbackReport,
+            average: cur.playCount?.average,
+          },
+          uniqueTracks: new Set([{id: cur.id, name: cur.name}]),
+          plays: cur.plays,
           lastPlayed: cur.lastPlayed,
           totalPlayDuration: cur.totalPlayDuration,
         })
       } else {
         acc[artistId].tracks.push(cur)
-        acc[artistId].playCount.jellyfin += cur.playCount.jellyfin
-        acc[artistId].playCount.playbackReport += cur.playCount.playbackReport
+        acc[artistId].playCount.jellyfin += cur.playCount?.jellyfin
+        acc[artistId].playCount.playbackReport += cur.playCount?.playbackReport
         acc[artistId].playCount.average = Math.ceil(((acc[artistId]?.playCount?.jellyfin || 0) + (acc[artistId]?.playCount?.playbackReport || 0))/2)
+        acc[artistId].uniqueTracks.add({id: cur.id, name: cur.name})
+        acc[artistId].plays.concat(cur.plays)
         acc[artistId].lastPlayed = (acc[artistId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[artistId]?.lastPlayed || 0) : cur.lastPlayed
-        acc[artistId].totalPlayDuration += cur.totalPlayDuration
+        acc[artistId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+        acc[artistId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+        acc[artistId].totalPlayDuration.average = Math.ceil(((acc[artistId]?.totalPlayDuration?.jellyfin || 0) + (acc[artistId]?.totalPlayDuration?.playbackReport || 0))/2)
       }
     })
     return acc
   }, {})
+
+  Object.entries(topArtistInfo).forEach(([artistId, artist]) => {
+    artist.uniqueTracks = Array.from(artist.uniqueTracks)
+  })
+  
   return topArtistInfo
 }
 
-export function generateTotalStats(topTrackInfo) {
+export function generateGenreInfo(topTrackInfo) {
+  const topGenreInfo = topTrackInfo.reduce((acc, cur) => {
+    cur.genreBaseInfo.forEach(genre => {
+      const genreId = genre.id
+      if (!acc[genreId]) {
+        acc[genreId] = new Artist({
+          id: genre.id,
+          name: genre.name,
+          tracks: [cur],
+          image: null,
+          playCount: {
+            jellyfin: cur.playCount?.jellyfin,
+            playbackReport: cur.playCount?.playbackReport,
+            average: cur.playCount?.average,
+          },
+          uniqueTracks: new Set([{id: cur.id, name: cur.name}]),
+          plays: cur.plays,
+          lastPlayed: cur.lastPlayed,
+          totalPlayDuration: cur.totalPlayDuration,
+        })
+      } else {
+        acc[genreId].tracks.push(cur)
+        acc[genreId].playCount.jellyfin += cur.playCount?.jellyfin
+        acc[genreId].playCount.playbackReport += cur.playCount?.playbackReport
+        acc[genreId].playCount.average = Math.ceil(((acc[genreId]?.playCount?.jellyfin || 0) + (acc[genreId]?.playCount?.playbackReport || 0))/2)
+        acc[genreId].uniqueTracks.add({id: cur.id, name: cur.name})
+        acc[genreId].plays.concat(cur.plays)
+        acc[genreId].lastPlayed = (acc[genreId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[genreId]?.lastPlayed || 0) : cur.lastPlayed
+        acc[genreId].totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+        acc[genreId].totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+        acc[genreId].totalPlayDuration.average = Math.ceil(((acc[genreId]?.totalPlayDuration?.jellyfin || 0) + (acc[genreId]?.totalPlayDuration?.playbackReport || 0))/2)
+      }
+    })
+    return acc
+  }, {})
+
+  Object.entries(topGenreInfo).forEach(([genreId, genre]) => {
+    genre.uniqueTracks = Array.from(genre.uniqueTracks)
+  })
+  
+  return topGenreInfo
+}
+
+export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   const totalStats = topTrackInfo.reduce((acc, cur) => {
-    acc.totalPlayCount.jellyfin += cur.playCount.jellyfin
-    acc.totalPlayCount.playbackReport += cur.playCount.playbackReport
+    acc.totalPlayCount.jellyfin += cur.playCount?.jellyfin || 0
+    acc.totalPlayCount.playbackReport += cur.playCount?.playbackReport || 0
     acc.totalPlayCount.average = Math.ceil((acc.totalPlayCount.jellyfin + acc.totalPlayCount.playbackReport)/2)
-    acc.totalPlayDuration += cur.totalPlayDuration
+    acc.totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
+    acc.totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
+    acc.totalPlayDuration.average = Math.ceil((acc.totalPlayDuration.jellyfin + acc.totalPlayDuration.playbackReport)/2)
     acc.uniqueTracks.add(cur.id)
     acc.uniqueAlbums.add(cur.albumBaseInfo?.id)
-    acc.uniqueArtists.add(cur.artistsBaseInfo[0]?.id)
+    acc.uniqueArtists.add(cur.artistsBaseInfo?.[0]?.id)
+
+    cur.plays.forEach(play => {
+      acc.playbackMethods.playCount[play.method] += 1
+      acc.playbackMethods.duration[play.method] += play.duration / 60 // convert to minutes
+
+      acc.locations.devices[play.device] = acc.locations.devices[play.device] ? acc.locations.devices[play.device] + 1 : 1
+      acc.locations.clients[play.client] = acc.locations.clients[play.client] ? acc.locations.clients[play.client] + 1 : 1
+      if (!acc.locations.combinations[`${play.device} - ${play.client}`]) {
+        acc.locations.combinations[`${play.device} - ${play.client}`] = {
+          device: play.device,
+          client: play.client,
+          playCount: 1,
+        }
+      } else {
+        acc.locations.combinations[`${play.device} - ${play.client}`].playCount += 1
+      }
+    })
+
+    if (cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount) {
+      acc.mostSuccessivePlays.track = cur
+      acc.mostSuccessivePlays.playCount = cur.mostSuccessivePlays.playCount
+      acc.mostSuccessivePlays.totalDuration = cur.mostSuccessivePlays.totalDuration / 60 // convert to minutes
+    }
+    
     return acc
   }, {
     totalPlayCount: {
@@ -132,57 +241,76 @@ export function generateTotalStats(topTrackInfo) {
       playbackReport: 0,
       average: 0,
     },
-    totalPlayDuration: 0,
+    totalPlayDuration: {
+      jellyfin: 0,
+      playbackReport: 0,
+    },
     uniqueTracks: new Set(),
     uniqueAlbums: new Set(),
     uniqueArtists: new Set(),
+    playbackMethods: {
+      playCount: {
+        directPlay: 0,
+        directStream: 0,
+        transcode: 0,
+      },
+      duration: {
+        directPlay: 0,
+        directStream: 0,
+        transcode: 0,
+      },
+    },
+    locations: {
+      devices: {},
+      clients: {},
+      combinations: {},
+    },
+    mostSuccessivePlays: {
+      track: null,
+      playCount: 0,
+      totalDuration: 0,
+    },
   })
+
+  console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
+  console.log(`enhancedPlaybackReport.notFound:`, enhancedPlaybackReport.notFound)
+  enhancedPlaybackReport.notFound.forEach((item) => {
+    totalStats.totalPlayCount.playbackReport += 1
+    totalStats.totalPlayCount.average = Math.ceil((totalStats.totalPlayCount.jellyfin + totalStats.totalPlayCount.playbackReport)/2)
+    totalStats.totalPlayDuration.playbackReport += Number(item.PlayDuration) / 60
+    totalStats.totalPlayDuration.average = Math.ceil((totalStats.totalPlayDuration.jellyfin + totalStats.totalPlayDuration.playbackReport)/2)
+  })
+  
   return totalStats
 }
 
-export function generateTopTracks(topTrackInfo, { by = `duration`, limit = 25 }) {
-  const topTracks = topTrackInfo
-    .sort((a, b) => {
-      if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
-      } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
-      } else if (by === `lastPlayed`) {
-        return b.lastPlayed - a.lastPlayed
-      }
-    })
-    .slice(0, limit)
-  return topTracks
-}
+export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource = `average` }) {
+  console.log(`itemInfo:`, itemInfo)
+  let topItems
+  if (!Array.isArray(itemInfo)) {
+    topItems = Object.values(itemInfo)
+  } else {
+    topItems = [...itemInfo]
+  }
+  // console.log(`topItems[0]:`, JSON.stringify(topItems[0]))
 
-export function generateTopAlbums(topAlbumInfo, { by = `duration`, limit = 25 }) {
-  const topAlbums = Object.values(topAlbumInfo)
-    .sort((a, b) => {
+  topItems.sort((a, b) => {
       if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
+        let aDuration = 0, bDuration = 0;
+        aDuration = a.totalPlayDuration[dataSource]
+        bDuration = b.totalPlayDuration[dataSource]
+        return bDuration - aDuration
       } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
+        let aPlayCount = 0, bPlayCount = 0;
+        aPlayCount = a.playCount[dataSource]
+        bPlayCount = b.playCount[dataSource]
+        return bPlayCount - aPlayCount
       } else if (by === `lastPlayed`) {
         return b.lastPlayed - a.lastPlayed
       }
     })
-    .slice(0, limit)
-  return topAlbums
-}
-
-export function generateTopArtists(topArtistInfo, { by = `duration`, limit = 25 }) {
-  const topArtists = Object.values(topArtistInfo)
-    .sort((a, b) => {
-      if (by === `duration`) {
-        return b.totalPlayDuration - a.totalPlayDuration
-      } else if (by === `playCount`) {
-        return b.playCount.average - a.playCount.average
-      } else if (by === `lastPlayed`) {
-        return b.lastPlayed - a.lastPlayed
-      }
-    })
-    .slice(0, limit)
-  return topArtists
+  // console.log(`topItems[0]:`, JSON.stringify(topItems[0]))
+  return topItems.slice(0, limit)
 }
 
 export function generateTotalPlaybackDurationByMonth(indexedPlaybackReport) {

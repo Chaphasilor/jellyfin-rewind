@@ -4,16 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Jellyfin Rewind</title>
+
   </head>
   <body>
     <div id="app"></div>
 
     <div class="p-2">
 
-      <span>
-        <button class="hidden border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
-      </span>
+      <div class="flex flex-row hidden gap-4" id="logged-in-info">
+        <div class="flex flex-col">
+          <span>Signed in as '<span id="logged-in-user"></span>'</span>
+          <span>at Jellyfin Server '<span id="logged-in-server"></span>'</span>
+        </div>
+        <button class="border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
+      </div>
       
       <div id="server-config">
         <label for="serverUrl">Server URL:</label>
@@ -38,7 +43,7 @@
         <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
       </div>
     
-      <span class="flex flex-row place-items-center">
+      <div class="flex flex-row place-items-center">
         <div class="flex flex-row gap-2">
           <button id="show-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">Show My Rewind</button>
           <button id="generate-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">(Re-)Generate Rewind</button>
@@ -49,16 +54,18 @@
           <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
           <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
        </svg>
-      </span>
+      </div>
+
+      <span id="info"></span>
     
-      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1" name="output" id="output" cols="80" rows="40"></textarea>
+      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1 hidden" name="output" id="output" cols="80" rows="40"></textarea>
   
     </div>
 
     <main id="features">
-      Features go here
     </main>
 
     <script type="module" src="/main.js"></script>
+
   </body>
 </html>

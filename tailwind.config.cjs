@@ -6,7 +6,12 @@ module.exports = {
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        'quicksand': ['Quicksand', 'serif', 'system-ui'],
+        'quicksand-bold': ['QuicksandBold', 'serif', 'system-ui'],
+      },
+    },
   },
   plugins: [],
 }

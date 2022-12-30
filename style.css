@@ -1,3 +1,12 @@
+@font-face {
+  font-family: Quicksand;
+  src: url("fonts/Quicksand/Quicksand-VariableFont_wght.ttf");
+}
+@font-face {
+  font-family: QuicksandBold;
+  src: url("fonts/Quicksand/Quicksand_Bold.otf");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
