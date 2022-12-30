@@ -459,7 +459,18 @@ async function generateRewindReport(year) {
   
   rewindReport = jellyfinRewindReport
   
-  return jellyfinRewindReport
+  return {
+    jellyfinRewindReport,
+    rawData: {
+      allItemInfoIndexed,
+      indexedPlaybackReport,
+      allTopTrackInfo,
+      totalStats,
+      topArtistInfo,
+      topAlbumInfo,
+      topGenreInfo,
+    },
+  }
   
 }
 

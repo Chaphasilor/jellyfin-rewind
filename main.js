@@ -158,16 +158,18 @@ const login = (userId) => async (event) => {
 
 function init() {
   showReport.addEventListener(`click`, async () => {
-    let rewindReport = null
+    let rewindReportData = null
     try {
       loadingSpinner.classList.remove(`hidden`)
-      rewindReport = jellyfinRewind.restoreRewindReport()
+      rewindReportData = {
+        jellyfinRewindReport: jellyfinRewind.restoreRewindReport()
+      }
 
-      if (rewindReport.commit !== __COMMITHASH__) {
+      if (rewindReportData.jellyfinRewindReport.commit !== __COMMITHASH__) {
         staleReport = true
       }
       // check if the report is for the previous year and it's after February
-      if (rewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+      if (rewindReportData.jellyfinRewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
         staleReport = true
       }
       
@@ -175,7 +177,7 @@ function init() {
     } catch (err) {
       console.warn(`Couldn't restore Rewind report:`, err)
       console.info(`Generating new report...`)
-      rewindReport = await generateRewindReport()
+      rewindReportData = await generateRewindReport()
     }
 
     if (staleReport) {
@@ -183,16 +185,16 @@ function init() {
     }
 
     // showRewindReport(rewindReport)
-    initializeFeatureStory(rewindReport)
+    initializeFeatureStory(rewindReportData)
 
   })
   generateReport.addEventListener(`click`, async () => {
     console.info(`Generating new report...`)
     featuresInitialized = false // reset features
-    let rewindReport = await generateRewindReport()
+    let rewindReportData = await generateRewindReport()
 
     // showRewindReport(rewindReport)
-    initializeFeatureStory(rewindReport)
+    initializeFeatureStory(rewindReportData)
 
   })
   generateReport.classList.remove(`hidden`)
@@ -202,11 +204,11 @@ function init() {
 
 async function generateRewindReport() {
 
-  let report
+  let reportData
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    report = await jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
+    reportData = await jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
     console.info(`Report generated successfully!`)
     loadingSpinner.classList.add(`hidden`)
     
@@ -221,16 +223,16 @@ async function generateRewindReport() {
     console.error(`Couldn't save Rewind report:`, err)
   }
   
-  return report    
+  return reportData    
 
 }
 window.generateRewindReport = generateRewindReport
 
-function showRewindReport(report) {
+function testShowRewindReport(report) {
 
   output.value = JSON.stringify(report, null, 2)
 
-  const topSongByDuration = report.tracks?.[`topTracksByPlayCount`]?.[0]
+  const topSongByDuration = report.jellyfinRewindReport.tracks?.[`topTracksByPlayCount`]?.[0]
 
   if (topSongByDuration) {
     document.querySelector('#app').innerHTML += `
@@ -261,3 +263,17 @@ function initializeFeatureStory(report) {
 
 }
 window.initializeFeatureStory = initializeFeatureStory
+
+function downloadRewindReportData(reportData, skipVerification) {
+  if (reportData.rawData || skipVerification || confirm(`The report you're about to download is incomplete and missing some data. Please re-generate and download the report without reloading the page in-between. Do you want to download the incomplete report anyway?`)) {
+    const reportDataString = JSON.stringify(reportData, null, 2)
+    const blob = new Blob([reportDataString], {type: `application/json`})
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement(`a`)
+    a.href = url
+    a.download = `jellyfin-rewind-report-${reportData.jellyfinRewindReport.year}_for-${jellyfinRewind.auth.config.user.name}-at-${jellyfinRewind.auth.config.serverInfo.name}_${new Date().toISOString().slice(0, 10)}.json`
+    a.click()
+  }
+
+}
+window.downloadRewindReportData = downloadRewindReportData

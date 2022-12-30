@@ -10,6 +10,8 @@ export const state = reactive({
   features: null,
   featureSideEffects: null,
   rewindReport: null,
+  rewindReportData: null,
+  rewindReportDownloaded: null,
   jellyHelper: null,
   auth: null,
   pollCanvas: false,
@@ -103,8 +105,7 @@ state.features = [
       </button>
 
     </div>
-
-  `),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
@@ -168,7 +169,7 @@ state.features = [
         `}
       </div>
     </div>
-  `, `bg-sky-100`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
   // top song
   buildFeature(`top song`, html`
     <div class="text-center text-white">
@@ -271,7 +272,7 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-sky-100`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
   //TODO add playlist intermezzo
   // top artist
   buildFeature(`top artist`, html`
@@ -362,7 +363,7 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-sky-100`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
   // top album
   buildFeature(`top album`, html`
     <div class="text-center text-white">
@@ -464,7 +465,7 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
-  `, `bg-sky-100`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
   // top generes of the year
   buildFeature(`top generes of the year`, html`
     <div class="text-center">
@@ -527,7 +528,7 @@ state.features = [
       `)}
     </ol>
     <!-- TODO add pie chart with percentages -->
-  `, `bg-sky-100`),
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
    // most successive streams
    buildFeature(`most successive streams`, html`
    <div class="text-center text-white">
@@ -548,14 +549,182 @@ state.features = [
      </div>
      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.playCount)}</span> successive streams.</div>
-       <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration)}</span> minutes.</div>
+       <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration.toFixed(1))}</span> minutes.</div>
      </div>
    </div>
    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
      <img id="most-successive-streams-track-background-image" class="w-full h-full" />
    </div>
- `),
+ `), //TODO build fallback
+ // outro
+ buildFeature(`outro`, html`
+  <div class="p-4">
+    
+    <h2 class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-800">That's the end<br>of this year's</h2>
+
+    <div class="mt-4 w-full flex flex-col items-center">
+      <img class="h-16" src="/media/jellyfin-banner-light.svg" alt="Jellyfin Rewind Logo">
+      <h3 class="-rotate-6 ml-4 -mt-2 text-3xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+    </div>
+
+    <div class="flex flex-col gap-3 text-lg font-medium leading-6 text-gray-500 mt-8 w-5/6 mx-auto">
+      <p class="">Thank you so much for checking it out, I hope you had fun and saw some interesting stats!</p>
+      <p class="">Please make sure to</p>
+    </div>
+    <button
+      class="px-6 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-3 flex flex-row gap-4 items-center mx-auto"
+      @click="${stopPropagation(() => {
+
+        if (!state.rewindReportData.rawData) {
+          showIncompleteReportOverlay()
+        } else {
+          window.downloadRewindReportData(state.rewindReportData)
+          state.rewindReportDownloaded = true
+        }
+        
+      })}"
+    >
+      <span class="leading-7">Download Your<br>Rewind Report</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+        <polyline points="7 11 12 16 17 11"></polyline>
+        <line x1="12" y1="4" x2="12" y2="16"></line>
+      </svg>
+    </button>
+
+    <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-3 w-5/6 mx-auto">
+      <p class="">and <span class="font-bold">store it until next year</span> because it might help to show you even more insights next time around!<br>Also, it could help to generate more accurate data in case you still don't have the Playback Reporting plugin installed next year.</p>
+      <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
+      <p class="relative">Thanks for using Jellyfin Rewind. See you next year &lt;3 <span class="absolute italic right-0 bottom-0">- Chaphasilor</span></p>
+    </div>
+
+    <button
+        class="px-4 py-2 rounded-xl text-base leading-6 bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
+        @click="${stopPropagation(() => {
+
+          const closeJellyfinRewind = () => {
+            closeOverlay(`overlay-download-report-prompt`)
+            next()
+          }
+          if (!state.rewindReportDownloaded) {
+            showOverlay({
+              title: `Are you sure?`,
+              key: `download-report-prompt`,
+              content: html`
+                <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
+                  <p class="">You haven't downloaded your Rewind report yet.</p>
+                  <p class="">Without this data, you might be missing out on some insights next year, as well as improved quality of the statistics.</p>
+                  <p class="">If possible, please save the Rewind report somewhere safe until next year, just in case. It's only a few (hundred) MBs in size.</p>
+                </div>
+
+                <button
+                  class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
+                  @click="${stopPropagation((e) => {
+                    if (!state.rewindReportData.rawData) {
+                      showIncompleteReportOverlay(closeJellyfinRewind)
+                    } else {
+                      window.downloadRewindReportData(state.rewindReportData)
+                      state.rewindReportDownloaded = true
+                    }
+                  })}"
+                >
+                  <span>Download Report</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-download" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                    <path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2 -2v-2"></path>
+                    <polyline points="7 11 12 16 17 11"></polyline>
+                    <line x1="12" y1="4" x2="12" y2="16"></line>
+                  </svg>
+                </button>
+
+                <button
+                  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+                  @click="${stopPropagation(() => {
+                    closeJellyfinRewind()
+                  })}"
+                >
+                  <span>Skip and close</span>
+                </button>
+              `,
+            })
+          } else {
+            next()
+          }
+        })}"
+      >
+        <span>Close<br>Jellyfin Rewind</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-[2.5] icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+  </div>
+`, `bg-[#00A4DC]/10 dark:bg-[#000B25]`),
 ]
+
+function showIncompleteReportOverlay(onClose = () => {}) {
+
+  console.log(`showing incomplete report overlay`)
+
+  showOverlay({
+    title: `Incomplete Report`,
+    key: `incomplete-report`,
+    content: html`
+      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
+        <p class="">The report you're about to download is incomplete and missing some data.</p>
+        <p class="">Please re-generate and download the report without reloading the page in-between.</p>
+      </div>
+
+      <button
+        class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
+        @click="${stopPropagation((e) => {
+          const button = e.target.closest(`button`)
+          const span = button.querySelector(`span`)
+          const svg = button.querySelector('svg') // arrowjs syntax highlighting breaks with backticks
+          button.disabled = true
+          span.innerHTML = `Generating...`
+          svg.classList.add(`animate-spin`)
+          window.generateRewindReport(state.rewindReport.year).then((rewindReportData) => {
+
+            span.innerHTML = `Regenerate and Download Report`
+            svg.classList.remove(`animate-spin`)
+            
+            state.rewindReportData = rewindReportData
+            window.downloadRewindReportData(rewindReportData)
+            state.rewindReportDownloaded = true
+            // closeOverlay(`overlay-incomplete-report`)
+            closeOverlay()
+
+            button.disabled = false
+          })
+        })}"
+      >
+        <span>Regenerate and<br>Download Report</span>
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
+        </svg>
+      </button>
+
+      <button
+        class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+        @click="${stopPropagation(() => {
+          window.downloadRewindReportData(state.rewindReportData, true)
+          // closeOverlay(`overlay-incomplete-report`)
+          closeOverlay()
+        })}"
+      >
+        <span>Download anyway</span>
+      </button>
+    `,
+    onClose: onClose,
+  })
+  
+}
 
 const settings = html`
 ${() =>
@@ -691,10 +860,16 @@ function showOverlay({ title, key, content, onClose }) {
 }
 
 function closeOverlay(overlayId) {
-  let index = state.overlays.findIndex(x => x.overlayId === overlayId)
-  console.log(`index, overlayId:`, index, overlayId)
-  state.overlays[index].onClose?.()
-  state.overlays.splice(index, 1)
+  if (!overlayId) {
+    state.overlays.pop()?.onClose?.()
+  } else {
+    let index = state.overlays.findIndex(x => x.overlayId === overlayId)
+    if (index > -1) {
+      console.log(`index, overlayId:`, index, overlayId)
+      state.overlays[index].onClose?.()
+      state.overlays.splice(index, 1)
+    }
+  }
 }
 
 function buildOverlay({ title, content, overlayId, onClose }) {
@@ -702,7 +877,7 @@ function buildOverlay({ title, content, overlayId, onClose }) {
   return html`
   <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
-      <div class="w-full h-full overflow-x-auto bg-white/75 pb-20 backdrop-blur rounded-xl p-4">
+      <div class="w-full h-full overflow-x-auto bg-white/80 pb-20 backdrop-blur rounded-xl p-4">
         <h3 class="w-full text-center text-lg font-quicksand font-medium text-[#00A4DC] mb-4">${() => title}</h3>
         ${() => content}
       </div>
@@ -754,6 +929,12 @@ watch(() => {
   console.log(`state.settings:`, state.settings)
 })
 
+watch(() => state.rewindReportDownloaded, (downloaded) => {
+  if (downloaded !== null) {
+    localStorage.setItem(`rewindReportDownloaded`, JSON.stringify(downloaded))
+  }
+})
+
 watch(() => {
   console.log(`featuresOpen:`, state.featuresOpen)
 })
@@ -785,14 +966,17 @@ watch(() => state.settings.rankingMetric, () => {
   }, 1000)
 })
 
-export function init(rewindReport, jellyHelper, auth) {
+export function init(rewindReportData, jellyHelper, auth) {
 
-  state.rewindReport = rewindReport
+  state.rewindReportData = rewindReportData
+  state.rewindReport = rewindReportData.jellyfinRewindReport
   state.jellyHelper = jellyHelper
   state.auth = auth
   console.log(`state.rewindReport:`, state.rewindReport)
   console.log(`state.rewindReport.type:`, state.rewindReport.type)
   console.log(`state.rewindReport.type !== 'full':`, state.rewindReport.type !== 'full')
+
+  state.rewindReportDownloaded = JSON.parse(localStorage.getItem(`rewindReportDownloaded`)) || false
 
   
   if (state.rewindReport.type !== `full`) {
@@ -846,7 +1030,7 @@ export function render() {
               <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
                 ${() => {
                   return state.features.map((feature, index) => {
-                    return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature === index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
+                    return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature >= index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
                   })
                 }}
               </ul>
@@ -998,6 +1182,7 @@ watch(() => {
 })
 
 function next() {
+  console.log(`next feature`)
   if (state.currentFeature >= state.features.length - 1) {
     state.currentFeature = 0
     closeFeatures()
