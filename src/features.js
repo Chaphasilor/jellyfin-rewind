@@ -144,7 +144,7 @@ state.features = [
         <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueArtistsPlayed`])}</span> unique albums.</div>
       </div>
 
-      <div class="absolute bottom-16 w-full h-2/5 px-8">
+      <div class="absolute bottom-20 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart" class="${() => state.extraFeatures.totalPlaytimeGraph ? `` : `opacity-30`}"></canvas>
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
@@ -189,7 +189,7 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
@@ -287,7 +287,7 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
@@ -383,7 +383,7 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
@@ -548,7 +548,7 @@ state.features = [
          </div>
        </div>
      </div>
-     <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+     <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.playCount)}</span> successive streams.</div>
        <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration.toFixed(1))}</span> minutes.</div>
      </div>
@@ -1126,10 +1126,14 @@ function autoAdvance() {
   }, 1000 * 12)
 }
 
-export function openFeatures() {
+export async function openFeatures() {
   state.featuresOpen = true
   // request fullscreen
-  // document.querySelector(`body`).requestFullscreen() //FIXME reenable fullscreen
+  try {
+    await document.querySelector(`body`).requestFullscreen()
+  } catch (err) {
+    console.warn(`Fullscreen permission denied`, err)
+  }
 }
 export function closeFeatures() {
 
