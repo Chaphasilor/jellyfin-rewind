@@ -877,9 +877,20 @@ function buildOverlay({ title, content, overlayId, onClose }) {
   return html`
   <div style="${() => `z-index: ${200 + state.overlays.length}`}" class="absolute top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
     <div @click="${() => onClose()}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
-      <div class="w-full h-full overflow-x-auto bg-white/80 pb-20 backdrop-blur rounded-xl p-4">
-        <h3 class="w-full text-center text-lg font-quicksand font-medium text-[#00A4DC] mb-4">${() => title}</h3>
-        ${() => content}
+      <div class="w-full h-full bg-white/80 pb-20 backdrop-blur rounded-xl">
+        <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
+          <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">${() => title}</h3>
+          <button @click="${() => onClose()}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <div class="w-full h-full overflow-x-auto p-4">
+          ${() => content}
+        </div>
       </div>
     </div>
   </div>
