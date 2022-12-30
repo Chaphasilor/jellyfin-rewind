@@ -1101,8 +1101,8 @@ export function render() {
           </ul>
           ${() => Object.values(state.overlays).map(x => x.overlay)}
         </div>
-        <audio id="audio-player-1"></audio>
-        <audio id="audio-player-2"></audio>
+        <audio id="audio-player-1" loop></audio>
+        <audio id="audio-player-2" loop></audio>
         `
         :
         html`<br>`
@@ -1607,28 +1607,40 @@ async function fadeToNextTrack(trackInfo) {
     inactivePlayer.volume = 0
     activePlayer.volume = 1
     inactivePlayer.play()
-  
-    // fade
-    let fadeInterval = setInterval(() => {
-      try {
-        if (inactivePlayer.volume + 0.1 <= 1) {
-          inactivePlayer.volume += 0.1
-          activePlayer.volume -= 0.1
-        } else {
-          clearInterval(fadeInterval)
+    inactivePlayer.volume = 0
+
+    // I hate Safari
     
+    const fadePerStep = 0.05
+    const fadeDuration = 1000
+    const fadeStepsOut = Array(1 / fadePerStep).fill(1).map((_, i) => Number((1 - i * fadePerStep).toFixed(2)))
+    const fadeStepsIn = Array(1 / fadePerStep).fill(1).map((_, i) => Number((i * fadePerStep).toFixed(2)))
+    fadeStepsIn.unshift(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+    const doFade = (stepIndex) => () => {
+      try {
+        inactivePlayer.volume = fadeStepsIn[stepIndex]
+        activePlayer.volume = fadeStepsOut[stepIndex] || 0
+        if (stepIndex === fadeStepsIn.length - 1) {
+          
           // stop the active player
           activePlayer.pause()
           activePlayer.currentTime = 0
+          //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+        } else {
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeStepsIn.length)
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err)
-        clearInterval(fadeInterval)
         inactivePlayer.volume = 1
         activePlayer.volume = 0
         activePlayer.pause()
       }
-    }, 100)
+    }
+    
+    // fade
+    doFade(0)()
+
   }
 
 }
@@ -1659,30 +1671,35 @@ function pausePlayback() {
   player1.volume = 1
   player2.volume = 1
 
-  // fade
-  let fadeInterval = setInterval(() => {
+  const fadePerStep = 0.05
+  const fadeDuration = 750
+  const fadeSteps = Array(1 / fadePerStep).fill(1).map((_, i) => Number((1 - i * fadePerStep).toFixed(2)))
+
+  const doFade = (stepIndex) => () => {
     try {
-      if (player1.volume - 0.1 >= 0) {
-        player1.volume -= 0.1
-        player2.volume -= 0.1
-      } else {
-        clearInterval(fadeInterval)
+      player1.volume = fadeSteps[stepIndex]
+      player2.volume = fadeSteps[stepIndex]
+      if (stepIndex === fadeSteps.length - 1) {
         
         // stop the active player
         player1.pause()
         player2.pause()
         //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+      } else {
+        setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length)
       }
     } catch (err) {
       console.error(`Error while fading tracks:`, err)
-      clearInterval(fadeInterval)
       player1.volume = 0
       player2.volume = 0
       player1.pause()
       player2.pause()
     }
-  }, 100)
+  }
   
+  // fade
+  doFade(0)()
+
 }
 
 // uses the tag data to determine the previously active player and resumes playback by fading it in
@@ -1706,21 +1723,26 @@ function resumePlayback() {
   activePlayer.volume = 0
   activePlayer.play()
 
-  // fade
-  let fadeInterval = setInterval(() => {
+  const fadePerStep = 0.05
+  const fadeDuration = 750
+  const fadeSteps = Array(1 / fadePerStep).fill(1).map((_, i) => Number((i * fadePerStep).toFixed(2)))
+
+  const doFade = (stepIndex) => () => {
     try {
-      if (activePlayer.volume + 0.1 <= 1) {
-        activePlayer.volume += 0.1
-      } else {
-        clearInterval(fadeInterval)
+      activePlayer.volume = fadeSteps[stepIndex]
+      
+      if (stepIndex !== fadeSteps.length - 1) {
+        setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length)
       }
     } catch (err) {
       console.error(`Error while fading tracks:`, err)
-      clearInterval(fadeInterval)
       activePlayer.volume = 1
     }
-  }, 100)
-
+  }
+  
+  // fade
+  doFade(0)()
+  
 }
 
 function showAsNumber(numberOrArray) {

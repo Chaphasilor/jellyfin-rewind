@@ -316,7 +316,7 @@ export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource 
 export function generateTotalPlaybackDurationByMonth(indexedPlaybackReport) {
   const totalPlaybackDurationByMonth = Object.values(indexedPlaybackReport).reduce((acc, cur) => {
     cur.Plays.forEach(play => {
-      const month = play.date.getMonth()
+      const month = play.date?.getMonth()
       acc[month] += play.duration
     })
     return acc

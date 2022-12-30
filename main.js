@@ -62,6 +62,7 @@ window.onload = () => {
     enableLogout()
     serverConfig.classList.add(`hidden`)
     init()
+    showReport.click() //FIXME remove this
   }
   
 }

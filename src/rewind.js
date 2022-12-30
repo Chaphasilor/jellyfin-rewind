@@ -115,8 +115,9 @@ function indexPlaybackReport(playbackReportJSON) {
   
   const items = {}
   for (const item of playbackReportJSON.items) {
+    const isoDate = item.DateCreated.replace(` `, `T`) + `Z` // Safari doesn't seem to support parsing the raw dates from playback reporting (RFC 3339)
     const playInfo = {
-      date: new Date(item.DateCreated),
+      date: new Date(isoDate),
       duration: Number(item.PlayDuration),
       client: item.ClientName,
       device: item.DeviceName,

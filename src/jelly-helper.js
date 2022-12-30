@@ -8,8 +8,6 @@ export default class JellyHelper {
   
   loadImage(elements, imageInfo, type = `track`, isDarkMode = false) {
 
-    console.log(`isDarkMode:`, isDarkMode)
-    
     if (!Array.isArray(elements)) {
       elements = [elements];
     }
@@ -100,7 +98,7 @@ export default class JellyHelper {
       'UserId': this.auth.config.user.id,
       'DeviceId': this.auth.config.user.deviceId,
       'api_key': this.auth.config.user.token,
-      'Container': `opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg`,
+      'Container': `opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg`, // limit to mp3 for best support
       'TranscodingContainer': `ts`,
       'TranscodingProtocol': `hls`,
       'AudioCodec': `aac`,
