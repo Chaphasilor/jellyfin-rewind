@@ -149,15 +149,7 @@ state.features = [
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlay({
-              title: `Why is this feature unavailable?`,
-              content: html`
-                <div class="text-center">
-                  <p class="text-lg">This feature is currently unavailable for ${() => state.settings.dataSource}.</p>
-                  <p class="text-lg">This is due to the fact that ${() => state.settings.dataSource} does not provide the required data.</p>
-                </div>
-              `,
-            }))}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white/80">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white/80">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
@@ -540,11 +532,11 @@ state.features = [
          <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
            <div class="">${() =>
              state.settings.useAlbumArtists ?
-               state.rewindReport.generalStats.mostSuccessivePlays.track.albumBaseInfo.albumArtistBaseInfo.name :
-               state.rewindReport.generalStats.mostSuccessivePlays.track.artistsBaseInfo
-                 .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+               state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name :
+               state.rewindReport.generalStats.mostSuccessivePlays?.artists
+                 ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
            } -</div>
-           <div class="mt-8 ml-10">${() => state.rewindReport.generalStats.mostSuccessivePlays.track.name}</div>
+           <div class="mt-8 ml-10">${() => state.rewindReport.generalStats.mostSuccessivePlays?.name}</div>
          </div>
        </div>
      </div>
@@ -725,6 +717,20 @@ function showIncompleteReportOverlay(onClose = () => {}) {
     onClose: onClose,
   })
   
+}
+
+function showOverlayFeatureUnavailableMissingPlaybackReporting() {
+  showOverlay({
+    title: `Why is this feature unavailable?`,
+    content: html`
+      <div class="flex flex-col items-start gap-2">
+        <p>This feature depends on the Playback Reporting plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
+        <p>You can install the Playback Reporting plugin into your Jellyfin server by clicking the button below. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
+        <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+        <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+      </div>
+    `,
+  })
 }
 
 const settings = html`
@@ -987,6 +993,8 @@ export function init(rewindReportData, jellyHelper, auth) {
   console.log(`state.rewindReport:`, state.rewindReport)
   console.log(`state.rewindReport.type:`, state.rewindReport.type)
   console.log(`state.rewindReport.type !== 'full':`, state.rewindReport.type !== 'full')
+  console.log(`state.jellyHelper:`, state.jellyHelper)
+  console.log(`state.auth:`, state.auth)
 
   state.rewindReportDownloaded = JSON.parse(localStorage.getItem(`rewindReportDownloaded`)) || false
 
@@ -1421,9 +1429,9 @@ function loadMostSuccessivePlaysTrackMedia() {
   const mostSuccessivePlaysTrackPrimaryImage = document.querySelector(`#most-successive-streams-track-image`);
   const mostSuccessivePlaysTrackBackgroundImage = document.querySelector(`#most-successive-streams-track-background-image`);
   console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage)
-  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
-  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
-  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], mostSuccessivePlaysTrack.image, `track`, state.settings.darkMode)
+  // const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
+  // console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], state.rewindReport.generalStats.mostSuccessivePlays?.image, `track`, state.settings.darkMode)
 
 }
 

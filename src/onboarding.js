@@ -1,6 +1,6 @@
 import { reactive, watch, html, } from '@arrow-js/core'
 
-import { connectToServer, loginViaAuthToken, loginViaPassword } from './setup';
+import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind } from './setup';
 
 export const state = reactive({
   currentView: `start`,
@@ -16,11 +16,14 @@ export const state = reactive({
     loginType: `password`,
     selectedUser: null,
   },
+  rewindGenerating: false,
+  rewindReport: null,
   auth: null,
+  featuresInitialized: false,
   darkMode: null,
 })
 
-export function init(auth) {
+export async function init(auth) {
   
   state.views = reactive({
     start: viewStart,
@@ -48,6 +51,18 @@ export function init(auth) {
   state.darkMode = darkModePreference.matches
 
   handleBackButton()
+
+  try {
+    let restored = await restoreAndPrepareRewind()
+  
+    state.rewindReport = restored.rewindReportData
+    console.log(`state.auth.config.user:`, state.auth.config.user)
+    state.currentView = `revisit`
+  } catch (err) {
+    if (state.auth.config.user) {
+      state.currentView = `load`
+    }
+  }
 
 }
 
@@ -322,6 +337,29 @@ const progressBar = (progress) => html`
 </div>
 `
 
+async function generateReport() {
+  try {
+    state.rewindGenerating = true
+    state.rewindReport = await generateRewindReport()
+    state.rewindGenerating = false
+  } catch (err) {
+    console.error(err)
+    state.rewindGenerating = false
+    state.currentView = `rewindGenerationError`
+  }
+}
+
+watch(() => state.currentView, async (view) => {
+  if (view === `load`) {
+    await generateReport()
+  }
+})
+
+function launchRewind() {
+  initializeFeatureStory(state.rewindReport, state.featuresInitialized)
+  state.featuresInitialized = true
+}
+
 const viewLoad = html`
 <div class="p-4">
 
@@ -335,18 +373,23 @@ const viewLoad = html`
 
   ${() => progressBar(0.5)}
   
-  <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
-    @click="${() => state.currentView = `load`}"
-  >
-    <span>Launch Rewind!</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
-      <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
-      <circle cx="15" cy="9" r="1"></circle>
-    </svg>
-  </button>
+  ${() =>
+    state.rewindReport ? html`
+    <button
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/40 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+      @click="${() => launchRewind()}"
+      disabled="${() => !state.rewindReport || state.rewindGenerating}"
+    >
+      <span>Launch Rewind!</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+        <circle cx="15" cy="9" r="1"></circle>
+      </svg>
+    </button>
+    ` : html`<br>`
+  }
 
   <button
   class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
@@ -372,13 +415,14 @@ const viewRevisit = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">Welcome back, ${() => state.auth.config.user.name}!</p>
+    <p class="">Welcome back, ${() => state.auth.config?.user?.name}!</p>
     <p class="">Your Rewind Report is still saved. You can view it any time you like.</p>
   </div>
 
   <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
-    @click="${() => state.currentView = `load`}"
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/40 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => launchRewind()}"
+    disabled="${() => !state.rewindReport || state.rewindGenerating}"
   >
     <span>Launch Rewind!</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -386,6 +430,20 @@ const viewRevisit = html`
       <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
       <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
       <circle cx="15" cy="9" r="1"></circle>
+    </svg>
+  </button>
+
+  <button
+  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-medium mt-8 flex flex-row gap-3 items-center mx-auto"
+    @click="${() => {
+      state.currentView = `load` 
+    }}"
+  >
+    <span>Regenerate Rewind</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+      <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
     </svg>
   </button>
 

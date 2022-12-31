@@ -230,6 +230,10 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
 
     if (cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount) {
       acc.mostSuccessivePlays.track = cur
+      acc.mostSuccessivePlays.name = cur.name
+      acc.mostSuccessivePlays.artists = cur.artistsBaseInfo
+      acc.mostSuccessivePlays.albumArtist = cur.albumBaseInfo?.albumArtistBaseInfo
+      acc.mostSuccessivePlays.image = cur.image
       acc.mostSuccessivePlays.playCount = cur.mostSuccessivePlays.playCount
       acc.mostSuccessivePlays.totalDuration = cur.mostSuccessivePlays.totalDuration / 60 // convert to minutes
     }
@@ -267,6 +271,10 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     },
     mostSuccessivePlays: {
       track: null,
+      name: ``,
+      artists: [],
+      albumArtist: null,
+      image: ``,
       playCount: 0,
       totalDuration: 0,
     },

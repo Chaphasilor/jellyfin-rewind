@@ -55,20 +55,21 @@ let selectedUsername = ``
 let featuresInitialized = false
 let staleReport = false
 
-window.onload = () => {
+window.onload = async () => {
 
+  window.jellyfinRewind = jellyfinRewind
+  
   console.log(`commit hash:`, __COMMITHASH__)
-
-  Onboarding.init(jellyfinRewind.auth)
-  Onboarding.render()
 
   if (jellyfinRewind.auth.restoreSession()) {
     console.info(`Session restored!`)
-    Onboarding.state.currentView = `revisit`
     enableLogout()
     serverConfig.classList.add(`hidden`)
     init()
   }
+
+  await Onboarding.init(jellyfinRewind.auth)
+  Onboarding.render()
   
 }
 
@@ -296,6 +297,7 @@ function init() {
   generateReport.classList.remove(`hidden`)
   showReport.classList.remove(`hidden`)
   helper = new JellyHelper(jellyfinRewind.auth)
+  window.helper = helper
 }
 
 async function generateRewindReport() {
@@ -322,7 +324,6 @@ async function generateRewindReport() {
   return reportData    
 
 }
-window.generateRewindReport = generateRewindReport
 
 function testShowRewindReport(report) {
 
@@ -358,7 +359,6 @@ function initializeFeatureStory(report) {
   }
 
 }
-window.initializeFeatureStory = initializeFeatureStory
 
 function downloadRewindReportData(reportData, skipVerification) {
   if (reportData.rawData || skipVerification || confirm(`The report you're about to download is incomplete and missing some data. Please re-generate and download the report without reloading the page in-between. Do you want to download the incomplete report anyway?`)) {
