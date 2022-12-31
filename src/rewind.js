@@ -297,9 +297,10 @@ function chunkedArray(array, chunkSize) {
   return chunks
 }
 
-async function generateRewindReport(year) {
+async function generateRewindReport(year, progressCallback = () => {}) {
 
   console.info(`Generating Rewind Report for ${year}...`)
+  progressCallback(0)
 
   let playbackReportAvailable = true
   let playbackReportComplete = true
@@ -313,12 +314,14 @@ async function generateRewindReport(year) {
     playbackReportInfo = null
     playbackReportAvailable = false
   }
+  progressCallback(0.2)
 
   const playbackReportJSON = generateJSONFromPlaybackReport(playbackReportInfo)
   console.log(`playbackReportJSON:`, playbackReportJSON)
   if (playbackReportJSON.items.length === 0) {
     playbackReportDataMissing = true
   }
+  progressCallback(0.25)
 
   // const allItemInfo = []
 
@@ -329,25 +332,33 @@ async function generateRewindReport(year) {
   // }
 
   const allItemInfo = (await loadItemInfo()).Items;
+  progressCallback(0.4)
   
   console.log(`allItemInfo:`, allItemInfo)
   
   const allItemInfoIndexed = indexItemInfo(allItemInfo)
+  progressCallback(0.5)
   
   const enhancedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
+  progressCallback(0.55)
   const indexedPlaybackReport = indexPlaybackReport(enhancedPlaybackReportJSON)
   console.log(`indexedPlaybackReport:`, indexedPlaybackReport)
+  progressCallback(0.6)
 
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
+  progressCallback(0.7)
 
   const artistInfo = indexArtists(await loadArtistInfo())
   console.log(`artistInfo:`, artistInfo)
+  progressCallback(0.75)
 
   const albumInfo = indexAlbums(await loadAlbumInfo())
   console.log(`albumInfo:`, albumInfo)
+  progressCallback(0.8)
 
   const totalStats = aggregate.generateTotalStats(allTopTrackInfo, enhancedPlaybackReportJSON)
+  progressCallback(0.95)
 
   const jellyfinRewindReport = {
     commit: __COMMITHASH__,
@@ -455,6 +466,8 @@ async function generateRewindReport(year) {
   }
   
   console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
+
+  progressCallback(1)
   
   rewindReport = jellyfinRewindReport
   

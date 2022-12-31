@@ -74,12 +74,12 @@ export async function restoreAndPrepareRewind() {
   }
 }
 
-export async function generateRewindReport() {
+export async function generateRewindReport(progressCallback) {
 
   let reportData
   try {
     
-    reportData = await window.jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
+    reportData = await window.jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR), progressCallback)
     console.info(`Report generated successfully!`)
     
   } catch (err) {

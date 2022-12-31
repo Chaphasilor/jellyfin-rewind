@@ -19,6 +19,7 @@ export const state = reactive({
   rewindGenerating: false,
   rewindReport: null,
   staleReport: false,
+  progress: 0,
   auth: null,
   featuresInitialized: false,
   darkMode: null,
@@ -328,22 +329,40 @@ const viewLogin = html`
 </div>
 `
 
-const progressBar = (progress) => html`
+const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
-  <img class="inline h-full animate-spin" src="/media/jellyfin-icon-transparent.svg" />
-  <div class="w-full flex flex-row gap-2 items-center bg-white rounded-full">
+  <!-- <img class="inline h-full animate-spin" src="/media/jellyfin-icon-transparent.svg" /> -->
+  <div class="w-full flex flex-row gap-2 items-center bg-white dark:bg-[#101010] rounded-full">
     <div
       class="h-full rounded-full bg-fixed bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]"
-      style="${() => `width: ${progress * 100}%;`}"
+      style="${() => `width: ${state.progress * 100}%;`}"
     ></div>
   </div>
 </div>
 `
 
+function smoothSeek(current, target, duration) {
+  const diff = Math.abs(target - current)
+  const stepCount = 20
+  const step = Math.abs(diff / stepCount)
+
+  const increase = () => {
+    if (state.progress < target) {
+      state.progress += step
+      setTimeout(increase, duration / stepCount)
+    }
+  }
+  increase()
+}
+
 async function generateReport() {
   try {
     state.rewindGenerating = true
-    state.rewindReport = await generateRewindReport()
+    state.progress = 0
+    state.rewindReport = await generateRewindReport((progress) => {
+      smoothSeek(state.progress, progress, 750)
+      // state.progress = progress
+    })
     state.rewindGenerating = false
   } catch (err) {
     console.error(err)
@@ -361,6 +380,7 @@ watch(() => state.currentView, async (view) => {
 function launchRewind() {
   initializeFeatureStory(state.rewindReport, state.featuresInitialized)
   state.featuresInitialized = true
+  state.currentView = `revisit`
 }
 
 const viewLoad = html`
@@ -374,12 +394,12 @@ const viewLoad = html`
     <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via Reddit so that I can look into it :)</p>
   </div>
 
-  ${() => progressBar(0.5)}
+  ${() => progressBar}
   
   ${() =>
     state.rewindReport ? html`
     <button
-      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/40 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
       @click="${() => launchRewind()}"
       disabled="${() => !state.rewindReport || state.rewindGenerating}"
     >
@@ -444,7 +464,7 @@ const viewRevisit = html`
   </button>
 
   <button
-    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-medium mt-8 flex flex-row gap-3 items-center mx-auto"
+    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-400 hover:bg-orange-500 opacity-80 text-white font-medium mt-32 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
       state.currentView = `load` 
     }}"
@@ -458,7 +478,7 @@ const viewRevisit = html`
   </button>
 
   <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 text-white font-medium mt-12 flex flex-row gap-3 items-center mx-auto"
+  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-500 hover:bg-red-600 opacity-80 text-white font-medium mt-6 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
       state.auth.destroySession()
       state.currentView = `start`
