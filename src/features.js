@@ -23,7 +23,7 @@ export const state = reactive({
     dataSource: `jellyfin`,
     rankingMetric: `playCount`,
     useAlbumArtists: true,
-    sound: false, //FIXME: change to true
+    sound: true,
     darkMode: false,
   },
   disabledSettings: [],
@@ -1229,11 +1229,6 @@ function buildFeature(featureName, content, classes) {
       <div>${content}</div>
       </li>
       `
-      // <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
-      //   <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
-      //   <div @click="${() => previous()}" class="col-span-1 row-span-1"></div>
-      //   <div @click="${() => next()}" class="col-span-2 row-span-1"></div>
-      // </div>
 }
 
 function handleFeatureClick(event) {
@@ -1254,8 +1249,6 @@ function handleFeatureClick(event) {
 
 function showPlaytimeByMonthChart() {
 
-  //TODO disable if playback reporting isn't enabled
-  
   console.log(`Loading chart...`)
 
   let canvas;
@@ -1458,7 +1451,7 @@ function playTopTracks() {
 
 async function playTopArtist() {
 
-  const topArtistByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
+  const topArtistByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
   console.log(`topArtistByDuration:`, topArtistByDuration)
 
   let artistsTracks = await state.jellyHelper.loadTracksForGroup(topArtistByDuration.id, `artist`)
@@ -1490,7 +1483,7 @@ async function playTopArtists() {
 
 async function playTopAlbum() {
 
-  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
+  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]
   console.log(`topAlbumByDuration:`, topAlbumByDuration)
 
   let albumsTracks = await state.jellyHelper.loadTracksForGroup(topAlbumByDuration.id, `album`)

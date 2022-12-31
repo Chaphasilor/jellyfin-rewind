@@ -20,8 +20,6 @@ const playbackReportQuery = (year) => {
   // GROUP BY ItemId -- don't group so that we can filter out wrong durations
   // LIMIT 200
 
-//TODO implement batched requests to not exceed maximum URL length
-
 async function loadPlaybackReport(year) {
 
   const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {

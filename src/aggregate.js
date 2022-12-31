@@ -6,10 +6,10 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
     const playbackReportItem = playbackReportJSON[item.Id]
     const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
 
-    if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
-      console.log(`item.ArtistItems:`, item.ArtistItems)
-      // TODO figure out how to consolidate artists with the same name but different IDs
-    }
+    // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
+    //   console.log(`item.ArtistItems:`, item.ArtistItems)
+    //   // TODO figure out how to consolidate artists with the same name but different IDs
+    // }
     const track = new Track({
       name: item.Name,
       id: item.Id,
