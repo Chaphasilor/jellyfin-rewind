@@ -18,6 +18,7 @@ export const state = reactive({
   },
   rewindGenerating: false,
   rewindReport: null,
+  staleReport: false,
   auth: null,
   featuresInitialized: false,
   darkMode: null,
@@ -32,6 +33,7 @@ export async function init(auth) {
     login: viewLogin,
     load: viewLoad,
     revisit: viewRevisit,
+    rewindGenerationError: viewRewindGenerationError,
   })
 
   state.auth = auth
@@ -56,6 +58,7 @@ export async function init(auth) {
     let restored = await restoreAndPrepareRewind()
   
     state.rewindReport = restored.rewindReportData
+    state.staleReport = restored.staleReport
     console.log(`state.auth.config.user:`, state.auth.config.user)
     state.currentView = `revisit`
   } catch (err) {
@@ -416,7 +419,14 @@ const viewRevisit = html`
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
     <p class="">Welcome back, ${() => state.auth.config?.user?.name}!</p>
-    <p class="">Your Rewind Report is still saved. You can view it any time you like.</p>
+    <p class="">${() =>
+      !state.staleReport ? 
+        html`
+        <span>Your Rewind Report is still saved. You can view it any time you like.</span>
+        ` : html`
+        <span class="font-bold text-orange-500">The stored Rewind report is stale. Please re-generate it for the best experience.</span>
+        `
+    }</p>
   </div>
 
   <button
@@ -434,7 +444,7 @@ const viewRevisit = html`
   </button>
 
   <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-medium mt-8 flex flex-row gap-3 items-center mx-auto"
+    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-medium mt-8 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
       state.currentView = `load` 
     }}"
@@ -459,6 +469,35 @@ const viewRevisit = html`
       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
       <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
       <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
+    </svg>
+  </button>
+
+</div>
+`
+
+const viewRewindGenerationError = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+    <p class="">Sorry, we couldn't generate your Rewind Report.</p>
+    <p class="">Please try again later.</p>
+    <p class="">If you keep seeing this message, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank">Twitter</a> so that I can try to resolve the issue!</p>
+  </div>
+
+  <button
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/40 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => {
+      state.currentView = `load` 
+    }
+  }"
+  >
+    <span>Try again</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
+      <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
     </svg>
   </button>
 

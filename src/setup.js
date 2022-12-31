@@ -68,13 +68,9 @@ export async function restoreAndPrepareRewind() {
     throw new Error(`Couldn't restore Rewind report.`)
   }
   
-  if (staleReport) {
-    return `The stored rewind report is stale. Please re-generate it for the best experience.`
-  }
-  
   return {
     rewindReportData,
-    staleReport
+    staleReport,
   }
 }
 
