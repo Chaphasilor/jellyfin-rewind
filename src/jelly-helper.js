@@ -12,9 +12,9 @@ export default class JellyHelper {
       elements = [elements];
     }
     
-    const blurhash = imageInfo.blurhash
-    const primaryTag = imageInfo.primaryTag
-    const parentItemId = imageInfo.parentItemId
+    const blurhash = imageInfo?.blurhash
+    const primaryTag = imageInfo?.primaryTag
+    const parentItemId = imageInfo?.parentItemId
   
     if (blurhash) {
       const dataUri = blurhashToDataURI(blurhash)

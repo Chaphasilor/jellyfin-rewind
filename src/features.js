@@ -17,6 +17,7 @@ export const state = reactive({
   pollCanvas: false,
   extraFeatures: {
     totalPlaytimeGraph: true,
+    mostSuccessivePlays: true,
     fullReport: true,
   },
   settings: {
@@ -531,24 +532,43 @@ state.features = [
        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
          <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
            <div class="">${() =>
-             state.settings.useAlbumArtists ?
-               state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name :
-               state.rewindReport.generalStats.mostSuccessivePlays?.artists
-                 ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+             state.extraFeatures.mostSuccessivePlays ?
+              state.settings.useAlbumArtists ?
+                state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name :
+                state.rewindReport.generalStats.mostSuccessivePlays?.artists
+                  ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+              : `???`
            } -</div>
-           <div class="mt-8 ml-10">${() => state.rewindReport.generalStats.mostSuccessivePlays?.name}</div>
+           <div class="mt-8 ml-10">${() => state.extraFeatures.mostSuccessivePlays ? state.rewindReport.generalStats.mostSuccessivePlays?.name : `???`}</div>
          </div>
        </div>
      </div>
      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
-       <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.playCount)}</span> successive streams.</div>
-       <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration.toFixed(1))}</span> minutes.</div>
+       <div><span class="font-semibold">${() => state.extraFeatures.mostSuccessivePlays ? showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays?.playCount) : `???`}</span> successive streams.</div>
+       <div>Adding up to <span class="font-semibold">${() => state.extraFeatures.mostSuccessivePlays ? showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays?.totalDuration.toFixed(1)) : `???`}</span> minutes.</div>
      </div>
    </div>
    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
      <img id="most-successive-streams-track-background-image" class="w-full h-full" />
    </div>
- `), //TODO build fallback
+   ${() => state.extraFeatures.mostSuccessivePlays ? html`<br>` : html`
+      <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
+        <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
+          <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
+          <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M12 8h.01"></path>
+              <path d="M11 12h1v4h1"></path>
+              <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+            </svg>
+            <span>Learn why</span>
+          </button>
+        </div>
+      </div>
+      `
+    }
+ `),
  // outro
  buildFeature(`outro`, html`
   <div class="p-4">
@@ -646,7 +666,7 @@ state.features = [
           }
         })}"
       >
-        <span>Close<br>Jellyfin Rewind</span>
+        <span>Close Jellyfin Rewind</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-[2.5] icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -724,7 +744,7 @@ function showOverlayFeatureUnavailableMissingPlaybackReporting() {
     title: `Why is this feature unavailable?`,
     content: html`
       <div class="flex flex-col items-start gap-2">
-        <p>This feature depends on the Playback Reporting plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
+        <p>This feature depends on the 'Playback Reporting' plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
         <p>You can install the Playback Reporting plugin into your Jellyfin server by clicking the button below. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
         <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
         <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
@@ -1031,6 +1051,10 @@ export function init(rewindReportData, jellyHelper, auth) {
     state.settings.rankingMetric = `duration`
   } else {
     state.settings.rankingMetric = `playCount`
+  }
+
+  if (!state.rewindReport.generalStats.mostSuccessivePlays) {
+    state.extraFeatures.mostSuccessivePlays = false
   }
 
   // MediaQueryList
@@ -1541,9 +1565,11 @@ async function playTopGenres() {
 
 function playMostSuccessivePlaysTrack() {
 
-  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
-  console.log(`topSongByDuration:`, mostSuccessivePlaysTrack)
-  fadeToNextTrack(mostSuccessivePlaysTrack)
+  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays?.track
+  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+  if (mostSuccessivePlaysTrack) {
+    fadeToNextTrack(mostSuccessivePlaysTrack)
+  }
 
 }
 
@@ -1755,7 +1781,7 @@ function showAsNumber(numberOrArray) {
   if (Array.isArray(numberOrArray)) {
     numberOrArray = numberOrArray.length
   }
-  return numberOrArray.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return numberOrArray?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // function stringToColor(string) {

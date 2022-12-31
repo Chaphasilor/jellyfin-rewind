@@ -37,7 +37,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
       plays: playbackReportItem?.Plays || [],
-      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || [],
+      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || null,
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: {
         jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
@@ -228,14 +228,16 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       }
     })
 
-    if (cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount) {
-      acc.mostSuccessivePlays.track = cur
-      acc.mostSuccessivePlays.name = cur.name
-      acc.mostSuccessivePlays.artists = cur.artistsBaseInfo
-      acc.mostSuccessivePlays.albumArtist = cur.albumBaseInfo?.albumArtistBaseInfo
-      acc.mostSuccessivePlays.image = cur.image
-      acc.mostSuccessivePlays.playCount = cur.mostSuccessivePlays.playCount
-      acc.mostSuccessivePlays.totalDuration = cur.mostSuccessivePlays.totalDuration / 60 // convert to minutes
+    if (cur.mostSuccessivePlays && (!acc.mostSuccessivePlays || cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount)) {
+      acc.mostSuccessivePlays = {
+        track: cur,
+        name: cur.name,
+        artists: cur.artistsBaseInfo,
+        albumArtist: cur.albumBaseInfo?.albumArtistBaseInfo,
+        image: cur.image,
+        playCount: cur.mostSuccessivePlays.playCount,
+        totalDuration: cur.mostSuccessivePlays.totalDuration / 60, // convert to minutes
+      }
     }
     
     return acc
@@ -269,15 +271,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       clients: {},
       combinations: {},
     },
-    mostSuccessivePlays: {
-      track: null,
-      name: ``,
-      artists: [],
-      albumArtist: null,
-      image: ``,
-      playCount: 0,
-      totalDuration: 0,
-    },
+    mostSuccessivePlays: null,
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
