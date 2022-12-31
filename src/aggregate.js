@@ -24,8 +24,8 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
       },
       genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
       image: new PrimaryImage({
-        parentItemId: item.Id,
-        primaryTag: item.ImageTags?.Primary,
+        parentItemId: item.ImageTags?.Primary ? item.Id : item.AlbumId,
+        primaryTag: item.ImageTags?.Primary ? item.ImageTags.Primary : item.AlbumPrimaryImageTag,
         blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags?.Primary],
       }),
       year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
