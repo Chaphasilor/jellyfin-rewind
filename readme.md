@@ -1,3 +1,5 @@
+![Jellyfin Rewind Banner](Jellyfin%20Rewind%20Banner.png)
+
 # Jellyfin Rewind
 
 ## Welcome to Jellyfin Rewind 2022!
