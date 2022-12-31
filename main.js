@@ -5,6 +5,7 @@ import { reactive, watch, html, } from '@arrow-js/core'
 import * as jellyfinRewind from './src/rewind.js'
 import JellyHelper from './src/jelly-helper.js'
 
+import * as Onboarding from './src/onboarding.js'
 import * as Features from './src/features.js'
 
 document.querySelector('#app').innerHTML = `
@@ -65,6 +66,8 @@ window.onload = () => {
     init()
     // showReport.click() //FIXME remove this
   }
+
+  Onboarding.init()
   
 }
 
