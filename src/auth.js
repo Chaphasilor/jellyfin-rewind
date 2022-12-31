@@ -165,6 +165,9 @@ export default class Auth {
 
   destroySession() {
     localStorage.removeItem('session');
+    localStorage.removeItem('rewindReport');
+    localStorage.removeItem('rewindReportLight');
+    localStorage.removeItem('rewindReportDownloaded');
     this.config = this.baseConfig;
   }
 

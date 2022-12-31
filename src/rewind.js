@@ -332,15 +332,15 @@ async function generateRewindReport(year, progressCallback = () => {}) {
   // }
 
   const allItemInfo = (await loadItemInfo()).Items;
-  progressCallback(0.4)
+  progressCallback(0.3)
   
   console.log(`allItemInfo:`, allItemInfo)
   
   const allItemInfoIndexed = indexItemInfo(allItemInfo)
-  progressCallback(0.5)
+  progressCallback(0.4)
   
   const enhancedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
-  progressCallback(0.55)
+  progressCallback(0.5)
   const indexedPlaybackReport = indexPlaybackReport(enhancedPlaybackReportJSON)
   console.log(`indexedPlaybackReport:`, indexedPlaybackReport)
   progressCallback(0.6)

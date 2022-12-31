@@ -21,6 +21,8 @@ export const state = reactive({
   staleReport: false,
   progress: 0,
   auth: null,
+  error: null,
+  connectionHelpDialogOpen: false,
   featuresInitialized: false,
   darkMode: null,
 })
@@ -95,6 +97,7 @@ export function render() {
   html`
   <div class="">
     ${() => state.views[state.currentView]}
+    ${() => state.connectionHelpDialogOpen ? connectionHelpDialog : null}
   </div>
   `(onboardingElement)
 }
@@ -136,10 +139,55 @@ const viewStart = html`
 </div>
 `
 
+const connectionHelpDialog = html`
+<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+  <div @click="${() => state.connectionHelpDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+    <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
+      <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
+        <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">How to Connect?</h3>
+        <button @click="${() => state.connectionHelpDialogOpen = false}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="w-full h-full overflow-x-auto p-4">
+        <div class="flex flex-col items-start gap-2">
+          <p>Make sure your using the same protocol (https or http) as your server is using.</p>
+          <p>Make sure you're not using a local IP address or mDNS hostname. For example, you could use your server's Tailscale IP address, if you use Tailscale as your VPN.</p>
+          <p>Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (http) from a "secure" website (http<span class="font-semibold">s</span>).</p>
+          <p>Therefore, <span class="font-semibold">if you're unsure what your Jellyfin server is using, simply use the first link</span> (http)!</p>
+          <p>Here are the links to the Jellyfin Rewind website:</p>
+          <p><span class="font-semibold">HTTP</span><br>(works for both http and https Jellyfin servers, but some things might not work correctly):<br><a class="text-[#00A4DC]" href="http://jellyfin-rewind-http.chaphasilor.xyz">http://jellyfin-rewind-http.chaphasilor.xyz</a></p>
+          <p><span class="font-semibold">HTTPS</span><br>(if your Jellyfin server has an https connection, this is the best experience):<br><a class="text-[#00A4DC]" href="https://jellyfin-rewind.chaphasilor.xyz">https://jellyfin-rewind.chaphasilor.xyz</a></p>
+          <!-- TODO add more -->
+          <br>
+          <p>Advanced users can also <a class="text-[#00A4DC]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases" target="_blank">download the zip-archive</a> and use a local web server to serve the files, because local IPs/domains are treated differently by browsers.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`
+
 async function connect() {
+  state.error = null
   state.server.url = document.querySelector(`#onboarding-server-url`).value
-  state.server.users = await connectToServer(state.auth, state.server.url)
-  state.currentView = `user`
+  try {
+    state.server.users = await connectToServer(state.auth, state.server.url)
+    state.currentView = `user`
+  } catch (err) {
+    console.error(`Error while connecting to the server:`, err)
+    state.error = html`
+    <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
+      <p class="">There was an error while connecting to the server.</p>
+      <p class="">Please check the URL and try again.</p>
+      <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 dark:text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
+    </div>
+    `
+  }
 }
 
 const viewServer = html`
@@ -158,7 +206,7 @@ const viewServer = html`
       <input
         id="onboarding-server-url"
         name="server-url"
-        class="px-3 py-1.5 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
+        class="px-3 py-1.5 dark:bg-[#101010] dark:text-gray-200 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
         type="text"
         placeholder="e.g. https://demo.jellyfin.org"
         @keydown="${(e) => e?.key?.toLowerCase() === `enter` && connect()}"
@@ -167,7 +215,7 @@ const viewServer = html`
   </form>
 
   <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
     @click="${() => connect()}"
   >
     <span>Connect</span>
@@ -176,6 +224,8 @@ const viewServer = html`
       <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
     </svg>
   </button>
+
+  ${() => state.error}
 
 </div>
 `
@@ -279,7 +329,7 @@ const viewLogin = html`
         <label class="flex flex-col gap-1">
           <span class="text-sm ml-1.5 font-medium">Username</span>
           <input
-            class="${() => `px-3 py-1.5 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none ${state.server.selectedUser ? `font-semibold text-gray-500` : `text-gray-700`}`}"
+            class="${() => `px-3 py-1.5 dark:bg-[#101010] dark:text-gray-200 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none ${state.server.selectedUser ? `font-semibold text-gray-500` : `text-gray-700`}`}"
             id="onboarding-username"
             name="username"
             type="text"
@@ -291,7 +341,7 @@ const viewLogin = html`
         <label class="flex flex-col gap-1">
           <span class="text-sm ml-1.5 font-medium">Password</span>
           <input
-            class="px-3 py-1.5 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
+            class="px-3 py-1.5 dark:bg-[#101010] dark:text-gray-200 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
             id="onboarding-password"
             name="password"
             type="password"
@@ -303,7 +353,7 @@ const viewLogin = html`
         <label class="flex flex-col gap-1">
           <span class="text-sm ml-1.5 font-medium">Auth Token</span>
           <input
-            class="px-3 py-1.5 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
+            class="px-3 py-1.5 dark:bg-[#101010] dark:text-gray-200 rounded-lg focus:ring-1 focus:ring-[#00A4DC] focus:outline-none"
             id="onboarding-auth-token"
             name="auth-token"
             type="text"
@@ -331,7 +381,7 @@ const viewLogin = html`
 
 const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
-  <!-- <img class="inline h-full animate-spin" src="/media/jellyfin-icon-transparent.svg" /> -->
+  <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-icon-transparent.svg" />
   <div class="w-full flex flex-row gap-2 items-center bg-white dark:bg-[#101010] rounded-full">
     <div
       class="h-full rounded-full bg-fixed bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]"

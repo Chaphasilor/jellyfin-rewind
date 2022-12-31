@@ -150,7 +150,7 @@ state.features = [
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white/80">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
@@ -208,7 +208,7 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                  <span class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden">by ${() =>
                     state.settings.useAlbumArtists ?
                       track.albumBaseInfo.albumArtistBaseInfo.name :
                       track.artistsBaseInfo
@@ -243,7 +243,7 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
               </div>
-              <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
+              <div class="ml-6 max-h-[2rem] text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
                 state.settings.useAlbumArtists ?
                   track.albumBaseInfo.albumArtistBaseInfo.name :
                   track.artistsBaseInfo
@@ -402,11 +402,11 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                  <span class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden">by ${() =>
                     state.settings.useAlbumArtists ?
                       album.albumArtist.name :
                       album.artists
-                        .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                        ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``) || `Unknown Artist`
                   }</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
@@ -437,11 +437,11 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold">${() =>
+                <div class="ml-6 max-h-[2rem] text-xs">by <span class="font-semibold">${() =>
                   state.settings.useAlbumArtists ?
                     album.albumArtist.name :
                     album.artists
-                      .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                      ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``) || `Unknown Artist`
                 }</span>
             </div>
             <!--
@@ -756,7 +756,7 @@ function showOverlayFeatureUnavailableMissingPlaybackReporting() {
 const settings = html`
 ${() =>
   !state.extraFeatures.fullReport ? html`
-    <p class="text-sm text-gray-500 dark:text-gray-400">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
+    <p class="text-sm text-orange-500 dark:text-orange-400">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
     <p class="text-sm mt-1 mb-3 text-gray-500 dark:text-gray-400">To access all settings, please <button @click="${() => {
       closeFeatures() // close settings
       closeFeatures() // close features

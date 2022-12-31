@@ -68,6 +68,9 @@ window.onload = async () => {
     init()
   }
 
+  helper = new JellyHelper(jellyfinRewind.auth)
+  window.helper = helper
+
   await Onboarding.init(jellyfinRewind.auth)
   Onboarding.render()
   
@@ -296,8 +299,6 @@ function init() {
   })
   generateReport.classList.remove(`hidden`)
   showReport.classList.remove(`hidden`)
-  helper = new JellyHelper(jellyfinRewind.auth)
-  window.helper = helper
 }
 
 async function generateRewindReport() {
