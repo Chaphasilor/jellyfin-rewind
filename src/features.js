@@ -1,4 +1,4 @@
-import { reactive, watch, html, } from '@arrow-js/core' 
+import { reactive, watch, html, } from '@arrow-js/core'
 import Chart from 'chart.js/auto';
 
 const mainElement = document.querySelector('main');
@@ -17,13 +17,14 @@ export const state = reactive({
   pollCanvas: false,
   extraFeatures: {
     totalPlaytimeGraph: true,
+    mostSuccessivePlays: true,
     fullReport: true,
   },
   settings: {
     dataSource: `jellyfin`,
     rankingMetric: `playCount`,
     useAlbumArtists: true,
-    sound: false, //FIXME: change to true
+    sound: true,
     darkMode: false,
   },
   disabledSettings: [],
@@ -144,20 +145,12 @@ state.features = [
         <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueArtistsPlayed`])}</span> unique albums.</div>
       </div>
 
-      <div class="absolute bottom-16 w-full h-2/5 px-8">
+      <div class="absolute bottom-20 w-full h-2/5 px-8">
         <canvas id="playtime-by-month-chart" class="${() => state.extraFeatures.totalPlaytimeGraph ? `` : `opacity-30`}"></canvas>
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-sky-900 tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlay({
-              title: `Why is this feature unavailable?`,
-              content: html`
-                <div class="text-center">
-                  <p class="text-lg">This feature is currently unavailable for ${() => state.settings.dataSource}.</p>
-                  <p class="text-lg">This is due to the fact that ${() => state.settings.dataSource} does not provide the required data.</p>
-                </div>
-              `,
-            }))}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white/80">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
@@ -189,12 +182,12 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-track-background-image" class="w-full h-full" />
     </div>
   `),
@@ -215,7 +208,7 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                  <span class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden">by ${() =>
                     state.settings.useAlbumArtists ?
                       track.albumBaseInfo.albumArtistBaseInfo.name :
                       track.artistsBaseInfo
@@ -250,7 +243,7 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
               </div>
-              <div class="ml-6 text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
+              <div class="ml-6 max-h-[2rem] text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
                 state.settings.useAlbumArtists ?
                   track.albumBaseInfo.albumArtistBaseInfo.name :
                   track.artistsBaseInfo
@@ -287,12 +280,12 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-artist-background-image" class="w-full h-full" />
     </div>
   `),
@@ -383,12 +376,12 @@ state.features = [
           </div>
         </div>
       </div>
-      <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
+      <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
         <div>Listened for <span class="font-semibold">${() => showAsNumber(state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource]?.toFixed(0))}</span> minutes.</div>
       </div>
     </div>
-    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+    <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
       <img id="top-album-background-image" class="w-full h-full" />
     </div>
   `),
@@ -409,11 +402,11 @@ state.features = [
                   <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
                   <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
                 </div>
-                  <span class="text-sm ml-2 text-ellipsis overflow-hidden">by ${() =>
+                  <span class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden">by ${() =>
                     state.settings.useAlbumArtists ?
                       album.albumArtist.name :
                       album.artists
-                        .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                        ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``) || `Unknown Artist`
                   }</span>
               </div>
               <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
@@ -444,11 +437,11 @@ state.features = [
                 <span class="font-semibold mr-2">${() => index + 1 + 5}.</span>
                 <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => album.name}</span>
               </div>
-                <div class="ml-6 text-xs">by <span class="font-semibold">${() =>
+                <div class="ml-6 max-h-[2rem] text-xs">by <span class="font-semibold">${() =>
                   state.settings.useAlbumArtists ?
                     album.albumArtist.name :
                     album.artists
-                      .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                      ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``) || `Unknown Artist`
                 }</span>
             </div>
             <!--
@@ -539,24 +532,43 @@ state.features = [
        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
          <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
            <div class="">${() =>
-             state.settings.useAlbumArtists ?
-               state.rewindReport.generalStats.mostSuccessivePlays.track.albumBaseInfo.albumArtistBaseInfo.name :
-               state.rewindReport.generalStats.mostSuccessivePlays.track.artistsBaseInfo
-                 .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+             state.extraFeatures.mostSuccessivePlays ?
+              state.settings.useAlbumArtists ?
+                state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name :
+                state.rewindReport.generalStats.mostSuccessivePlays?.artists
+                  ?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+              : `???`
            } -</div>
-           <div class="mt-8 ml-10">${() => state.rewindReport.generalStats.mostSuccessivePlays.track.name}</div>
+           <div class="mt-8 ml-10">${() => state.extraFeatures.mostSuccessivePlays ? state.rewindReport.generalStats.mostSuccessivePlays?.name : `???`}</div>
          </div>
        </div>
      </div>
-     <div class="absolute bottom-16 left-0 w-full flex flex-col items-center gap-3">
-       <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.playCount)}</span> successive streams.</div>
-       <div>Adding up to <span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays.totalDuration.toFixed(1))}</span> minutes.</div>
+     <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
+       <div><span class="font-semibold">${() => state.extraFeatures.mostSuccessivePlays ? showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays?.playCount) : `???`}</span> successive streams.</div>
+       <div>Adding up to <span class="font-semibold">${() => state.extraFeatures.mostSuccessivePlays ? showAsNumber(state.rewindReport.generalStats.mostSuccessivePlays?.totalDuration.toFixed(1)) : `???`}</span> minutes.</div>
      </div>
    </div>
-   <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
+   <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
      <img id="most-successive-streams-track-background-image" class="w-full h-full" />
    </div>
- `), //TODO build fallback
+   ${() => state.extraFeatures.mostSuccessivePlays ? html`<br>` : html`
+      <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
+        <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
+          <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
+          <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M12 8h.01"></path>
+              <path d="M11 12h1v4h1"></path>
+              <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+            </svg>
+            <span>Learn why</span>
+          </button>
+        </div>
+      </div>
+      `
+    }
+ `),
  // outro
  buildFeature(`outro`, html`
   <div class="p-4">
@@ -640,7 +652,7 @@ state.features = [
                 </button>
 
                 <button
-                  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+                  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
                   @click="${stopPropagation(() => {
                     closeJellyfinRewind()
                   })}"
@@ -654,7 +666,7 @@ state.features = [
           }
         })}"
       >
-        <span>Close<br>Jellyfin Rewind</span>
+        <span>Close Jellyfin Rewind</span>
         <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 stroke-[2.5] icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -712,7 +724,7 @@ function showIncompleteReportOverlay(onClose = () => {}) {
       </button>
 
       <button
-        class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+        class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
         @click="${stopPropagation(() => {
           window.downloadRewindReportData(state.rewindReportData, true)
           // closeOverlay(`overlay-incomplete-report`)
@@ -727,10 +739,24 @@ function showIncompleteReportOverlay(onClose = () => {}) {
   
 }
 
+function showOverlayFeatureUnavailableMissingPlaybackReporting() {
+  showOverlay({
+    title: `Why is this feature unavailable?`,
+    content: html`
+      <div class="flex flex-col items-start gap-2">
+        <p>This feature depends on the 'Playback Reporting' plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
+        <p>You can install the Playback Reporting plugin into your Jellyfin server by clicking the button below. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
+        <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+        <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+      </div>
+    `,
+  })
+}
+
 const settings = html`
 ${() =>
   !state.extraFeatures.fullReport ? html`
-    <p class="text-sm text-gray-500 dark:text-gray-400">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
+    <p class="text-sm text-orange-500 dark:text-orange-400">Jellyfin Rewind is using a 'light' version of the Rewind report, therefore some settings are not available.</p>
     <p class="text-sm mt-1 mb-3 text-gray-500 dark:text-gray-400">To access all settings, please <button @click="${() => {
       closeFeatures() // close settings
       closeFeatures() // close features
@@ -987,6 +1013,8 @@ export function init(rewindReportData, jellyHelper, auth) {
   console.log(`state.rewindReport:`, state.rewindReport)
   console.log(`state.rewindReport.type:`, state.rewindReport.type)
   console.log(`state.rewindReport.type !== 'full':`, state.rewindReport.type !== 'full')
+  console.log(`state.jellyHelper:`, state.jellyHelper)
+  console.log(`state.auth:`, state.auth)
 
   state.rewindReportDownloaded = JSON.parse(localStorage.getItem(`rewindReportDownloaded`)) || false
 
@@ -1025,6 +1053,10 @@ export function init(rewindReportData, jellyHelper, auth) {
     state.settings.rankingMetric = `playCount`
   }
 
+  if (!state.rewindReport.generalStats.mostSuccessivePlays) {
+    state.extraFeatures.mostSuccessivePlays = false
+  }
+
   // MediaQueryList
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -1051,58 +1083,60 @@ export function render() {
       ${() => {
         return state.featuresOpen ?
           html`
-          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white">
-            <div class="absolute top-0 left-0 z-[5] w-[100vw] h-10 flex flex-row justify-between bg-gray-700/30">
-              <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
-                ${() => {
-                  return state.features.map((feature, index) => {
-                    return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature >= index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
-                  })
-                }}
-              </ul>
-              <button class="px-1 z-[150]" @click="${() => toggleMute()}" type="button">
-                ${() => state.settings.sound ?
-                  html`
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white flex flex-row justify-center">
+            <div class="absolute w-full md:max-w-4xl h-full">
+              <div class="absolute top-0 left-0 z-[5] w-full h-10 flex flex-row justify-between bg-gray-700/30">
+                <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
+                  ${() => {
+                    return state.features.map((feature, index) => {
+                      return html`<li class="${() => `relative block w-full rounded-full h-full text-white/0 ${state.currentFeature >= index ? `bg-white/90` : `bg-black/50`}`}"> </li>`
+                    })
+                  }}
+                </ul>
+                <button class="px-1 z-[150]" @click="${() => toggleMute()}" type="button">
+                  ${() => state.settings.sound ?
+                    html`
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M15 8a5 5 0 0 1 0 8"></path>
+                      <path d="M17.7 5a9 9 0 0 1 0 14"></path>
+                      <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+                    </svg>
+                    ` :
+                    html`
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                      <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"></path>
+                      <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"></path>
+                      <path d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"></path>
+                      <path d="M3 3l18 18"></path>
+                    </svg>
+                    `
+                  }
+                </button>
+                <button class="px-1 z-[150]" @click="${() => toggleSettings()}" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M15 8a5 5 0 0 1 0 8"></path>
-                    <path d="M17.7 5a9 9 0 0 1 0 14"></path>
-                    <path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"></path>
+                    <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
                   </svg>
-                  ` :
-                  html`
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                </button>
+                <button class="px-1 z-[150]" @click="${() => closeFeatures()}" type="button">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                     <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                    <path d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"></path>
-                    <path d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"></path>
-                    <path d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"></path>
-                    <path d="M3 3l18 18"></path>
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
                   </svg>
-                  `
-                }
-              </button>
-              <button class="px-1 z-[150]" @click="${() => toggleSettings()}" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-settings" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"></path>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-              <button class="px-1 z-[150]" @click="${() => closeFeatures()}" type="button">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white icon icon-tabler icon-tabler-x" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
-          <ul class="absolute top-0 left-0 w-full h-full">
-            ${() => state.features.map((feature, index) => feature(index))}
-          </ul>
-          ${() => Object.values(state.overlays).map(x => x.overlay)}
+                </button>
+              </div>
+            <ul class="absolute top-0 left-0 w-full h-full">
+              ${() => state.features.map((feature, index) => feature(index))}
+            </ul>
+            ${() => Object.values(state.overlays).map(x => x.overlay)}
+          </div>
+          <audio id="audio-player-1" loop></audio>
+          <audio id="audio-player-2" loop></audio>
         </div>
-        <audio id="audio-player-1"></audio>
-        <audio id="audio-player-2"></audio>
         `
         :
         html`<br>`
@@ -1113,10 +1147,6 @@ export function render() {
   state.currentFeature = 0
 
   // autoAdvance()
-
-  // document.querySelector(`#playtime-by-month-chart`).addEventListener(`load`, () => {
-  //   showPlaytimeByMonthChart()
-  // })
   
 }
 
@@ -1126,10 +1156,14 @@ function autoAdvance() {
   }, 1000 * 12)
 }
 
-export function openFeatures() {
+export async function openFeatures() {
   state.featuresOpen = true
   // request fullscreen
-  // document.querySelector(`body`).requestFullscreen() //FIXME reenable fullscreen
+  try {
+    await document.querySelector(`body`).requestFullscreen()
+  } catch (err) {
+    console.warn(`Fullscreen permission denied`, err)
+  }
 }
 export function closeFeatures() {
 
@@ -1227,11 +1261,6 @@ function buildFeature(featureName, content, classes) {
       <div>${content}</div>
       </li>
       `
-      // <div class="fixed top-0 left-0 w-full h-full grid grid-cols-3 grid-rows-1">
-      //   <!-- TODO use single click event with some javascript for checking if the click was on the left or right side, so that the feature can still be interacted with -->
-      //   <div @click="${() => previous()}" class="col-span-1 row-span-1"></div>
-      //   <div @click="${() => next()}" class="col-span-2 row-span-1"></div>
-      // </div>
 }
 
 function handleFeatureClick(event) {
@@ -1239,8 +1268,11 @@ function handleFeatureClick(event) {
   console.log(event)
   let featureElement = event.target.closest(`[data-feature-name]`)
   console.log(`featureElement:`, featureElement)
+  console.log(`event.clientX:`, event.clientX)
+  console.log(`featureElement.offsetLeft:`, featureElement.offsetLeft)
+  console.log(`featureElement.getBoundingClientRect().x:`, featureElement.getBoundingClientRect().x)
 
-  if (event.clientX < featureElement.offsetWidth / 3) {
+  if ((event.clientX - featureElement.getBoundingClientRect().x) < featureElement.offsetWidth / 3) {
     previous()
   } else {
     next()
@@ -1249,8 +1281,6 @@ function handleFeatureClick(event) {
 
 function showPlaytimeByMonthChart() {
 
-  //TODO disable if playback reporting isn't enabled
-  
   console.log(`Loading chart...`)
 
   let canvas;
@@ -1423,9 +1453,9 @@ function loadMostSuccessivePlaysTrackMedia() {
   const mostSuccessivePlaysTrackPrimaryImage = document.querySelector(`#most-successive-streams-track-image`);
   const mostSuccessivePlaysTrackBackgroundImage = document.querySelector(`#most-successive-streams-track-background-image`);
   console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage)
-  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
-  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
-  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], mostSuccessivePlaysTrack.image, `track`, state.settings.darkMode)
+  // const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
+  // console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+  state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], state.rewindReport.generalStats.mostSuccessivePlays?.image, `track`, state.settings.darkMode)
 
 }
 
@@ -1453,7 +1483,7 @@ function playTopTracks() {
 
 async function playTopArtist() {
 
-  const topArtistByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
+  const topArtistByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
   console.log(`topArtistByDuration:`, topArtistByDuration)
 
   let artistsTracks = await state.jellyHelper.loadTracksForGroup(topArtistByDuration.id, `artist`)
@@ -1485,7 +1515,7 @@ async function playTopArtists() {
 
 async function playTopAlbum() {
 
-  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0] //TODO adhere to settings for ranking
+  const topAlbumByDuration = state.rewindReport.albums?.[state.settings.rankingMetric]?.[0]
   console.log(`topAlbumByDuration:`, topAlbumByDuration)
 
   let albumsTracks = await state.jellyHelper.loadTracksForGroup(topAlbumByDuration.id, `album`)
@@ -1535,9 +1565,11 @@ async function playTopGenres() {
 
 function playMostSuccessivePlaysTrack() {
 
-  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
-  console.log(`topSongByDuration:`, mostSuccessivePlaysTrack)
-  fadeToNextTrack(mostSuccessivePlaysTrack)
+  const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays?.track
+  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+  if (mostSuccessivePlaysTrack) {
+    fadeToNextTrack(mostSuccessivePlaysTrack)
+  }
 
 }
 
@@ -1607,28 +1639,40 @@ async function fadeToNextTrack(trackInfo) {
     inactivePlayer.volume = 0
     activePlayer.volume = 1
     inactivePlayer.play()
-  
-    // fade
-    let fadeInterval = setInterval(() => {
-      try {
-        if (inactivePlayer.volume + 0.1 <= 1) {
-          inactivePlayer.volume += 0.1
-          activePlayer.volume -= 0.1
-        } else {
-          clearInterval(fadeInterval)
+    inactivePlayer.volume = 0
+
+    // I hate Safari
     
+    const fadePerStep = 0.05
+    const fadeDuration = 1000
+    const fadeStepsOut = Array(1 / fadePerStep).fill(1).map((_, i) => Number((1 - i * fadePerStep).toFixed(2)))
+    const fadeStepsIn = Array(1 / fadePerStep).fill(1).map((_, i) => Number((i * fadePerStep).toFixed(2)))
+    fadeStepsIn.unshift(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+    const doFade = (stepIndex) => () => {
+      try {
+        inactivePlayer.volume = fadeStepsIn[stepIndex]
+        activePlayer.volume = fadeStepsOut[stepIndex] || 0
+        if (stepIndex === fadeStepsIn.length - 1) {
+          
           // stop the active player
           activePlayer.pause()
           activePlayer.currentTime = 0
+          //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+        } else {
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeStepsIn.length)
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err)
-        clearInterval(fadeInterval)
         inactivePlayer.volume = 1
         activePlayer.volume = 0
         activePlayer.pause()
       }
-    }, 100)
+    }
+    
+    // fade
+    doFade(0)()
+
   }
 
 }
@@ -1659,30 +1703,35 @@ function pausePlayback() {
   player1.volume = 1
   player2.volume = 1
 
-  // fade
-  let fadeInterval = setInterval(() => {
+  const fadePerStep = 0.05
+  const fadeDuration = 750
+  const fadeSteps = Array(1 / fadePerStep).fill(1).map((_, i) => Number((1 - i * fadePerStep).toFixed(2)))
+
+  const doFade = (stepIndex) => () => {
     try {
-      if (player1.volume - 0.1 >= 0) {
-        player1.volume -= 0.1
-        player2.volume -= 0.1
-      } else {
-        clearInterval(fadeInterval)
+      player1.volume = fadeSteps[stepIndex]
+      player2.volume = fadeSteps[stepIndex]
+      if (stepIndex === fadeSteps.length - 1) {
         
         // stop the active player
         player1.pause()
         player2.pause()
         //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+      } else {
+        setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length)
       }
     } catch (err) {
       console.error(`Error while fading tracks:`, err)
-      clearInterval(fadeInterval)
       player1.volume = 0
       player2.volume = 0
       player1.pause()
       player2.pause()
     }
-  }, 100)
+  }
   
+  // fade
+  doFade(0)()
+
 }
 
 // uses the tag data to determine the previously active player and resumes playback by fading it in
@@ -1706,28 +1755,33 @@ function resumePlayback() {
   activePlayer.volume = 0
   activePlayer.play()
 
-  // fade
-  let fadeInterval = setInterval(() => {
+  const fadePerStep = 0.05
+  const fadeDuration = 750
+  const fadeSteps = Array(1 / fadePerStep).fill(1).map((_, i) => Number((i * fadePerStep).toFixed(2)))
+
+  const doFade = (stepIndex) => () => {
     try {
-      if (activePlayer.volume + 0.1 <= 1) {
-        activePlayer.volume += 0.1
-      } else {
-        clearInterval(fadeInterval)
+      activePlayer.volume = fadeSteps[stepIndex]
+      
+      if (stepIndex !== fadeSteps.length - 1) {
+        setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length)
       }
     } catch (err) {
       console.error(`Error while fading tracks:`, err)
-      clearInterval(fadeInterval)
       activePlayer.volume = 1
     }
-  }, 100)
-
+  }
+  
+  // fade
+  doFade(0)()
+  
 }
 
 function showAsNumber(numberOrArray) {
   if (Array.isArray(numberOrArray)) {
     numberOrArray = numberOrArray.length
   }
-  return numberOrArray.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  return numberOrArray?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 // function stringToColor(string) {

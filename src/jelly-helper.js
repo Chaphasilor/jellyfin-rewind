@@ -8,15 +8,13 @@ export default class JellyHelper {
   
   loadImage(elements, imageInfo, type = `track`, isDarkMode = false) {
 
-    console.log(`isDarkMode:`, isDarkMode)
-    
     if (!Array.isArray(elements)) {
       elements = [elements];
     }
     
-    const blurhash = imageInfo.blurhash
-    const primaryTag = imageInfo.primaryTag
-    const parentItemId = imageInfo.parentItemId
+    const blurhash = imageInfo?.blurhash
+    const primaryTag = imageInfo?.primaryTag
+    const parentItemId = imageInfo?.parentItemId
   
     if (blurhash) {
       const dataUri = blurhashToDataURI(blurhash)
@@ -33,9 +31,9 @@ export default class JellyHelper {
           case `artist`:
             element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
-            case `album`:
-              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
-            break;
+          case `album`:
+            element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
         
           default:
             break;
@@ -43,8 +41,12 @@ export default class JellyHelper {
       })
     }
   
-    if (primaryTag && parentItemId) {
-      fetch(`${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`, {
+    if (primaryTag && (parentItemId || type === `user`)) {
+      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      if (type === `user`) {
+        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      }
+      fetch(url, {
         method: `GET`,
         headers: {
           ...this.auth.config.defaultHeaders,
@@ -76,9 +78,12 @@ export default class JellyHelper {
           case `artist`:
             element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
             break;
-            case `album`:
-              element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
-            break;
+          case `album`:
+            element.src = `/media/AlbumPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
+          case `user`:
+            element.src = `/media/ArtistPlaceholder${isDarkMode ? `-dark` : ``}.png`
+          break;
         
           default:
             break;
@@ -100,7 +105,7 @@ export default class JellyHelper {
       'UserId': this.auth.config.user.id,
       'DeviceId': this.auth.config.user.deviceId,
       'api_key': this.auth.config.user.token,
-      'Container': `opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg`,
+      'Container': `opus,webm|opus,mp3,aac,m4a|aac,m4b|aac,flac,webma,webm|webma,wav,ogg`, // limit to mp3 for best support
       'TranscodingContainer': `ts`,
       'TranscodingProtocol': `hls`,
       'AudioCodec': `aac`,

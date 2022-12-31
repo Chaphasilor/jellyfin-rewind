@@ -20,8 +20,6 @@ const playbackReportQuery = (year) => {
   // GROUP BY ItemId -- don't group so that we can filter out wrong durations
   // LIMIT 200
 
-//TODO implement batched requests to not exceed maximum URL length
-
 async function loadPlaybackReport(year) {
 
   const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {
@@ -115,8 +113,9 @@ function indexPlaybackReport(playbackReportJSON) {
   
   const items = {}
   for (const item of playbackReportJSON.items) {
+    const isoDate = item.DateCreated.replace(` `, `T`) + `Z` // Safari doesn't seem to support parsing the raw dates from playback reporting (RFC 3339)
     const playInfo = {
-      date: new Date(item.DateCreated),
+      date: new Date(isoDate),
       duration: Number(item.PlayDuration),
       client: item.ClientName,
       device: item.DeviceName,
@@ -298,9 +297,10 @@ function chunkedArray(array, chunkSize) {
   return chunks
 }
 
-async function generateRewindReport(year) {
+async function generateRewindReport(year, progressCallback = () => {}) {
 
   console.info(`Generating Rewind Report for ${year}...`)
+  progressCallback(0)
 
   let playbackReportAvailable = true
   let playbackReportComplete = true
@@ -314,12 +314,14 @@ async function generateRewindReport(year) {
     playbackReportInfo = null
     playbackReportAvailable = false
   }
+  progressCallback(0.2)
 
   const playbackReportJSON = generateJSONFromPlaybackReport(playbackReportInfo)
   console.log(`playbackReportJSON:`, playbackReportJSON)
   if (playbackReportJSON.items.length === 0) {
     playbackReportDataMissing = true
   }
+  progressCallback(0.25)
 
   // const allItemInfo = []
 
@@ -330,25 +332,33 @@ async function generateRewindReport(year) {
   // }
 
   const allItemInfo = (await loadItemInfo()).Items;
+  progressCallback(0.3)
   
   console.log(`allItemInfo:`, allItemInfo)
   
   const allItemInfoIndexed = indexItemInfo(allItemInfo)
+  progressCallback(0.4)
   
   const enhancedPlaybackReportJSON = adjustPlaybackReportJSON(playbackReportJSON, allItemInfoIndexed)
+  progressCallback(0.5)
   const indexedPlaybackReport = indexPlaybackReport(enhancedPlaybackReportJSON)
   console.log(`indexedPlaybackReport:`, indexedPlaybackReport)
+  progressCallback(0.6)
 
   console.log(`Object.keys(allItemInfoIndexed).length:`, Object.keys(allItemInfoIndexed).length)
   const allTopTrackInfo = aggregate.generateTopTrackInfo(allItemInfoIndexed, indexedPlaybackReport)
+  progressCallback(0.7)
 
   const artistInfo = indexArtists(await loadArtistInfo())
   console.log(`artistInfo:`, artistInfo)
+  progressCallback(0.75)
 
   const albumInfo = indexAlbums(await loadAlbumInfo())
   console.log(`albumInfo:`, albumInfo)
+  progressCallback(0.8)
 
   const totalStats = aggregate.generateTotalStats(allTopTrackInfo, enhancedPlaybackReportJSON)
+  progressCallback(0.95)
 
   const jellyfinRewindReport = {
     commit: __COMMITHASH__,
@@ -456,6 +466,8 @@ async function generateRewindReport(year) {
   }
   
   console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
+
+  progressCallback(1)
   
   rewindReport = jellyfinRewindReport
   

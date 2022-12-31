@@ -6,10 +6,10 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
     const playbackReportItem = playbackReportJSON[item.Id]
     const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
 
-    if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
-      console.log(`item.ArtistItems:`, item.ArtistItems)
-      // TODO figure out how to consolidate artists with the same name but different IDs
-    }
+    // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
+    //   console.log(`item.ArtistItems:`, item.ArtistItems)
+    //   // TODO figure out how to consolidate artists with the same name but different IDs
+    // }
     const track = new Track({
       name: item.Name,
       id: item.Id,
@@ -37,7 +37,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
       },
       plays: playbackReportItem?.Plays || [],
-      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || [],
+      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || null,
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: {
         jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
@@ -228,10 +228,16 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       }
     })
 
-    if (cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount) {
-      acc.mostSuccessivePlays.track = cur
-      acc.mostSuccessivePlays.playCount = cur.mostSuccessivePlays.playCount
-      acc.mostSuccessivePlays.totalDuration = cur.mostSuccessivePlays.totalDuration / 60 // convert to minutes
+    if (cur.mostSuccessivePlays && (!acc.mostSuccessivePlays || cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount)) {
+      acc.mostSuccessivePlays = {
+        track: cur,
+        name: cur.name,
+        artists: cur.artistsBaseInfo,
+        albumArtist: cur.albumBaseInfo?.albumArtistBaseInfo,
+        image: cur.image,
+        playCount: cur.mostSuccessivePlays.playCount,
+        totalDuration: cur.mostSuccessivePlays.totalDuration / 60, // convert to minutes
+      }
     }
     
     return acc
@@ -265,11 +271,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       clients: {},
       combinations: {},
     },
-    mostSuccessivePlays: {
-      track: null,
-      playCount: 0,
-      totalDuration: 0,
-    },
+    mostSuccessivePlays: null,
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
@@ -316,7 +318,7 @@ export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource 
 export function generateTotalPlaybackDurationByMonth(indexedPlaybackReport) {
   const totalPlaybackDurationByMonth = Object.values(indexedPlaybackReport).reduce((acc, cur) => {
     cur.Plays.forEach(play => {
-      const month = play.date.getMonth()
+      const month = play.date?.getMonth()
       acc[month] += play.duration
     })
     return acc
