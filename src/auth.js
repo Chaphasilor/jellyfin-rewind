@@ -1,12 +1,13 @@
 export default class Auth {
 
   constructor() {
-    this.config = {
+    this.baseConfig = {
       baseUrl: ``,
       serverInfo: null,
       user: null,
       defaultHeaders: {},
     }
+    this.config = this.baseConfig
   }
 
   async connectToServer(serverUrl) {
@@ -164,7 +165,7 @@ export default class Auth {
 
   destroySession() {
     localStorage.removeItem('session');
-    this.config = null;
+    this.config = this.baseConfig;
   }
 
 }

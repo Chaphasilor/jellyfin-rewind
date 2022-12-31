@@ -59,14 +59,16 @@ window.onload = () => {
 
   console.log(`commit hash:`, __COMMITHASH__)
 
+  Onboarding.init(jellyfinRewind.auth)
+  Onboarding.render()
+
   if (jellyfinRewind.auth.restoreSession()) {
     console.info(`Session restored!`)
+    Onboarding.state.currentView = `revisit`
     enableLogout()
     serverConfig.classList.add(`hidden`)
     init()
   }
-
-  Onboarding.init()
   
 }
 
