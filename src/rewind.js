@@ -76,7 +76,10 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
 
     // adjust playback duration if necessary
 
-    const playbackReportDuration = Number(item.PlayDuration)
+    let playbackReportDuration = Number(item.PlayDuration)
+    if (isNaN(playbackReportDuration)) {
+      playbackReportDuration = 0
+    }
     const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000)
     
     if (playbackReportDuration > jellyfinItemDuration) {
@@ -116,7 +119,7 @@ function indexPlaybackReport(playbackReportJSON) {
     const isoDate = item.DateCreated.replace(` `, `T`) + `Z` // Safari doesn't seem to support parsing the raw dates from playback reporting (RFC 3339)
     const playInfo = {
       date: new Date(isoDate),
-      duration: Number(item.PlayDuration),
+      duration: !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0,
       client: item.ClientName,
       device: item.DeviceName,
       method: convertPlaybackMethod(item.PlaybackMethod),
@@ -124,13 +127,13 @@ function indexPlaybackReport(playbackReportJSON) {
     if (!items[item.ItemId]) {
       items[item.ItemId] = {
         ...item,
-        TotalDuration: Number(item.PlayDuration),
+        TotalDuration: !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0,
         TotalPlayCount: 1,
         Plays: [playInfo],
       }
 
     } else {
-      items[item.ItemId].TotalDuration += Number(item.PlayDuration)
+      items[item.ItemId].TotalDuration += !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
       items[item.ItemId].TotalPlayCount += 1
       items[item.ItemId].Plays.push(playInfo)
     }
@@ -144,10 +147,10 @@ function indexPlaybackReport(playbackReportJSON) {
       }
       currentSuccessivePlays.itemId = item.ItemId
       currentSuccessivePlays.count = 1
-      currentSuccessivePlays.totalDuration = Number(item.PlayDuration)
+      currentSuccessivePlays.totalDuration = !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
     } else {
       currentSuccessivePlays.count += 1
-      currentSuccessivePlays.totalDuration += Number(item.PlayDuration)
+      currentSuccessivePlays.totalDuration += !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
     }
       
   }

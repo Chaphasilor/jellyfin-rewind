@@ -29,7 +29,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags?.Primary],
       }),
       year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
-      duration: Math.round(item.RunTimeTicks / 10000000),
+      duration: !isNaN(Math.round(item.RunTimeTicks / 10000000)) ? Math.round(item.RunTimeTicks / 10000000) : 0,
       playCount: {
         jellyfin: item.UserData?.PlayCount || 0,
         // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
@@ -40,9 +40,9 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
       mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || null,
       lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
       totalPlayDuration: {
-        jellyfin: Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)), // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
-        playbackReport: Number(playbackReportItem?.TotalDuration) / 60 || 0, // convert to minutes
-        average: Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2),
+        jellyfin: !isNaN(Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) ? Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)) : 0, // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
+        playbackReport: !isNaN(Number(playbackReportItem?.TotalDuration) / 60 || 0) ? (Number(playbackReportItem?.TotalDuration) / 60 || 0) : 0, // convert to minutes
+        average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
       },
       isFavorite: item.UserData?.IsFavorite,
     })
