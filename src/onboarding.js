@@ -23,8 +23,10 @@ export const state = reactive({
   auth: null,
   error: null,
   connectionHelpDialogOpen: false,
+  playbackReportingDialogOpen: false,
   featuresInitialized: false,
   darkMode: null,
+  selectedAction: null,
 })
 
 export async function init(auth) {
@@ -98,6 +100,7 @@ export function render() {
   <div class="">
     ${() => state.views[state.currentView]}
     ${() => state.connectionHelpDialogOpen ? connectionHelpDialog : null}
+    ${() => state.playbackReportingDialogOpen ? playbackReportingDialog : null}
   </div>
   `(onboardingElement)
 }
@@ -119,22 +122,16 @@ const viewStart = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">Hi there!</p>
-    <p class="">Before we can get started with your rewind, you'll have to log into your Jellyfin server.</p>
-    <p class="">Ideally, your server is reachable over the internet and via secure HTTPS, but even if not, there are ways to enjoy your Rewind.</p>
-    <p class="">Let's get started!</p>
-  </div>
 
-  <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
-    @click="${() => state.currentView = `server`}"
-  >
-    <span>Log In</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
-    </svg>
-  </button>
+    <p class="">Hi there!</p>
+    
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2023</span> will launch on <span class="text-white">December 31st, 2023</span> (if all goes well).</p>
+    <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
+    <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
+    
+    <p class="font-light text-base italic">If you're instead looking for Jellyfin Rewind 2022, I'm sorry to tell you that it's already closed. You can still <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases/tag/2022.0.1" target="_blank">download all the files of Jellyfin Rewind 2022 at GitHub</a>, if you really want to check it out, but please be aware that due to missing metadata, your generated stats will possibly <span class="font-semibold not-italic">not</span> be limited to 2022 only.
+
+  </div>
 
 </div>
 `
@@ -172,13 +169,79 @@ const connectionHelpDialog = html`
 </div>
 `
 
+const playbackReportingDialog = html`
+<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+  <div @click="${() => state.playbackReportingDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+    <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
+      <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
+        <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">Setting up Playback Reporting</h3>
+        <button @click="${() => state.playbackReportingDialogOpen = false}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="w-full h-full overflow-x-auto p-4">
+        <div class="flex flex-col items-start gap-2">
+          <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like 2023 only!<span></p>
+          <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This will result in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
+          <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? (You'll have to be logged in as an admin user.)</p>
+          ${() => state.server.url !== `` ? html`
+            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+            ` : html`
+            <button
+              class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]"
+              @click="${() => {
+                state.selectedAction = `openPluginsPage`
+                state.currentView = `server`
+                state.playbackReportingDialogOpen = false
+              }}">Open Plugins Page!</button>
+            `
+          }
+          <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
+          ${() => state.server.url !== `` ? html`
+            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Playback Reporting Settings!</a>
+            ` : html`
+            <button
+              class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]"
+              @click="${() => {
+                state.selectedAction = `openPlaybackReportingSettings`
+                state.currentView = `server`
+                state.playbackReportingDialogOpen = false
+              }}">Open Playback Reporting Settings!</button>
+            `
+          }
+          <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+          <p>I will try to offer a way to import 2022's Rewind data into Jellyfin Rewind 2023, so that more information can be used and the used data can be properly limited to the current year only.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`
+
 async function connect() {
   state.error = null
   state.server.url = document.querySelector(`#onboarding-server-url`).value
   try {
     state.server.users = await connectToServer(state.auth, state.server.url)
-    state.currentView = `user`
+    // state.currentView = `user`
+
+    state.playbackReportingDialogOpen = true
+    state.currentView = `start`
+
+    if (state.selectedAction) {
+      if (state.selectedAction === `openPluginsPage`) {
+        window.open(`${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`, `_blank`)
+      } else if (state.selectedAction === `openPlaybackReportingSettings`) {
+        window.open(`${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`, `_blank`)
+      }
+    }
+    
   } catch (err) {
+
     console.error(`Error while connecting to the server:`, err)
     state.error = html`
     <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
@@ -187,6 +250,14 @@ async function connect() {
       <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 dark:text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
     </div>
     `
+
+    // try anyway, in case of CORS issues but correct URL
+    if (state.selectedAction === `openPluginsPage`) {
+      window.open(`${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`, `_blank`)
+    } else if (state.selectedAction === `openPlaybackReportingSettings`) {
+      window.open(`${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`, `_blank`)
+    }
+
   }
 }
 
@@ -196,7 +267,8 @@ const viewServer = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">First, type in the web address (URL) of your Jellyfin server.</p>
+    <p class="">In order to open this page, you'll need to configure your Jellyfin server's URL:</p>
+    <p class="">Type in the web address (URL) of your Jellyfin server in the field below.</p>
     <p class="">If you don't know the URL, you can open your Jellyfin app, open the menu/sidebar and click on "Select Server". It should display your server's URL and you can easily copy it!</p>
   </div>
 
