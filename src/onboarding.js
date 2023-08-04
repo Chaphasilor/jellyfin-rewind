@@ -125,9 +125,9 @@ const viewStart = html`
 
     <p class="">Hi there!</p>
     
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2023</span> will launch on <span class="text-white">December 31st, 2023</span> (if all goes well).</p>
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-[#00A4DC] dark:text-white">Jellyfin Rewind 2023</span> will launch on <span class="text-[#00A4DC] dark:text-white">December 31st, 2023</span> (if all goes well).</p>
     <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
-    <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
+    <button class="self-center text-white font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
     
     <p class="font-light text-base italic">If you're instead looking for Jellyfin Rewind 2022, I'm sorry to tell you that it's already closed. You can still <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases/tag/2022.0.1" target="_blank">download all the files of Jellyfin Rewind 2022 at GitHub</a>, if you really want to check it out, but please be aware that due to missing metadata, your generated stats will possibly <span class="font-semibold not-italic">not</span> be limited to 2022 only.
 
