@@ -80,11 +80,19 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
     if (isNaN(playbackReportDuration)) {
       playbackReportDuration = 0
     }
-    const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000)
+    const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000) // get duration in seconds
     
-    if (playbackReportDuration > jellyfinItemDuration) {
+    if (playbackReportDuration > jellyfinItemDuration + 1) {
       console.debug(`Wrong duration for ${item.ItemId} (${item.ItemName}), adjusting from ${playbackReportDuration} to ${jellyfinItemDuration}`)
       playbackReportJSON.items[index].PlayDuration = jellyfinItemDuration
+      playbackReportJSON.items[index].FullySkipped = false
+      playbackReportJSON.items[index].PartiallySkipped = false
+    } else if (playbackReportDuration < (jellyfinItemDuration - 1) * 0.3) {
+      playbackReportJSON.items[index].FullySkipped = true
+      playbackReportJSON.items[index].PartiallySkipped = true
+    } else if (playbackReportDuration < (jellyfinItemDuration - 1) * 0.7) {
+      playbackReportJSON.items[index].FullySkipped = false
+      playbackReportJSON.items[index].PartiallySkipped = true
     }
 
   }
@@ -120,6 +128,8 @@ function indexPlaybackReport(playbackReportJSON) {
     const playInfo = {
       date: new Date(isoDate),
       duration: !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0,
+      wasFullSkip: item.FullySkipped,
+      wasPartialSkip: item.PartiallySkipped && !item.FullySkipped,
       client: item.ClientName,
       device: item.DeviceName,
       method: convertPlaybackMethod(item.PlaybackMethod),
@@ -130,11 +140,19 @@ function indexPlaybackReport(playbackReportJSON) {
         TotalDuration: !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0,
         TotalPlayCount: 1,
         Plays: [playInfo],
+        FullSkips: playInfo.wasFullSkip ? 1 : 0,
+        PartialSkips: playInfo.wasPartialSkip ? 1 : 0, 
       }
 
     } else {
       items[item.ItemId].TotalDuration += !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
       items[item.ItemId].TotalPlayCount += 1
+      if (playInfo.wasFullSkip) {
+        items[item.ItemId].FullSkips += 1
+      }
+      if (playInfo.wasPartialSkip) {
+        items[item.ItemId].PartialSkips += 1
+      }
       items[item.ItemId].Plays.push(playInfo)
     }
 
@@ -415,11 +433,15 @@ async function generateRewindReport(year, progressCallback = () => {}) {
 
   const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
   const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })
+  const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20 })
+  const topTracksByMostSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips.full`, limit: 20 })
   // const topTracksByLastPlayed = aggregate.getTopItems(allTopTrackInfo, { by: `lastPlayed`, limit: 20, dataSource: dataSource })
   
   jellyfinRewindReport.tracks[`duration`] = topTracksByDuration
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
   jellyfinRewindReport.tracks[`playCount`] = topTracksByPlayCount
+  jellyfinRewindReport.tracks[`leastSkipped`] = topTracksByLeastSkipped
+  jellyfinRewindReport.tracks[`mostSkipped`] = topTracksByMostSkipped
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${x.playCount.average} plays`).join(`\n`)
   // jellyfinRewindReport.tracks[`topTracksByLastPlayed`] = topTracksByLastPlayed
   // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)

@@ -1,15 +1,23 @@
 import { PrimaryImage, BackdropImage, Artist, Album, Track } from './types.js'
 
 export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
+  let missingPlaybackReportItems = 0
   const topTrackInfo = Object.values(itemInfo).map(item => {
+
+    try {
       
       const playbackReportItem = playbackReportJSON[item.Id]
       const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
+
+      if (!playbackReportItem) {
+        missingPlaybackReportItems += 1
+      }
 
       // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
       //   console.log(`item.ArtistItems:`, item.ArtistItems)
       //   // TODO figure out how to consolidate artists with the same name but different IDs
       // }
+      
       const track = new Track({
         name: item.Name,
         id: item.Id,
@@ -30,6 +38,12 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         }),
         year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
         duration: !isNaN(Math.round(item.RunTimeTicks / 10000000)) ? Math.round(item.RunTimeTicks / 10000000) : 0,
+        skips: {
+          partial: playbackReportItem?.PartialSkips || 0,
+          full: playbackReportItem?.FullSkips || 0,
+          total: (playbackReportItem?.PartialSkips || 0) + (playbackReportItem?.FullSkips || 0),
+          //TODO compare amount of skips with amount of plays for better data
+        },
         playCount: {
           jellyfin: item.UserData?.PlayCount || 0,
           // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
@@ -49,8 +63,16 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   
       return track
       
+    } catch (err) {
+
+      console.error(`Error while generating track info:`, err)
+      throw new Error(`Error while generating track info:`, err)
+      
+    }
+    
   })
   
+  console.log(`missingPlaybackReportItems:`, missingPlaybackReportItems)
   return topTrackInfo
 }
 
@@ -207,6 +229,9 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     acc.totalPlayDuration.jellyfin += cur.totalPlayDuration.jellyfin
     acc.totalPlayDuration.playbackReport += cur.totalPlayDuration.playbackReport
     acc.totalPlayDuration.average = Math.ceil((acc.totalPlayDuration.jellyfin + acc.totalPlayDuration.playbackReport)/2)
+    acc.totalSkips.partial += cur.skips?.partial || 0
+    acc.totalSkips.full += cur.skips?.full || 0
+    acc.totalSkips.total += cur.skips?.total || 0
     acc.uniqueTracks.add(cur.id)
     acc.uniqueAlbums.add(cur.albumBaseInfo?.id)
     acc.uniqueArtists.add(cur.artistsBaseInfo?.[0]?.id)
@@ -251,6 +276,11 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       jellyfin: 0,
       playbackReport: 0,
     },
+    totalSkips: {
+      partial: 0,
+      full: 0,
+      total: 0,
+    },
     uniqueTracks: new Set(),
     uniqueAlbums: new Set(),
     uniqueArtists: new Set(),
@@ -290,7 +320,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   return totalStats
 }
 
-export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource = `average` }) {
+export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limit = 25, dataSource = `average` }) {
   console.log(`itemInfo:`, itemInfo)
   let topItems
   if (!Array.isArray(itemInfo)) {
@@ -305,14 +335,44 @@ export function getTopItems(itemInfo, { by = `duration`, limit = 25, dataSource 
         let aDuration = 0, bDuration = 0;
         aDuration = a.totalPlayDuration[dataSource]
         bDuration = b.totalPlayDuration[dataSource]
-        return bDuration - aDuration
+        const result = bDuration - aDuration
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
       } else if (by === `playCount`) {
         let aPlayCount = 0, bPlayCount = 0;
         aPlayCount = a.playCount[dataSource]
         bPlayCount = b.playCount[dataSource]
-        return bPlayCount - aPlayCount
+        const result = bPlayCount - aPlayCount
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
       } else if (by === `lastPlayed`) {
-        return b.lastPlayed - a.lastPlayed
+        const result = b.lastPlayed - a.lastPlayed
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
+      } else if (by === `skips`) {
+        const result = b.skips.total - a.skips.total
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
+      } else if (by === `skips.partial`) {
+        const result = b.skips.partial - a.skips.partial
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
+      } else if (by === `skips.full`) {
+        const result = b.skips.full - a.skips.full
+        if (lowToHigh) {
+          return result * -1
+        }
+        return result
       }
     })
   // console.log(`topItems[0]:`, JSON.stringify(topItems[0]))
