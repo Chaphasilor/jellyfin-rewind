@@ -1,6 +1,7 @@
 import { reactive, watch, html, } from '@arrow-js/core'
 
 import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind } from './setup';
+import { getFeatureDelta, importRewindReport } from './delta';
 
 export const state = reactive({
   currentView: `start`,
@@ -18,6 +19,7 @@ export const state = reactive({
   },
   rewindGenerating: false,
   rewindReport: null,
+  oldReport: null,
   staleReport: false,
   progress: 0,
   auth: null,
@@ -36,6 +38,7 @@ export async function init(auth) {
     server: viewServer,
     user: viewUser,
     login: viewLogin,
+    importReport: viewImportReport,
     load: viewLoad,
     revisit: viewRevisit,
     rewindGenerationError: viewRewindGenerationError,
@@ -321,7 +324,7 @@ const viewUser = html`
             @click="${() => {
               state.server.selectedUser = user
               state.server.loginType = `password`
-              state.currentView = `login`
+              state.currentView = `importReport`
             }}"
           >
             <img
@@ -458,6 +461,69 @@ const viewLogin = html`
 </div>
 `
 
+const viewImportReport = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+    <p class="">You can import last year's Jellyfin Rewind report.</p>
+    <p class="">This will give you more (reliable) statistics about your listening activity.</p>
+    <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via Reddit so that I can look into it :)</p>
+  </div>
+
+  ${() => progressBar}
+
+  <label for="import-file" class="flex flex-col gap-1 mt-10 w-5/6 mx-auto">Import Last Year's Report</label>
+  <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
+    console.info(`Importing file...`)
+    try {
+      state.oldReport = await importRewindReport(e.target.files[0])
+      console.log(`state.oldReport:`, state.oldReport)
+      // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
+      // console.log(`featureDelta:`, featureDelta)
+    } catch (err) {
+      console.error(`Error while importing rewind report:`, err)
+    }
+  }}">
+  
+  ${() =>
+    state.rewindReport ? html`
+    <!-- TODO alert if no old report was selected -->
+    <button
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+      @click="${() => state.currentView = `load`}"
+    >
+      <span>Generate Rewind</span>
+      <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+        <circle cx="15" cy="9" r="1"></circle>
+      </svg> -->
+    </button>
+    ` : html`<br>`
+  }
+
+  <button
+  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
+    @click="${() => {
+      state.auth.destroySession()
+      state.currentView = `start`
+    }}"
+  >
+    <span>Log out</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
+      <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
+    </svg>
+  </button>
+
+</div>
+`
+
+
 const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
   <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-icon-transparent.svg" />
@@ -488,9 +554,12 @@ async function generateReport() {
   try {
     state.rewindGenerating = true
     state.progress = 0
-    state.rewindReport = await generateRewindReport((progress) => {
-      smoothSeek(state.progress, progress, 750)
-      // state.progress = progress
+    state.rewindReport = await generateRewindReport({
+      progressCallback: (progress) => {
+        smoothSeek(state.progress, progress, 750)
+        // state.progress = progress
+      },
+      oldReport: state.oldReport,
     })
     state.rewindGenerating = false
   } catch (err) {
@@ -540,6 +609,7 @@ const viewLoad = html`
         <circle cx="15" cy="9" r="1"></circle>
       </svg>
     </button>
+
     ` : html`<br>`
   }
 

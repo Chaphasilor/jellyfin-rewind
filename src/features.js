@@ -916,7 +916,9 @@ function showIncompleteReportOverlay(onClose = () => {}) {
           button.disabled = true
           span.innerHTML = `Generating...`
           svg.classList.add(`animate-spin`)
-          window.generateRewindReport(state.rewindReport.year).then((rewindReportData) => {
+          window.generateRewindReport({
+            year: state.rewindReport.year,
+          }).then((rewindReportData) => {
 
             span.innerHTML = `Regenerate and Download Report`
             svg.classList.remove(`animate-spin`)
