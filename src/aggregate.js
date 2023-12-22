@@ -2,53 +2,53 @@ import { PrimaryImage, BackdropImage, Artist, Album, Track } from './types.js'
 
 export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
   const topTrackInfo = Object.values(itemInfo).map(item => {
+      
+      const playbackReportItem = playbackReportJSON[item.Id]
+      const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
 
-    const playbackReportItem = playbackReportJSON[item.Id]
-    const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(x => Math.floor(Number(x.duration)) > 0)?.length
-
-    // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
-    //   console.log(`item.ArtistItems:`, item.ArtistItems)
-    //   // TODO figure out how to consolidate artists with the same name but different IDs
-    // }
-    const track = new Track({
-      name: item.Name,
-      id: item.Id,
-      artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name || `Unknown Artist`})),
-      albumBaseInfo: {
-        id: item.AlbumId, 
-        name: item.Album,
-        albumArtistBaseInfo: {
-          id: item.AlbumArtists?.[0]?.Id || ``,
-          name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
+      // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
+      //   console.log(`item.ArtistItems:`, item.ArtistItems)
+      //   // TODO figure out how to consolidate artists with the same name but different IDs
+      // }
+      const track = new Track({
+        name: item.Name,
+        id: item.Id,
+        artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name || `Unknown Artist`})),
+        albumBaseInfo: {
+          id: item.AlbumId, 
+          name: item.Album,
+          albumArtistBaseInfo: {
+            id: item.AlbumArtists?.[0]?.Id || ``,
+            name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
+          },
         },
-      },
-      genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
-      image: new PrimaryImage({
-        parentItemId: item.ImageTags?.Primary ? item.Id : item.AlbumId,
-        primaryTag: item.ImageTags?.Primary ? item.ImageTags.Primary : item.AlbumPrimaryImageTag,
-        blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags?.Primary],
-      }),
-      year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
-      duration: !isNaN(Math.round(item.RunTimeTicks / 10000000)) ? Math.round(item.RunTimeTicks / 10000000) : 0,
-      playCount: {
-        jellyfin: item.UserData?.PlayCount || 0,
-        // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
-        playbackReport: adjustedPlaybackReportPlayCount || 0,
-        average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
-      },
-      plays: playbackReportItem?.Plays || [],
-      mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || null,
-      lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
-      totalPlayDuration: {
-        jellyfin: !isNaN(Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) ? Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)) : 0, // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
-        playbackReport: !isNaN(Number(playbackReportItem?.TotalDuration) / 60 || 0) ? (Number(playbackReportItem?.TotalDuration) / 60 || 0) : 0, // convert to minutes
-        average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
-      },
-      isFavorite: item.UserData?.IsFavorite,
-    })
-
-    return track
-
+        genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
+        image: new PrimaryImage({
+          parentItemId: item.ImageTags?.Primary ? item.Id : item.AlbumId,
+          primaryTag: item.ImageTags?.Primary ? item.ImageTags.Primary : item.AlbumPrimaryImageTag,
+          blurhash: item.ImageBlurHashes?.Primary?.[item.ImageTags?.Primary],
+        }),
+        year: item.PremiereDate ? new Date(item.PremiereDate).getFullYear() : null,
+        duration: !isNaN(Math.round(item.RunTimeTicks / 10000000)) ? Math.round(item.RunTimeTicks / 10000000) : 0,
+        playCount: {
+          jellyfin: item.UserData?.PlayCount || 0,
+          // playbackReport: Number(playbackReportItem?.TotalPlayCount) || 0,
+          playbackReport: adjustedPlaybackReportPlayCount || 0,
+          average: Math.ceil(((item.UserData?.PlayCount || 0) + Number(adjustedPlaybackReportPlayCount || 0))/2),
+        },
+        plays: playbackReportItem?.Plays || [],
+        mostSuccessivePlays: playbackReportItem?.MostSuccessivePlays || null,
+        lastPlayed: item.UserData?.LastPlayedDate ? new Date(item.UserData.LastPlayedDate) : new Date(0),
+        totalPlayDuration: {
+          jellyfin: !isNaN(Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) ? Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60)) : 0, // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
+          playbackReport: !isNaN(Number(playbackReportItem?.TotalDuration) / 60 || 0) ? (Number(playbackReportItem?.TotalDuration) / 60 || 0) : 0, // convert to minutes
+          average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
+        },
+        isFavorite: item.UserData?.IsFavorite,
+      })
+  
+      return track
+      
   })
   
   return topTrackInfo
@@ -282,6 +282,10 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     totalStats.totalPlayDuration.playbackReport += Number(item.PlayDuration) / 60
     totalStats.totalPlayDuration.average = Math.ceil((totalStats.totalPlayDuration.jellyfin + totalStats.totalPlayDuration.playbackReport)/2)
   })
+
+  totalStats.uniqueTracks = totalStats.uniqueTracks.size
+  totalStats.uniqueAlbums = totalStats.uniqueAlbums.size
+  totalStats.uniqueArtists = totalStats.uniqueArtists.size
   
   return totalStats
 }

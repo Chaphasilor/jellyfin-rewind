@@ -125,13 +125,22 @@ const viewStart = html`
 
     <p class="">Hi there!</p>
     
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-[#00A4DC] dark:text-white">Jellyfin Rewind 2023</span> will launch on <span class="text-[#00A4DC] dark:text-white">December 31st, 2023</span> (if all goes well).</p>
-    <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
-    <button class="self-center text-white font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
-    
-    <p class="font-light text-base italic">If you're instead looking for Jellyfin Rewind 2022, I'm sorry to tell you that it's already closed. You can still <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases/tag/2022.0.1" target="_blank">download all the files of Jellyfin Rewind 2022 at GitHub</a>, if you really want to check it out, but please be aware that due to missing metadata, your generated stats will possibly <span class="font-semibold not-italic">not</span> be limited to 2022 only.
+    <p class="">Before we can get started with your rewind, you'll have to log into your Jellyfin server.</p>
+    <p class="">Ideally, your server is reachable over the internet and via secure HTTPS, but even if not, there are ways to enjoy your Rewind.</p>
+    <p class="">Let's get started!</p>
 
   </div>
+
+  <button
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.currentView = `server`}"
+  >
+    <span>Log In</span>
+    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+      <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
+    </svg>
+  </button>
 
 </div>
 `
@@ -227,19 +236,7 @@ async function connect() {
   state.server.url = document.querySelector(`#onboarding-server-url`).value
   try {
     state.server.users = await connectToServer(state.auth, state.server.url)
-    // state.currentView = `user`
-
-    state.playbackReportingDialogOpen = true
-    state.currentView = `start`
-
-    if (state.selectedAction) {
-      if (state.selectedAction === `openPluginsPage`) {
-        window.open(`${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`, `_blank`)
-      } else if (state.selectedAction === `openPlaybackReportingSettings`) {
-        window.open(`${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`, `_blank`)
-      }
-    }
-    
+    state.currentView = `user`
   } catch (err) {
 
     console.error(`Error while connecting to the server:`, err)
@@ -370,7 +367,11 @@ async function login()  {
     state.currentView = `load`
   } catch (err) {
     console.error(`Error while logging in:`, err)
-    //TODO error handling
+    state.error = html`
+    <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
+      <p class="w-full text-center">${err.toString()}</p>
+    </div>
+    `
   }
 }
 
@@ -381,7 +382,11 @@ async function loginAuthToken()  {
     state.currentView = `load`
   } catch (err) {
     console.error(`Error while logging in:`, err)
-    //TODO error handling
+    state.error = html`
+    <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
+      <p class="w-full text-center">${err.toString()}</p>
+    </div>
+    `
   }
 }
 
@@ -447,6 +452,8 @@ const viewLogin = html`
       <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
     </svg>
   </button>
+
+  ${() => state.error}
 
 </div>
 `

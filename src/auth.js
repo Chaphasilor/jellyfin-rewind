@@ -100,11 +100,14 @@ export default class Auth {
       }),
     })
 
-    const json = await response.json()
-    
     if (response.status !== 200) {
-      throw new Error(`Authentication failed: ${response.json()}`);
+      if (response.status === 401) {
+        throw new Error(`Login failed. Wrong password?`)
+      }
+      throw new Error(`Authentication failed: ${await response.text()}`);
     }
+    
+    const json = await response.json()
     
     this.config.user = {
       token: json.AccessToken,

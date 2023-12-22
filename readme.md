@@ -24,7 +24,7 @@ Therefore, **if you're unsure what your Jellyfin server is using, simply use the
 
 **Please, please, please download your Rewind report at the end!**
 
-Jellyfin's statistics aren't very exhaustive, and any additional data could help offer you more insights during next year's Rewind! Especially if you don't have the *Playback Reporting* plugin installed, this year's Rewind report might come in very handy, so keep it save!
+Jellyfin's statistics aren't very exhaustive, and any additional data could help offer you more insights during next year's Rewind! Especially if you don't have the *Playback Reporting* plugin installed, this year's Rewind report might come in very handy, so keep it safe!
 
 If something doesn't work and you can't download the data, I'll be happy to help you resolve the issue.
 
@@ -44,8 +44,6 @@ For next year, I might release a separate plugin that can use your Jellyfin serv
 If you know something about web development, are a designer of some sorts, or have experience (or are curious about) developing Jellyfin plugins, I'd love to hear from you! There's so much I want to implement for next year's Jellyfin Rewind, and I need your help to bring all these ideas to life!
 
 I had many more features planned for this year, but simply didn't have the time. I originally planned to launch back in November, and that obviously didn't work out :)
-
-
 
 Thanks to everyone who uses Jellyfin Rewind, I sincerely hope you enjoyed it as much as I did!  
 See you next year!!!

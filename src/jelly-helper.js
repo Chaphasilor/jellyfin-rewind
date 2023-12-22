@@ -11,6 +11,8 @@ export default class JellyHelper {
     if (!Array.isArray(elements)) {
       elements = [elements];
     }
+
+    elements = elements.filter(element => !!element)
     
     const blurhash = imageInfo?.blurhash
     const primaryTag = imageInfo?.primaryTag

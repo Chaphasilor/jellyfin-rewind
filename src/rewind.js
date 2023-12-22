@@ -138,6 +138,7 @@ function indexPlaybackReport(playbackReportJSON) {
       items[item.ItemId].Plays.push(playInfo)
     }
 
+    // calculate successive plays
     if (!currentSuccessivePlays.itemId || currentSuccessivePlays.itemId !== item.ItemId) {
       if (currentSuccessivePlays.itemId) {
         items[currentSuccessivePlays.itemId].MostSuccessivePlays = {
@@ -379,12 +380,7 @@ async function generateRewindReport(year, progressCallback = () => {}) {
 
   // check if at least 3 months of playback report data is available
   jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`] = aggregate.generateTotalPlaybackDurationByMonth(indexedPlaybackReport)
-  if (!Object.values(jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`]).reduce((acc, cur) => {
-    if (cur > 0) {
-      return acc + 1
-    }
-    return acc
-  }, 0) < 12) {
+  if (Object.values(jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`]).filter(month => month > 0).length < 12) {
     playbackReportComplete = false
   }
   console.log(`jellyfinRewindReport.generalStats['totalPlaybackDurationByMonth']:`, jellyfinRewindReport.generalStats[`totalPlaybackDurationByMonth`])
@@ -408,9 +404,9 @@ async function generateRewindReport(year, progressCallback = () => {}) {
     average: Number((totalStats.totalPlayDuration[`average`] / 60).toFixed(1)),
     jellyfin: Number((totalStats.totalPlayDuration[`jellyfin`] / 60).toFixed(1)),
   }
-  jellyfinRewindReport.generalStats[`uniqueTracksPlayed`] = totalStats.uniqueTracks.size
-  jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums.size
-  jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists.size
+  jellyfinRewindReport.generalStats[`uniqueTracksPlayed`] = totalStats.uniqueTracks
+  jellyfinRewindReport.generalStats[`uniqueAlbumsPlayed`] = totalStats.uniqueAlbums
+  jellyfinRewindReport.generalStats[`uniqueArtistsPlayed`] = totalStats.uniqueArtists
 
   jellyfinRewindReport.generalStats[`playbackMethods`] = totalStats.playbackMethods
   jellyfinRewindReport.generalStats[`locations`] = totalStats.locations
@@ -464,9 +460,7 @@ async function generateRewindReport(year, progressCallback = () => {}) {
   // jellyfinRewindReport.genres[`topGenresByLastPlayed`] = topGenresByLastPlayed
   // .map(x => `${x.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
-  if (!playbackReportComplete) {
-    jellyfinRewindReport.playbackReportComplete = false
-  }
+  jellyfinRewindReport.playbackReportComplete = playbackReportComplete
   
   console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
 

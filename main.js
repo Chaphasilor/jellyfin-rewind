@@ -59,6 +59,7 @@ window.onload = async () => {
 
   window.jellyfinRewind = jellyfinRewind
   
+  console.log(`target year:`, import.meta.env.VITE_TARGET_YEAR)
   console.log(`commit hash:`, __COMMITHASH__)
 
   if (jellyfinRewind.auth.restoreSession()) {
