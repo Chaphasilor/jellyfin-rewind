@@ -251,6 +251,8 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       } else {
         acc.locations.combinations[`${play.device} - ${play.client}`].playCount += 1
       }
+
+      acc.totalMusicDays.add(play.date?.toLocaleDateString())
     })
 
     if (cur.mostSuccessivePlays && (!acc.mostSuccessivePlays || cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount)) {
@@ -302,6 +304,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       combinations: {},
     },
     mostSuccessivePlays: null,
+    totalMusicDays: new Set(),
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
@@ -316,6 +319,8 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   totalStats.uniqueTracks = totalStats.uniqueTracks.size
   totalStats.uniqueAlbums = totalStats.uniqueAlbums.size
   totalStats.uniqueArtists = totalStats.uniqueArtists.size
+
+  totalStats.totalMusicDays = totalStats.totalMusicDays.size
   
   return totalStats
 }

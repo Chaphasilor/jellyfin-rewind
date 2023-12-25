@@ -1,5 +1,6 @@
 import { reactive, watch, html, } from '@arrow-js/core'
 import Chart from 'chart.js/auto';
+import anime from 'animejs/lib/anime.es.js';
 
 const mainElement = document.querySelector('main');
 
@@ -17,6 +18,7 @@ export const state = reactive({
   pollCanvas: false,
   extraFeatures: {
     totalPlaytimeGraph: true,
+    totalMusicDays: true,
     leastSkippedTracks: true,
     mostSkippedTracks: true,
     mostSuccessivePlays: true,
@@ -35,6 +37,10 @@ export const state = reactive({
 })
 window.state = state
 
+const animators = reactive({
+  totalMusicDays: 0,
+})
+
 state.featureSideEffects = {
   0: {
 
@@ -47,41 +53,58 @@ state.featureSideEffects = {
     leave: destroyPlayTimeByMonthChart,
   },
   2: {
+    enter: () => {
+      if (state.extraFeatures.totalMusicDays) {
+        console.log(`animating totalMusicDays`)
+        anime({
+          targets: animators,
+          totalMusicDays: state.rewindReport.generalStats.totalMusicDays,
+          round: 1,
+          easing: 'easeInOutExpo',
+          delay: 750,
+          duration: 3000,
+        });
+      }
+      // showPlaytimeByMonthChart()
+    },
+    // leave: destroyPlayTimeByMonthChart,
+  },
+  3: {
     load: loadTopTrackMedia,
     enter: playTopTrack,
   },
-  3: {
+  4: {
     load: loadTopTracksMedia,
     enter: playTopTracks,
   },
-  4: {
+  5: {
     load: loadTopArtistMedia,
     enter: playTopArtist,
   },
-  5: {
+  6: {
     load: loadTopArtistsMedia,
     enter: playTopArtists,
   },
-  6: {
+  7: {
     load: loadTopAlbumMedia,
     enter: playTopAlbum,
   },
-  7: {
+  8: {
     load: loadTopAlbumsMedia,
     enter: playTopAlbums,
   },
-  8: {
+  9: {
     enter: playTopGenres,
   },
-  9: {
+  10: {
     load: loadLeastSkippedTracksMedia,
     enter: playLeastSkippedTracks,
   },
-  10: {
+  11: {
     load: loadMostSkippedTracksMedia,
     enter: playMostSkippedTracks,
   },
-  11: {
+  12: {
     load: loadMostSuccessivePlaysTrackMedia,
     enter: playMostSuccessivePlaysTrack,
   },
@@ -126,12 +149,12 @@ state.features = [
         content: html`
           <div class="flex flex-col items-start gap-2">
             <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport.year} only!<span></p>
-            <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This will results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
+            <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
             <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a> 
             <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a> 
-            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">the Jellyfin documentation</a>.</p>
             <p>So, please treat all of this information with a grain of salt. You can take a look at the settings in order to choose which data will be used, but any information that needs to be interpolated will have a negative influence on the quality of these stats.</p>
             <p>I will try to offer a way to import this year's Rewind data into next year's Jellyfin Rewind, so that more information can be used and the used data can be properly limited to the current year only. Because of this, please <span class="font-semibold">make sure to download a copy of your Rewind data at the end and store it until next year!</span></p>
           </div>
@@ -162,6 +185,40 @@ state.features = [
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M12 8h.01"></path>
+                <path d="M11 12h1v4h1"></path>
+                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+              </svg>
+              <span>Learn why</span>
+            </button>
+          </div>
+        `}
+      </div>
+    </div>
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
+  // days listened to music
+  buildFeature(`days listened to music`, html`
+    <div class="text-center">
+      <div class="mt-32 -rotate-6 font-quicksand text-sky-500 text-8xl"><span class="font-quicksand-bold">${() => state.extraFeatures.totalMusicDays ? showAsNumber(animators.totalMusicDays.toFixed(0)) : `???`}</span></div>
+
+      <div class="mt-24 w-full px-10 flex flex-col items-center gap-6">
+        <div><span class="font-semibold text-xl">That's on how many days you listened to music through Jellyfin this year.</div>
+        ${() => state.extraFeatures.totalMusicDays ? (
+          state.rewindReport.generalStats.totalMusicDays < 364 ? html`
+            <div><span class="font-semibold absolute bottom-20 left-0 w-full text-center px-10">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
+              ` : html`
+              <div><span class="font-semibold absolute bottom-20 left-0 w-full text-center px-10">Good news: next year you can get one additional day!</div>
+            `) : null
+        }
+      </div>
+
+      <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
+        ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
+          <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
+            <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
             <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
@@ -965,7 +1022,7 @@ function showOverlayFeatureUnavailableMissingPlaybackReporting() {
         <p>This feature depends on the 'Playback Reporting' plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
         <p>You can install the Playback Reporting plugin into your Jellyfin server by clicking the button below. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
         <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
-        <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
+        <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">the Jellyfin documentation</a>.</p>
       </div>
     `,
   })
@@ -1262,6 +1319,7 @@ export function init(rewindReportData, jellyHelper, auth) {
   }
 
   state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable && !state.rewindReport.playbackReportDataMissing
+  state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable
 
   console.log(`dataSource:`, state.settings.dataSource)
 
@@ -1274,6 +1332,7 @@ export function init(rewindReportData, jellyHelper, auth) {
   if (state.settings.dataSource === `jellyfin`) {
     state.extraFeatures.leastSkippedTracks = false
     state.extraFeatures.mostSkippedTracks = false
+    state.extraFeatures.totalMusicDays = false
   }
   
   if (!state.rewindReport.generalStats.mostSuccessivePlays) {

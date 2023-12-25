@@ -198,7 +198,7 @@ const playbackReportingDialog = html`
       <div class="w-full h-full overflow-x-auto p-4">
         <div class="flex flex-col items-start gap-2">
           <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like 2023 only!<span></p>
-          <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This will result in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
+          <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
           <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? (You'll have to be logged in as an admin user.)</p>
           ${() => state.server.url !== `` ? html`
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
@@ -505,20 +505,7 @@ const viewImportReport = html`
     ` : html`<br>`
   }
 
-  <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
-    @click="${() => {
-      state.auth.destroySession()
-      state.currentView = `start`
-    }}"
-  >
-    <span>Log out</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
-      <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
-    </svg>
-  </button>
+  ${() => buttonLogOut}
 
 </div>
 `
@@ -613,22 +600,26 @@ const viewLoad = html`
     ` : html`<br>`
   }
 
-  <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
-    @click="${() => {
-      state.auth.destroySession()
-      state.currentView = `start`
-    }}"
-  >
-    <span>Log out</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
-      <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
-    </svg>
-  </button>
+  ${() => buttonLogOut}
 
 </div>
+`
+
+const buttonLogOut = html`
+<button
+  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
+  @click="${() => {
+    state.auth.destroySession()
+    state.currentView = `start`
+  }}"
+>
+  <span>Log out</span>
+  <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+    <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
+    <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
+  </svg>
+</button>
 `
 
 const viewRevisit = html`
@@ -665,7 +656,7 @@ const viewRevisit = html`
   <button
     class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-400 hover:bg-orange-500 opacity-80 text-white font-medium mt-32 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
-      state.currentView = `load` 
+      state.currentView = `importReport` 
     }}"
   >
     <span>Regenerate Rewind</span>
@@ -676,20 +667,7 @@ const viewRevisit = html`
     </svg>
   </button>
 
-  <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-500 hover:bg-red-600 opacity-80 text-white font-medium mt-6 flex flex-row gap-3 items-center mx-auto"
-    @click="${() => {
-      state.auth.destroySession()
-      state.currentView = `start`
-    }}"
-  >
-    <span>Log out</span>
-    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"></path>
-      <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
-    </svg>
-  </button>
+  ${() => buttonLogOut}
 
 </div>
 `
