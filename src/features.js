@@ -215,8 +215,8 @@ state.features = [
         }
       </div>
 
-      <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
-        ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
+      ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
+        <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
           <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
             <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
             <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
@@ -229,8 +229,8 @@ state.features = [
               <span>Learn why</span>
             </button>
           </div>
+        </div>
         `}
-      </div>
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top song
@@ -880,7 +880,7 @@ state.features = [
     </button>
 
     <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 text-gray-400 mt-3 w-5/6 mx-auto">
-      <p class="">and <span class="font-bold">store it until next year</span> because it might help to show you even more insights next time around!<br>Also, it could help to generate more accurate data in case you still don't have the Playback Reporting plugin installed next year.</p>
+      <p class="">and <span class="font-bold text-orange-600">store it until next year</span> because it might help to show you even more insights next time around!<br>Also, it could help to generate more accurate data in case you still don't have the Playback Reporting plugin installed next year.</p>
       <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
       <p class="relative">Thanks for using Jellyfin Rewind. See you next year &lt;3 <span class="absolute italic right-0 bottom-0">- Chaphasilor</span></p>
     </div>
@@ -925,7 +925,7 @@ state.features = [
                 </button>
 
                 <button
-                  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+                  class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 dark:bg-orange-600 dark:hover:bg-orange-700 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
                   @click="${stopPropagation(() => {
                     closeJellyfinRewind()
                   })}"
