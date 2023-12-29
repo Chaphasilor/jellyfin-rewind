@@ -483,6 +483,7 @@ async function generateRewindReport({
 
     jellyfinRewindReport.generalStats[`mostSuccessivePlays`] = totalStats.mostSuccessivePlays
     jellyfinRewindReport.generalStats[`totalMusicDays`] = totalStats.totalMusicDays
+    jellyfinRewindReport.generalStats[`minutesPerDay`] = totalStats.minutesPerDay
 
     const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
     const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })

@@ -208,12 +208,21 @@ state.features = [
         <div><span class="font-semibold text-xl">That's on how many days you listened to music through Jellyfin this year.</div>
         ${() => state.extraFeatures.totalMusicDays ? (
           state.rewindReport.generalStats.totalMusicDays < 364 ? html`
-            <div><span class="font-semibold absolute bottom-20 left-0 w-full text-center px-10">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
+            <div><span class="font-semibold text-sm text-center">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
               ` : html`
-              <div><span class="font-semibold absolute bottom-20 left-0 w-full text-center px-10">Good news: next year you can get one additional day!</div>
+              <div><span class="font-semibold text-sm text-center">Good news: next year you can get one additional day!</div>
             `) : null
         }
       </div>
+
+      ${() => state.extraFeatures.totalMusicDays ? html`
+        <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
+          <div><span class="font-semibold text-xl">You listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
+          <div><span class="font-semibold text-xl">That's <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0).toFixed(2))}</span> hours or <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0 / 24.0 * 100.0).toFixed(1))}%</span> of a day.</div>
+          <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care about accuracy)</div>
+        </div>
+        ` : null
+      }
 
       ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
         <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
@@ -1526,8 +1535,9 @@ watch(() => {
 function next() {
   console.log(`next feature`)
   if (state.currentFeature >= state.features.length - 1) {
-    state.currentFeature = 0
-    closeFeatures()
+    // nop, use buttons instead
+    // state.currentFeature = 0
+    // closeFeatures()
   } else {
     state.currentFeature++;
   }

@@ -270,7 +270,7 @@ function init() {
         staleReport = true
       }
       // check if the report is for the previous year and it's after February
-      if (rewindReportData.jellyfinRewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+      if (rewindReportData.jellyfinRewindReport.year < new Date().getFullYear() && new Date().getMonth() > 1) {
         staleReport = true
       }
       

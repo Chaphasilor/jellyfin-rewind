@@ -253,6 +253,12 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
       }
 
       acc.totalMusicDays.add(play.date?.toLocaleDateString())
+
+      if (!acc.minutesPerDay[play.date?.toLocaleDateString()]) {
+        acc.minutesPerDay[play.date?.toLocaleDateString()] = play.duration / 60.0 // convert to minutes
+      } else {
+        acc.minutesPerDay[play.date?.toLocaleDateString()] += play.duration / 60.0 // convert to minutes
+      }
     })
 
     if (cur.mostSuccessivePlays && (!acc.mostSuccessivePlays || cur.mostSuccessivePlays.playCount > acc.mostSuccessivePlays.playCount)) {
@@ -305,6 +311,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
     },
     mostSuccessivePlays: null,
     totalMusicDays: new Set(),
+    minutesPerDay: {},
   })
 
   console.log(`enhancedPlaybackReport:`, enhancedPlaybackReport)
@@ -321,6 +328,11 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   totalStats.uniqueArtists = totalStats.uniqueArtists.size
 
   totalStats.totalMusicDays = totalStats.totalMusicDays.size
+
+  totalStats.minutesPerDay = {
+    mean: Object.values(totalStats.minutesPerDay).reduce((acc, cur) => acc + cur, 0) / Object.values(totalStats.minutesPerDay).length,
+    median: Object.values(totalStats.minutesPerDay).length % 2 === 0 ? (Object.values(totalStats.minutesPerDay)[Object.values(totalStats.minutesPerDay).length / 2] + Object.values(totalStats.minutesPerDay)[Object.values(totalStats.minutesPerDay).length / 2 - 1]) / 2 : Object.values(totalStats.minutesPerDay)[Math.floor(Object.values(totalStats.minutesPerDay).length / 2)],
+  }
   
   return totalStats
 }
