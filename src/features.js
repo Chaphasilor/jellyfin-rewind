@@ -736,7 +736,7 @@ state.features = [
    // most skipped
   buildFeature(`most skipped`, html`
     <div class="text-center">
-      <h2 class="text-2xl mt-5">Sick of it:<br>Songs you always skipped</h2>
+      <h2 class="text-2xl mt-5">Sick of it:<br>Songs you skipped the most</h2>
       ${() => !state.extraFeatures.mostSkippedTracks ? html`
         <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
           <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
@@ -919,7 +919,7 @@ state.features = [
     </button>
 
     <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 text-gray-400 mt-3 w-5/6 mx-auto">
-      <p class="">and <span class="font-bold text-orange-600">store it until next year</span> because it might help to show you even more insights next time around!<br>Also, it could help to generate more accurate data in case you still don't have the Playback Reporting plugin installed next year.</p>
+      <p class="">and <span class="font-bold text-orange-600">store it until next year</span> because it might help to show you even more insights next time around!</p>
       <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
       <p class="relative">Thanks for using Jellyfin Rewind. See you next year &lt;3 <span class="absolute italic right-0 bottom-0">- Chaphasilor</span></p>
     </div>

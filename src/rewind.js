@@ -489,8 +489,8 @@ async function generateRewindReport({
 
     const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
     const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })
-    const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20 })
-    const topTracksByMostSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips.full`, limit: 20 })
+    const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20, dataSource: dataSource })
+    const topTracksByMostSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips.full`, limit: 20, dataSource: dataSource })
     // const topTracksByLastPlayed = aggregate.getTopItems(allTopTrackInfo, { by: `lastPlayed`, limit: 20, dataSource: dataSource })
     
     jellyfinRewindReport.tracks[`duration`] = topTracksByDuration

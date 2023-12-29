@@ -43,6 +43,11 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           full: playbackReportItem?.FullSkips || 0,
           total: (playbackReportItem?.PartialSkips || 0) + (playbackReportItem?.FullSkips || 0),
           //TODO compare amount of skips with amount of plays for better data
+          score: {
+            jellyfin: 0,
+            playbackReport: 0,
+            average: 0,
+          },
         },
         playCount: {
           jellyfin: item.UserData?.PlayCount || 0,
@@ -60,6 +65,10 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         },
         isFavorite: item.UserData?.IsFavorite,
       })
+
+      track.skips.score.jellyfin = (track.skips.total + 1) * 2 / track.playCount.jellyfin
+      track.skips.score.playbackReport = (track.skips.total + 1) * 2 / track.playCount.playbackReport
+      track.skips.score.average = (track.skips.total + 1) * 2 / track.playCount.average
   
       return track
       
@@ -425,10 +434,14 @@ export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limi
         }
         return result
       } else if (by === `skips`) {
-        const result = b.skips.total - a.skips.total
-        if (lowToHigh) {
-          return result * -1
-        }
+        let result = b.playCount[dataSource] <= 2 ?
+            (a.playCount[dataSource] <= 2 ? 
+              0 :
+              -1
+            ) :
+            (a.playCount[dataSource] <= 2 ?
+              1 :
+              lowToHigh ? (a.skips.score[dataSource] - b.skips.score[dataSource]) : (b.skips.score[dataSource] - a.skips.score[dataSource]))
         return result
       } else if (by === `skips.partial`) {
         const result = b.skips.partial - a.skips.partial
