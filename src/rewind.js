@@ -485,6 +485,8 @@ async function generateRewindReport({
     jellyfinRewindReport.generalStats[`totalMusicDays`] = totalStats.totalMusicDays
     jellyfinRewindReport.generalStats[`minutesPerDay`] = totalStats.minutesPerDay
 
+    jellyfinRewindReport.libraryStats = totalStats.libraryStats
+
     const topTracksByDuration = aggregate.getTopItems(allTopTrackInfo, { by: `duration`, limit: 20, dataSource: dataSource })
     const topTracksByPlayCount = aggregate.getTopItems(allTopTrackInfo, { by: `playCount`, limit: 20, dataSource: dataSource })
     const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20 })

@@ -267,7 +267,6 @@ const viewServer = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">In order to open this page, you'll need to configure your Jellyfin server's URL:</p>
     <p class="">Type in the web address (URL) of your Jellyfin server in the field below.</p>
     <p class="">If you don't know the URL, you can open your Jellyfin app, open the menu/sidebar and click on "Select Server". It should display your server's URL and you can easily copy it!</p>
   </div>
@@ -324,7 +323,7 @@ const viewUser = html`
             @click="${() => {
               state.server.selectedUser = user
               state.server.loginType = `password`
-              state.currentView = `importReport`
+              state.currentView = `login`
             }}"
           >
             <img

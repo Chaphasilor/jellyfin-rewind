@@ -53,6 +53,14 @@ state.featureSideEffects = {
     leave: destroyPlayTimeByMonthChart,
   },
   2: {
+    load: loadTopTrackMedia,
+    enter: playTopTrack,
+  },
+  3: {
+    load: loadTopTracksMedia,
+    enter: playTopTracks,
+  },
+  4: {
     enter: () => {
       if (state.extraFeatures.totalMusicDays) {
         console.log(`animating totalMusicDays`)
@@ -69,14 +77,6 @@ state.featureSideEffects = {
     },
     // leave: destroyPlayTimeByMonthChart,
   },
-  3: {
-    load: loadTopTrackMedia,
-    enter: playTopTrack,
-  },
-  4: {
-    load: loadTopTracksMedia,
-    enter: playTopTracks,
-  },
   5: {
     load: loadTopArtistMedia,
     enter: playTopArtist,
@@ -86,25 +86,27 @@ state.featureSideEffects = {
     enter: playTopArtists,
   },
   7: {
+  },
+  8: {
     load: loadTopAlbumMedia,
     enter: playTopAlbum,
   },
-  8: {
+  9: {
     load: loadTopAlbumsMedia,
     enter: playTopAlbums,
   },
-  9: {
+  10: {
     enter: playTopGenres,
   },
-  10: {
+  11: {
     load: loadLeastSkippedTracksMedia,
     enter: playLeastSkippedTracks,
   },
-  11: {
+  12: {
     load: loadMostSkippedTracksMedia,
     enter: playMostSkippedTracks,
   },
-  12: {
+  13: {
     load: loadMostSuccessivePlaysTrackMedia,
     enter: playMostSuccessivePlaysTrack,
   },
@@ -176,8 +178,8 @@ state.features = [
       <div class="mt-12 w-full flex flex-col items-center gap-0.5 text-sm">
         <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`totalPlays`]?.[state.settings.dataSource])}</span> total streams.</div>
         <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueTracksPlayed`])}</span> unique tracks.</div>
-        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueAlbumsPlayed`])}</span> unique artists.</div>
-        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueArtistsPlayed`])}</span> unique albums.</div>
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueArtistsPlayed`])}</span> unique artists.</div>
+        <div><span class="font-semibold">${() => showAsNumber(state.rewindReport.generalStats?.[`uniqueAlbumsPlayed`])}</span> unique albums.</div>
       </div>
 
       <div class="absolute bottom-20 w-full h-2/5 px-8">
@@ -197,49 +199,6 @@ state.features = [
           </div>
         `}
       </div>
-    </div>
-  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
-  // days listened to music
-  buildFeature(`days listened to music`, html`
-    <div class="text-center">
-      <div class="mt-32 -rotate-6 font-quicksand text-sky-500 text-8xl"><span class="font-quicksand-bold">${() => state.extraFeatures.totalMusicDays ? showAsNumber(animators.totalMusicDays.toFixed(0)) : `???`}</span></div>
-
-      <div class="mt-24 w-full px-10 flex flex-col items-center gap-6">
-        <div><span class="font-semibold text-xl">That's on how many days you listened to music through Jellyfin this year.</div>
-        ${() => state.extraFeatures.totalMusicDays ? (
-          state.rewindReport.generalStats.totalMusicDays < 364 ? html`
-            <div><span class="font-semibold text-sm text-center">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
-              ` : html`
-              <div><span class="font-semibold text-sm text-center">Good news: next year you can get one additional day!</div>
-            `) : null
-        }
-      </div>
-
-      ${() => state.extraFeatures.totalMusicDays ? html`
-        <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
-          <div><span class="font-semibold text-xl">You listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
-          <div><span class="font-semibold text-xl">That's <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0).toFixed(2))}</span> hours or <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0 / 24.0 * 100.0).toFixed(1))}%</span> of a day.</div>
-          <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care about accuracy)</div>
-        </div>
-        ` : null
-      }
-
-      ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
-        <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
-          <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
-            <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <path d="M12 8h.01"></path>
-                <path d="M11 12h1v4h1"></path>
-                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
-              </svg>
-              <span>Learn why</span>
-            </button>
-          </div>
-        </div>
-        `}
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top song
@@ -346,6 +305,49 @@ state.features = [
     </ol>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   //TODO add playlist intermezzo
+  // days listened to music
+  buildFeature(`days listened to music`, html`
+    <div class="text-center">
+      <div class="mt-32 -rotate-6 font-quicksand text-sky-500 text-8xl"><span class="font-quicksand-bold">${() => state.extraFeatures.totalMusicDays ? showAsNumber(animators.totalMusicDays.toFixed(0)) : `???`}</span></div>
+
+      <div class="mt-24 w-full px-10 flex flex-col items-center gap-6">
+        <div><span class="font-semibold text-xl">That's on how many days you listened to music through Jellyfin this year.</div>
+        ${() => state.extraFeatures.totalMusicDays ? (
+          state.rewindReport.generalStats.totalMusicDays < 364 ? html`
+            <div><span class="font-semibold text-sm text-center">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
+              ` : html`
+              <div><span class="font-semibold text-sm text-center">Good news: next year you can get one additional day!</div>
+            `) : null
+        }
+      </div>
+
+      ${() => state.extraFeatures.totalMusicDays ? html`
+        <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
+          <div><span class="font-semibold text-xl">You listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
+          <div><span class="font-semibold text-xl">That's <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0).toFixed(2))}</span> hours or <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0 / 24.0 * 100.0).toFixed(1))}%</span> of a day.</div>
+          <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care about accuracy)</div>
+        </div>
+        ` : null
+      }
+
+      ${() => state.extraFeatures.totalMusicDays ? html`<br>` : html`
+        <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
+          <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
+            <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M12 8h.01"></path>
+                <path d="M11 12h1v4h1"></path>
+                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+              </svg>
+              <span>Learn why</span>
+            </button>
+          </div>
+        </div>
+        `}
+    </div>
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top artist
   buildFeature(`top artist`, html`
     <div class="text-center text-white">
@@ -435,6 +437,34 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
+  // library stats and delta
+  buildFeature(`library stats and delta`, html`
+    <div class="text-center">
+
+      <h2 class="text-2xl font-medium mt-5">Your Library & You</h2>
+      
+      <div class="mt-12 w-full px-6 flex flex-col items-center gap-2">
+        <div class="font-semibold text-xl">Listening to your entire library would take <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.libraryStats?.totalRuntime / 60.0 / 60.0).toFixed(0))}</span> hours.</div>
+        <div class="font-semibold text-xl">That's <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.libraryStats?.totalRuntime / 60.0 / 60.0 / 24.0).toFixed(1))}</span> days!</div>
+      </div>
+      
+      <div class="mt-16 w-full px-10 flex flex-col items-center gap-3">
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.favorite)}</span> favorite songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.total)}</span> unique songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.albums?.total)}</span> albums.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.artists?.total)}</span> artists.</div>
+        <div><span class="font-semibold text-xl mt-4">Impressive.</div>
+      </div>
+
+      <div class="mt-20 w-full px-10 flex flex-col items-center gap-2">
+        <div><span class="font-semibold text-xl">Average song length: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds.</div>
+        <div><span class="font-semibold -mt-1">(Median: <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.median.toFixed(0))}</span>)</div>
+        <div><span class="font-semibold text-xl">Shortest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.min.toFixed(0))}</span> seconds.</div>
+        <div><span class="font-semibold text-xl">Longest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.max.toFixed(0))}</span> seconds.</div>
+        <div><span class="font-semibold text-xl mt-4">Surprised?</div>
+
+    </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top album
   buildFeature(`top album`, html`
@@ -900,7 +930,8 @@ state.features = [
 
           const closeJellyfinRewind = () => {
             closeOverlay(`overlay-download-report-prompt`)
-            next()
+            state.currentFeature = 0
+            closeFeatures()
           }
           if (!state.rewindReportDownloaded) {
             showOverlay({
