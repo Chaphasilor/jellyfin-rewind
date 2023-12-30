@@ -626,9 +626,15 @@ function restoreRewindReport() {
   return rewindReport
 }
 
+function deleteRewindReport() {
+  localStorage.removeItem(`rewindReport`)
+  localStorage.removeItem(`rewindReportLight`)
+}
+
 export {
   generateRewindReport,
   saveRewindReport,
   restoreRewindReport,
+  deleteRewindReport,
   auth,
 }

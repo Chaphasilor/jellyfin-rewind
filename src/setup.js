@@ -74,6 +74,15 @@ export async function restoreAndPrepareRewind() {
   }
 }
 
+export async function deleteRewind() {
+  try {
+    jellyfinRewind.deleteRewindReport()
+    console.info(`Rewind report deleted successfully!`)
+  } catch (err) {
+    console.error(`Couldn't delete Rewind report:`, err)
+  }
+}
+
 export async function generateRewindReport({
   progressCallback,
   oldReport

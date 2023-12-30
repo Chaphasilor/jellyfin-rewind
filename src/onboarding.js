@@ -1,6 +1,6 @@
 import { reactive, watch, html, } from '@arrow-js/core'
 
-import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind } from './setup';
+import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind, deleteRewind } from './setup';
 import { getFeatureDelta, importRewindReport } from './delta';
 
 export const state = reactive({
@@ -24,6 +24,7 @@ export const state = reactive({
   progress: 0,
   auth: null,
   error: null,
+  playbackReportingInspectionResult: null,
   connectionHelpDialogOpen: false,
   playbackReportingDialogOpen: false,
   featuresInitialized: false,
@@ -38,6 +39,7 @@ export async function init(auth) {
     server: viewServer,
     user: viewUser,
     login: viewLogin,
+    playbackReportingIssues: viewPlaybackReportingIssues,
     importReport: viewImportReport,
     load: viewLoad,
     revisit: viewRevisit,
@@ -71,7 +73,8 @@ export async function init(auth) {
     state.currentView = `revisit`
   } catch (err) {
     if (state.auth.config.user) {
-      state.currentView = `load`
+      // determine which view to show
+      await checkPlaybackReportingSetup()
     }
   }
 
@@ -237,6 +240,8 @@ const playbackReportingDialog = html`
 async function connect() {
   state.error = null
   state.server.url = document.querySelector(`#onboarding-server-url`).value
+  // remove trailing slash
+  state.server.url = state.server.url.replace(/\/$/, ``)
   try {
     state.server.users = await connectToServer(state.auth, state.server.url)
     state.currentView = `user`
@@ -366,7 +371,8 @@ async function login()  {
   const password = document.querySelector(`#onboarding-password`).value
   try {
     let userInfo = await loginViaPassword(state.auth, username, password)
-    state.currentView = `importReport`
+    // state.currentView = `importReport`
+    checkPlaybackReportingSetup()
   } catch (err) {
     console.error(`Error while logging in:`, err)
     state.error = html`
@@ -381,7 +387,8 @@ async function loginAuthToken()  {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
     let userInfo = await loginViaAuthToken(state.auth, username, token)
-    state.currentView = `importReport`
+    // state.currentView = `importReport`
+    checkPlaybackReportingSetup()
   } catch (err) {
     console.error(`Error while logging in:`, err)
     state.error = html`
@@ -391,6 +398,182 @@ async function loginAuthToken()  {
     `
   }
 }
+
+function inspectPlaybackReportingSetup(playbackReportingSetup) {
+
+  const inspection = {
+    valid: true,
+    issue: ``,
+    action: null,
+  }
+
+  if (!playbackReportingSetup.installed) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is not installed.`
+    if (window.helper && state.auth.config.user.isAdmin) {
+      inspection.action = html`
+      <button
+        class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+        @click="${async () => {
+          try {
+            await window.helper.installPlaybackReportingPlugin()
+            checkPlaybackReportingSetup()
+          } catch (err) {
+            console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          }
+        }}">Install Playback Reporting Plugin!</button>
+      `
+    }
+  } else if (playbackReportingSetup.restartRequired) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is installed, but the Jellyfin server needs to be restarted in order to activate it.`
+    if (window.helper && state.auth.config.user.isAdmin) {
+      inspection.action = html`
+      <button
+        class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+        @click="${async () => {
+          try {
+            await window.helper.shutdownServer()
+            setTimeout(() => {
+              checkPlaybackReportingSetup()
+            }, 5000)
+          } catch (err) {
+            console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          }
+        }}">Shut down Jellyfin Server</button>
+      <p class="italic">For most setups, the server will <b>automatically restart</b> after shutting it down.</p>
+      `
+    }
+  } else if (playbackReportingSetup.disabled) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is installed, but disabled.`
+    if (window.helper && state.auth.config.user.isAdmin) {
+      inspection.action = html`
+      <button
+        class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+        @click="${async () => {
+          try {
+            await window.helper.enablePlaybackReportingPlugin(playbackReportingSetup)
+            checkPlaybackReportingSetup()
+          } catch (err) {
+            console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          }
+        }}">Enable Playback Reporting Plugin!</button>
+      `
+    }
+  } else if (playbackReportingSetup.version && parseInt(playbackReportingSetup.version) < 13) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is installed and active, but there is a newer version available. Please update the plugin to the latest version to make sure everything is working correctly.`
+  } else if (Number(playbackReportingSetup.settings.retentionInterval) !== -1 && Number(playbackReportingSetup.settings?.retentionInterval) < 24) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is installed, but the retention interval is short (${playbackReportingSetup.settings?.retentionInterval} months).`
+    if (window.helper && state.auth.config.user.isAdmin) {
+      inspection.action = html`
+        <button
+          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+          @click="${async () => {
+            try {
+              const newSettings = {
+                ...playbackReportingSetup.settings,
+                MaxDataAge: "-1",
+              }
+              await window.helper.updatePlaybackReportingSettings(newSettings)
+              checkPlaybackReportingSetup()
+            } catch (err) {
+              console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+            }
+          }}">Set retention interval<br>to forever</button>
+        <button
+          class="px-2 py-1 mt-1 mx-auto rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto"
+          @click="${async () => {
+            try {
+              const newSettings = {
+                ...playbackReportingSetup.settings,
+                MaxDataAge: 24,
+              }
+              await window.helper.updatePlaybackReportingSettings(newSettings)
+              checkPlaybackReportingSetup()
+            } catch (err) {
+              console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+            }
+          }}">Set retention interval to 2 years</button>
+      `
+    }
+  } else if (playbackReportingSetup.ignoredUsers.some(user => user.id === state.auth?.config?.user?.id)) {
+    inspection.valid = false
+    inspection.issue = `The Playback Reporting plugin is installed and active, but your user account is ignored. Please remove your user from the list of ignored users so that listening activity is recorded for your account.`
+    // if (window.helper && state.auth.config.user.isAdmin) {
+      inspection.action = html`
+      <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Playback Reporting Settings!</a>
+      `
+    // }
+  }
+
+  return inspection
+  
+} 
+
+async function checkPlaybackReportingSetup() {
+
+  // there's nothing we can do without the helper
+  if (!window.helper) {
+    state.currentView = `importReport`
+  }
+
+  try {
+
+    const playbackReportingSetup = await window.helper.checkIfPlaybackReportingInstalled()
+    console.log(`playbackReportingSetup:`, playbackReportingSetup)
+
+    const inspection = inspectPlaybackReportingSetup(playbackReportingSetup)
+    console.log(`inspection:`, inspection)
+
+    
+    if (!inspection.valid) {
+      state.currentView = `playbackReportingIssues`
+      state.playbackReportingInspectionResult = inspection
+    } else {
+      state.currentView = `importReport`
+    }
+    
+  } catch (err) {
+    console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
+    state.currentView = `importReport`
+  }
+  
+}
+
+const viewPlaybackReportingIssues = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+    <p class="">It seems like the Playback Reporting plugin isn't set up correctly.</p>
+    <p class="">The following problem was detected:</p>
+  </div>
+
+  <div class="w-full px-6 flex flex-col gap-3 items-center text-center mt-10 text-gray-300">
+    <p class="w-full text-lg text-balance font-semibold text-red-500 dark:text-red-400">${() => state.playbackReportingInspectionResult?.issue}</p>
+    ${() => state.playbackReportingInspectionResult?.action}
+  </div>
+
+  <button
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-12 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.playbackReportingDialogOpen = true}"
+  >
+    <span>More Information about<br>why this is important</span>
+  </button>
+
+  <button
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-24 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.currentView = `importReport`}"
+  >
+    <span>Continue anyway</span>
+  </button>
+
+</div>
+`
 
 const viewLogin = html`
 <div class="p-4">
@@ -609,6 +792,7 @@ const buttonLogOut = html`
   class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
   @click="${() => {
     state.auth.destroySession()
+    deleteRewind()
     state.currentView = `start`
   }}"
 >
