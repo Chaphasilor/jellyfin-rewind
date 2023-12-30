@@ -115,6 +115,7 @@ export default class Auth {
       name: json.User.Name,
       primaryImageTag: json.User.PrimaryImageTag,
       sessionId: json.SessionInfo.Id,
+      isAdmin: json.User.Policy.IsAdministrator,
     };
 
     this.setDefaultHeaders(this.config.user.token);
@@ -146,6 +147,7 @@ export default class Auth {
       name: json.Name,
       primaryImageTag: json.PrimaryImageTag,
       sessionId: null,
+      isAdmin: json.Policy.IsAdministrator,
     };
 
     this.setDefaultHeaders(this.config.user.token);

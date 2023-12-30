@@ -201,10 +201,10 @@ const playbackReportingDialog = html`
           <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
           <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? (You'll have to be logged in as an admin user.)</p>
           ${() => state.server.url !== `` ? html`
-            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+            <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
             ` : html`
             <button
-              class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]"
+              class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
               @click="${() => {
                 state.selectedAction = `openPluginsPage`
                 state.currentView = `server`
@@ -366,7 +366,7 @@ async function login()  {
   const password = document.querySelector(`#onboarding-password`).value
   try {
     let userInfo = await loginViaPassword(state.auth, username, password)
-    state.currentView = `load`
+    state.currentView = `importReport`
   } catch (err) {
     console.error(`Error while logging in:`, err)
     state.error = html`
@@ -381,7 +381,7 @@ async function loginAuthToken()  {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
     let userInfo = await loginViaAuthToken(state.auth, username, token)
-    state.currentView = `load`
+    state.currentView = `importReport`
   } catch (err) {
     console.error(`Error while logging in:`, err)
     state.error = html`

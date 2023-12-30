@@ -19,6 +19,7 @@ export const state = reactive({
   extraFeatures: {
     totalPlaytimeGraph: true,
     totalMusicDays: true,
+    listeningActivityDifference: true,
     leastSkippedTracks: true,
     mostSkippedTracks: true,
     mostSuccessivePlays: true,
@@ -132,6 +133,10 @@ state.features = [
         <p class="">Feel free to share your Rewind on social media, I'd love to see your <span class="text-[#00A4DC]" @click="${stopPropagation()}">#JellyfinRewind</span> posts! If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>.</p>
       </div>
 
+      <div>
+        <button class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-800 mt-8 flex flex-row gap-4 items-center mx-auto" @click="${stopPropagation(() => showOverlayDataAccuracy())}">Accuracy Disclaimer</button> 
+      </div>
+
       <button
         class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
         @click="${stopPropagation(() => next())}"
@@ -148,22 +153,7 @@ state.features = [
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport?.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
-        title: `About the accuracy of this data`,
-        content: html`
-          <div class="flex flex-col items-start gap-2">
-            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport?.year} only!<span></p>
-            <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
-            <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
-            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a> 
-            <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
-            <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a> 
-            <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">the Jellyfin documentation</a>.</p>
-            <p>So, please treat all of this information with a grain of salt. You can take a look at the settings in order to choose which data will be used, but any information that needs to be interpolated will have a negative influence on the quality of these stats.</p>
-            <p>I will try to offer a way to import this year's Rewind data into next year's Jellyfin Rewind, so that more information can be used and the used data can be properly limited to the current year only. Because of this, please <span class="font-semibold">make sure to download a copy of your Rewind data at the end and store it until next year!</span></p>
-          </div>
-        `,
-      }))}">
+      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport?.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlayDataAccuracy())}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-asterisk" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <path d="M12 12l8 -4.5"></path>
@@ -189,14 +179,14 @@ state.features = [
         ${() => state.extraFeatures.totalPlaytimeGraph ? html`<br>` : html`
           <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12">
             <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
                 <path d="M11 12h1v4h1"></path>
                 <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
               </svg>
-              <span>Learn why</span>
+              <span class="font-medium">Learn why</span>
             </button>
           </div>
         `}
@@ -325,9 +315,9 @@ state.features = [
 
       ${() => state.extraFeatures.totalMusicDays ? html`
         <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
-          <div><span class="font-semibold text-xl">You listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
+          <div><span class="font-semibold text-xl">On those ${() => state.rewindReport.generalStats.totalMusicDays} days,<br>you listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
           <div><span class="font-semibold text-xl">That's <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0).toFixed(2))}</span> hours or <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0 / 24.0 * 100.0).toFixed(1))}%</span> of a day.</div>
-          <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care about accuracy)</div>
+          <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care)</div>
         </div>
         ` : null
       }
@@ -336,14 +326,14 @@ state.features = [
         <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
           <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
             <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
                 <path d="M11 12h1v4h1"></path>
                 <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
               </svg>
-              <span>Learn why</span>
+              <span class="font-medium">Learn why</span>
             </button>
           </div>
         </div>
@@ -579,19 +569,38 @@ state.features = [
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
       <div class="mt-40 w-full px-6 flex flex-col items-center gap-2">
-        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> songs ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0 ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> songs ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
       </div>
       
       <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
         <span class="font-semibold text-xl mb-3">Additionally, you listened to</span>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0 ? `more` : `less`}  songs.</div>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0 ? `more` : `less`}  artists.</div>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0 ? `more` : `less`}  albums.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? `more` : `less`}  artists.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? `more` : `less`}  albums.</div>
       </div>
 
-      <div class="mt-16 w-full px-10">
-        <span class="font-semibold text-xl">Keep it up!</span>
-      </div>
+      ${() => state.extraFeatures.listeningActivityDifference ? html`
+        <div class="mt-16 w-full px-10">
+          <span class="font-semibold text-xl">Keep it up!</span>
+        </div>
+      ` : null}
+
+      ${() => state.extraFeatures.listeningActivityDifference ? html`<br>` : html`
+        <div class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25">
+          <div class=" flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl">
+            <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold">Unavailable</span>
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingOldReport())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <path d="M12 8h.01"></path>
+                <path d="M11 12h1v4h1"></path>
+                <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
+              </svg>
+              <span class="font-medium">Learn why</span>
+            </button>
+          </div>
+        </div>
+      `}
 
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
@@ -666,14 +675,14 @@ state.features = [
         <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
           <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
             <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
                 <path d="M11 12h1v4h1"></path>
                 <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
               </svg>
-              <span>Learn why</span>
+              <span class="font-medium">Learn why</span>
             </button>
           </div>
         </div>
@@ -768,14 +777,14 @@ state.features = [
         <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
           <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
             <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
-            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+            <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                 <path d="M12 8h.01"></path>
                 <path d="M11 12h1v4h1"></path>
                 <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
               </svg>
-              <span>Learn why</span>
+              <span class="font-medium">Learn why</span>
             </button>
           </div>
         </div>
@@ -894,14 +903,14 @@ state.features = [
       <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
         <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
           <span class="text-4xl rotate-12 text-[#00A4DC] tracking-wider font-semibold">Unavailable</span>
-          <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-800">
+          <button @click="${stopPropagation(() => showOverlayFeatureUnavailableMissingPlaybackReporting())}" class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
               <path d="M12 8h.01"></path>
               <path d="M11 12h1v4h1"></path>
               <path d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"></path>
             </svg>
-            <span>Learn why</span>
+            <span class="font-medium">Learn why</span>
           </button>
         </div>
       </div>
@@ -1081,6 +1090,35 @@ function showIncompleteReportOverlay(onClose = () => {}) {
   
 }
 
+function showOverlayDataAccuracy() {
+  showOverlay({
+    title: `About the accuracy of this report`,
+    content: html`
+      <div class="flex flex-col items-start gap-2">
+        <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport?.year} without plugins!<span></p>
+        <p>However, if you have the <span class="font-semibold">"Playback Reporting"</span> plugin installed, <span class="font-semibold">significantly more information can be collected</span>, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. <span class="font-semibold">Offline playback is not recorded at all</span>.</p>
+        <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
+        ${() => state.auth.config?.user?.isAdmin ? html`
+          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+          ` : html`
+          <a disabled class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0">Open Plugins Page!</a>
+          <p class="font-medium mb-6">You're not logged in with an administrator account, but you need to be an admin in order to install plugins. If you are logged into Jellyfin with an admin account, you can <a class="text-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">click here to open the plugins page</a>. If nothing happens or Jellyfin just keeps loading, that means the logged-in account is not an administrator.</p>
+        `}
+        <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
+        ${() => state.auth.config?.user?.isAdmin ? html`
+          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a>
+        ` : html`
+          <a disabled class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0">Open Settings!</a>
+          <p class="font-medium mb-6">You're not logged in with an administrator account, but you need to be an admin in order to install plugins. If you are logged into Jellyfin with an admin account and already have the Playback Reporting plugin installed, you can <a class="text-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">click here to open the plugin settings</a>. If nothing happens or Jellyfin just keeps loading, that means the logged-in account is not an administrator.</p>
+        `}
+        <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">the Jellyfin documentation</a>.</p>
+        <p>So, please treat all of this information with a grain of salt. You can take a look at the settings in order to choose which data will be used, but any information that needs to be interpolated will have a negative influence on the quality of these stats.</p>
+        <p>I will try to offer a way to import this year's Rewind data into next year's Jellyfin Rewind, so that more information can be used and the used data can be properly limited to the current year only. Because of this, please <span class="font-semibold">make sure to download a copy of your Rewind data at the end and store it until next year!</span></p>
+      </div>
+    `,
+  })
+}
+
 function showOverlayFeatureUnavailableMissingPlaybackReporting() {
   showOverlay({
     title: `Why is this feature unavailable?`,
@@ -1088,8 +1126,37 @@ function showOverlayFeatureUnavailableMissingPlaybackReporting() {
       <div class="flex flex-col items-start gap-2">
         <p>This feature depends on the 'Playback Reporting' plugin, which is either not installed on your Jellyfin server or hasn't been installed for long enough.</p>
         <p>You can install the Playback Reporting plugin into your Jellyfin server by clicking the button below. It won't take longer than 5 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
-        <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+        ${() => state.auth.config?.user?.isAdmin ? html`
+          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+          ` : html`
+          <a disabled class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0">Open Plugins Page!</a>
+          <p class="font-medium mb-6">You're not logged in with an administrator account, but you need to be an admin in order to install plugins. If you are logged into Jellyfin with an admin account, you can <a class="text-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">click here to open the plugins page</a>. If nothing happens or Jellyfin just keeps loading, that means the logged-in account is not an administrator.</p>
+        `}
+        <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
+        ${() => state.auth.config?.user?.isAdmin ? html`
+          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a>
+        ` : html`
+          <a disabled class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0">Open Settings!</a>
+          <p class="font-medium mb-6">You're not logged in with an administrator account, but you need to be an admin in order to install plugins. If you are logged into Jellyfin with an admin account and already have the Playback Reporting plugin installed, you can <a class="text-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">click here to open the plugin settings</a>. If nothing happens or Jellyfin just keeps loading, that means the logged-in account is not an administrator.</p>
+        `}
         <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">the Jellyfin documentation</a>.</p>
+      </div>
+    `,
+  })
+}
+
+function showOverlayFeatureUnavailableMissingOldReport() {
+  showOverlay({
+    title: `Why is this feature unavailable?`,
+    content: html`
+      <div class="flex flex-col items-start gap-2">
+        <p>In order to make comparisons between last year and this year, you will need to import last year's Rewind Report.</p>
+        <p>If you downloaded your Rewind Report last year and still have the <span class="font-mono">.json</span>-file around, you can simply close the report (X-button in upper right corner) and then click the "Regenerate Rewind" button. There you will have the option to select the file from last year.</p>
+        <p>You'll then have to re-generate your report for this year to include the additional statistics.</p>
+        <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `/#importReport`}" @click="${() => {
+          closeFeatures(true)
+        }}">Go to Import Page!</a>
+        <p class="mt-6">If you didn't use Jellyfin Rewind last year, forgot to download your Rewind Report, or can't find the file anymore, I'm sorry to tell you that this feature will be unavailable for you this year. But if you make sure to download this year's Rewind Report at the end and keep it safe until next year, you can try it out in ${() => state.rewindReport?.year}!</p>
       </div>
     `,
   })
@@ -1406,6 +1473,10 @@ export function init(rewindReportData, jellyHelper, auth) {
     state.extraFeatures.mostSuccessivePlays = false
   }
 
+  if (!state.rewindReport.featureDelta?.listeningActivityDifference) {
+    state.extraFeatures.listeningActivityDifference = false
+  }
+
   // MediaQueryList
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -1514,16 +1585,19 @@ export async function openFeatures() {
     console.warn(`Fullscreen permission denied`, err)
   }
 }
-export function closeFeatures() {
+export function closeFeatures(fullyClose = false) {
 
   if (state.overlays.length > 0) {
     closeOverlay(state.overlays.slice(-1)[0].overlayId)
-    return
+    if (!fullyClose) {
+      return
+    }
   }
   
   // mainElement.innerHTML = ``;
   state.featuresOpen = false
   state.pollCanvas = false
+  state.currentFeature = 0
   // exit fullscreen
   document.exitFullscreen().catch((err) => {
     console.warn(`Could not exit fullscreen`, err)
