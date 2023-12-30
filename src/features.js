@@ -96,17 +96,19 @@ state.featureSideEffects = {
     enter: playTopAlbums,
   },
   10: {
-    enter: playTopGenres,
   },
   11: {
+    enter: playTopGenres,
+  },
+  12: {
     load: loadLeastSkippedTracksMedia,
     enter: playLeastSkippedTracks,
   },
-  12: {
+  13: {
     load: loadMostSkippedTracksMedia,
     enter: playMostSkippedTracks,
   },
-  13: {
+  14: {
     load: loadMostSuccessivePlaysTrackMedia,
     enter: playMostSuccessivePlaysTrack,
   },
@@ -122,7 +124,7 @@ state.features = [
       </div>
 
 
-      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport.year}!</h2>
+      <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport?.year}!</h2>
 
       <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
         <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
@@ -146,11 +148,11 @@ state.features = [
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
+      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport?.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlay({
         title: `About the accuracy of this data`,
         content: html`
           <div class="flex flex-col items-start gap-2">
-            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport.year} only!<span></p>
+            <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport?.year} only!<span></p>
             <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
             <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a> 
@@ -204,7 +206,7 @@ state.features = [
   // top song
   buildFeature(`top song`, html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-5">Your Top Song<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Song<br>of ${() => state.rewindReport?.year}:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="px-4 py-4 overflow-hidden whitespace-wrap">
@@ -351,7 +353,7 @@ state.features = [
   // top artist
   buildFeature(`top artist`, html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-5">Your Top Artist<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Artist<br>of ${() => state.rewindReport?.year}:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-artist-image" class="w-[30vh] h-[30vh] mx-auto rounded-2xl drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="px-4 py-4 overflow-hidden whitespace-wrap">
@@ -438,8 +440,8 @@ state.features = [
       )}
     </ol>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
-  // library stats and delta
-  buildFeature(`library stats and delta`, html`
+  // library stats
+  buildFeature(`library stats`, html`
     <div class="text-center">
 
       <h2 class="text-2xl font-medium mt-5">Your Library & You</h2>
@@ -463,13 +465,14 @@ state.features = [
         <div><span class="font-semibold text-xl">Shortest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.min.toFixed(0))}</span> seconds.</div>
         <div><span class="font-semibold text-xl">Longest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.max.toFixed(0))}</span> seconds.</div>
         <div><span class="font-semibold text-xl mt-4">Surprised?</div>
+      </div>
 
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top album
   buildFeature(`top album`, html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-5">Your Top Album<br>of 2022:</h2>
+      <h2 class="text-2xl mt-5">Your Top Album<br>of ${() => state.rewindReport?.year}:</h2>
       <div class="flex mt-10 flex-col items-center">
         <img id="top-album-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="px-4 py-4 overflow-hidden whitespace-wrap">
@@ -567,6 +570,30 @@ state.features = [
       `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
       )}
     </ol>
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
+  // feature delta
+  buildFeature(`feature delta`, html`
+    <div class="text-center">
+
+      <h2 class="text-2xl font-medium mt-10">Your Listening Habits</h2>
+      <h3 class="text-2xl font-medium">...compared to last year!</h3>
+      
+      <div class="mt-40 w-full px-6 flex flex-col items-center gap-2">
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> songs ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0 ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+      </div>
+      
+      <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
+        <span class="font-semibold text-xl mb-3">Additionally, you listened to</span>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0 ? `more` : `less`}  songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0 ? `more` : `less`}  artists.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span> ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0 ? `more` : `less`}  albums.</div>
+      </div>
+
+      <div class="mt-16 w-full px-10">
+        <span class="font-semibold text-xl">Keep it up!</span>
+      </div>
+
+    </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
   // top generes of the year
   buildFeature(`top generes of the year`, html`
@@ -938,7 +965,7 @@ state.features = [
               title: `Are you sure?`,
               key: `download-report-prompt`,
               content: html`
-                <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
+                <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-200 mt-10 w-5/6 mx-auto">
                   <p class="">You haven't downloaded your Rewind report yet.</p>
                   <p class="">Without this data, you might be missing out on some insights next year, as well as improved quality of the statistics.</p>
                   <p class="">If possible, please save the Rewind report somewhere safe until next year, just in case. It's only a few (hundred) MBs in size.</p>
@@ -1014,7 +1041,7 @@ function showIncompleteReportOverlay(onClose = () => {}) {
           span.innerHTML = `Generating...`
           svg.classList.add(`animate-spin`)
           window.generateRewindReport({
-            year: state.rewindReport.year,
+            year: state.rewindReport?.year,
           }).then((rewindReportData) => {
 
             span.innerHTML = `Regenerate and Download Report`

@@ -226,7 +226,7 @@ const playbackReportingDialog = html`
             `
           }
           <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
-          <p>I will try to offer a way to import 2022's Rewind data into Jellyfin Rewind 2023, so that more information can be used and the used data can be properly limited to the current year only.</p>
+          <p>I will try to again offer a way to import ${() => state.rewindReport?.year}'s Rewind data into Jellyfin Rewind ${() => state.rewindReport?.year+1}, so that more information can be used and the used data can be properly limited to the current year only.</p>
         </div>
       </div>
     </div>

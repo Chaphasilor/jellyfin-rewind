@@ -2,7 +2,7 @@
 
 # Jellyfin Rewind
 
-## Welcome to Jellyfin Rewind 2022!
+## Welcome to Jellyfin Rewind 2023!
 
 ### How to use
 
