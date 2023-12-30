@@ -438,6 +438,11 @@ async function generateRewindReport({
       commit: __COMMITHASH__,
       year,
       timestamp: new Date().toISOString(),
+      user: {
+        id: auth.config?.user?.id,
+        name: auth.config?.user?.name,
+      },
+      server: auth.config?.serverInfo,
       type: `full`,
       playbackReportAvailable,
       playbackReportDataMissing,
