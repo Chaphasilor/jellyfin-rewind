@@ -20,6 +20,7 @@ export const state = reactive({
   rewindGenerating: false,
   rewindReport: null,
   oldReport: null,
+  importingOldReport: false,
   staleReport: false,
   progress: 0,
   auth: null,
@@ -116,7 +117,7 @@ watch(() => [
 ])
 
 const header = html`
-<div class="mt-10 w-full flex flex-col items-center">
+<div class="mt-10 w-full flex flex-col items-center mb-24">
   <img class="h-24" src="${() =>  state.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
   <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
 </div>
@@ -321,10 +322,10 @@ const viewUser = html`
   <div class="mt-6 w-5/6 mx-auto">
     <span class="text-sm ml-1.5 font-medium">Select a User</span>
     <ul class="flex flex-col gap-4 mt-2">
-      <div class="flex flex-col gap-2 max-h-[14rem] overflow-x-auto">
+      <div class="flex flex-row flex-wrap justify-center gap-2 max-h-[14rem] overflow-x-hidden">
         ${() => state.server.users.map(user => html`
           <li
-            class="flex flex-row gap-3 items-center bg-white shadow-sm rounded-xl p-2"
+            class="flex flex-col gap-2 items-center bg-white shadow-sm rounded-xl p-2"
             @click="${() => {
               state.server.selectedUser = user
               state.server.loginType = `password`
@@ -334,7 +335,7 @@ const viewUser = html`
             <img
               class="w-10 h-10 rounded-md" src="${() => user.PrimaryImageTag ? `${state.auth.config.baseUrl}/Users/${user.Id}/Images/Primary?tag=${user.PrimaryImageTag}` : `/media/ArtistPlaceholder.png`}"
             >
-            <span class="text-xl font-semibold text-gray-700">${user.Name}</span>
+            <span class="text-lg text-wrap text-center font-semibold text-gray-700">${user.Name}</span>
           </li>
         `)}
       </div>
@@ -347,7 +348,7 @@ const viewUser = html`
             state.currentView = `login`
           }}"
         >
-          <span class="text-base text-center w-full font-regular italic text-gray-700">Manually enter username</span>
+          <span class="text-base text-center w-full font-regular text-gray-900">Manually enter username</span>
         </li>
         <span class="w-full text-center text-gray-600 font-semibold text-xs -mt-1.5 -mb-1">or</span>
         <li
@@ -357,7 +358,7 @@ const viewUser = html`
             state.currentView = `login`
           }}"
         >
-          <span class="text-base text-center w-full font-regular italic text-gray-700">Log in via auth token</span>
+          <span class="text-base text-center w-full font-regular text-gray-900">Log in via auth token</span>
         </li>
       </div>
     </ul>
@@ -649,43 +650,60 @@ const viewImportReport = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">You can import last year's Jellyfin Rewind report.</p>
-    <p class="">This will give you more (reliable) statistics about your listening activity.</p>
-    <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via Reddit so that I can look into it :)</p>
+    <p class="">Awesome, you're logged in!</p>
+    <p class="">You can now import last year's Jellyfin Rewind report, if you have one.</p>
+    <p class="">This will give you more, and more reliable, statistics about your listening activity.</p>
   </div>
 
-  ${() => progressBar}
+  <div class="w-full flex flex-col items-center text-center mt-24">
+    ${() =>
+      !state.oldReport ? html`
+        <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOldReport ? `saturation-50` : ``}`}">Import Last Year's Report</label>
+        <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
+          console.info(`Importing file...`)
+          const input = e.target
+          try {
+            state.importingOldReport = true
+            input.disabled = true
+            state.oldReport = await importRewindReport(e.target.files[0])
+            console.log(`state.oldReport:`, state.oldReport)
+            state.currentView = `load`
+            // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
+            // console.log(`featureDelta:`, featureDelta)
+          } catch (err) {
+            console.error(`Error while importing rewind report:`, err)
+          }
+          input.disabled = false
+          state.importingOldReport = false
+        }}">
 
-  <label for="import-file" class="flex flex-col gap-1 mt-10 w-5/6 mx-auto">Import Last Year's Report</label>
-  <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
-    console.info(`Importing file...`)
-    try {
-      state.oldReport = await importRewindReport(e.target.files[0])
-      console.log(`state.oldReport:`, state.oldReport)
-      // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
-      // console.log(`featureDelta:`, featureDelta)
-    } catch (err) {
-      console.error(`Error while importing rewind report:`, err)
+        ${() => state.importingOldReport ? html`
+          <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-300">Importing, please wait a few seconds...</p>
+          ` : html`
+            <button
+              class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-16 flex flex-row gap-4 items-center mx-auto"
+              @click="${() => state.currentView = `load`}"
+            >
+              <span>Continue without last year's report</span>
+            </button>
+          `
+        }
+      ` : html`
+        <button
+          class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+          @click="${() => state.currentView = `load`}"
+        >
+          <span>Generate Rewind!</span>
+          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+            <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+            <circle cx="15" cy="9" r="1"></circle>
+          </svg> -->
+        </button>
+      `
     }
-  }}">
-  
-  ${() =>
-    state.rewindReport ? html`
-    <!-- TODO alert if no old report was selected -->
-    <button
-      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
-      @click="${() => state.currentView = `load`}"
-    >
-      <span>Generate Rewind</span>
-      <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
-        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
-        <circle cx="15" cy="9" r="1"></circle>
-      </svg> -->
-    </button>
-    ` : html`<br>`
-  }
+  </div>
 
   ${() => buttonLogOut}
 
@@ -756,7 +774,6 @@ const viewLoad = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
-    <p class="">Awesome, you're now logged in!</p>
     <p class="">Your Rewind Report is now generating. This might take a few seconds.</p>
     <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via Reddit so that I can look into it :)</p>
   </div>
@@ -770,13 +787,15 @@ const viewLoad = html`
       @click="${() => launchRewind()}"
       disabled="${() => !state.rewindReport || state.rewindGenerating}"
     >
-      <span>Launch Rewind!</span>
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
-        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
-        <circle cx="15" cy="9" r="1"></circle>
-      </svg>
+      <span>${() => state.rewindGenerating ? `Generating...` : `Launch Rewind!`}</span>
+      ${() => !state.rewindGenerating ? html`
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+          <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+          <circle cx="15" cy="9" r="1"></circle>
+        </svg>
+      ` : null}
     </button>
 
     ` : html`<br>`
@@ -837,7 +856,7 @@ const viewRevisit = html`
   </button>
 
   <button
-    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-400 hover:bg-orange-500 opacity-80 text-white font-medium mt-32 flex flex-row gap-3 items-center mx-auto"
+    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-400 hover:bg-orange-500 dark:bg-orange-500 dark:hover:bg-orange-600 opacity-80 text-white font-medium mt-32 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
       state.currentView = `importReport` 
     }}"

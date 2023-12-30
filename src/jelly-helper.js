@@ -17,6 +17,7 @@ export default class JellyHelper {
     const blurhash = imageInfo?.blurhash
     const primaryTag = imageInfo?.primaryTag
     const parentItemId = imageInfo?.parentItemId
+    const resolution = 256
   
     if (blurhash) {
       const dataUri = blurhashToDataURI(blurhash)
@@ -44,9 +45,9 @@ export default class JellyHelper {
     }
   
     if (primaryTag && (parentItemId || type === `user`)) {
-      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       if (type === `user`) {
-        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}`
+        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       }
       fetch(url, {
         method: `GET`,

@@ -102,16 +102,44 @@ state.featureSideEffects = {
     enter: playTopGenres,
   },
   12: {
-    load: loadLeastSkippedTracksMedia,
-    enter: playLeastSkippedTracks,
+    load: () => {
+      if (state.extraFeatures.leastSkippedTracks) {
+        loadLeastSkippedTracksMedia()
+      }
+    },
+    enter: () => {
+      if (state.extraFeatures.leastSkippedTracks) {
+        playLeastSkippedTracks()
+      }
+    },
   },
   13: {
-    load: loadMostSkippedTracksMedia,
-    enter: playMostSkippedTracks,
+    load: () => {
+      if (state.extraFeatures.mostSkippedTracks) {
+        loadMostSkippedTracksMedia()
+      }
+    },
+    enter: () => {
+      if (state.extraFeatures.mostSkippedTracks) {
+        playMostSkippedTracks()
+      }
+    }
   },
   14: {
-    load: loadMostSuccessivePlaysTrackMedia,
-    enter: playMostSuccessivePlaysTrack,
+    load: () => {
+      if (state.extraFeatures.mostSuccessivePlays) {
+        loadMostSuccessivePlaysTrackMedia()
+      }
+    },
+    enter: () => {
+      if (state.extraFeatures.mostSuccessivePlays) {
+        playMostSuccessivePlaysTrack()
+      }
+    }
+  },
+  15: {
+    load: loadSummary,
+    enter: playTopTrack,
   },
 }
 
@@ -134,7 +162,7 @@ state.features = [
       </div>
 
       <div>
-        <button class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-800 mt-8 flex flex-row gap-4 items-center mx-auto" @click="${stopPropagation(() => showOverlayDataAccuracy())}">Accuracy Disclaimer</button> 
+        <button class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-300 mt-8 flex flex-row gap-4 items-center mx-auto" @click="${stopPropagation(() => showOverlayDataAccuracy())}">Accuracy Disclaimer</button> 
       </div>
 
       <button
@@ -569,19 +597,23 @@ state.features = [
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
       <div class="mt-40 w-full px-6 flex flex-col items-center gap-2">
-        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> songs ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> songs ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
       </div>
       
       <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
         <span class="font-semibold text-xl mb-3">Additionally, you listened to</span>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  songs.</div>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? `more` : `less`}  artists.</div>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums)) : `???`}</span> ${() => (state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? `more` : `less`}  albums.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? `more` : `less`}  artists.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? `more` : `less`}  albums.</div>
       </div>
 
       ${() => state.extraFeatures.listeningActivityDifference ? html`
         <div class="mt-16 w-full px-10">
+          ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0 ? html`
           <span class="font-semibold text-xl">Keep it up!</span>
+          ` : html`
+          <span class="font-semibold text-xl">What's going on there?</span>
+          `}
         </div>
       ` : null}
 
@@ -876,7 +908,7 @@ state.features = [
    <div class="text-center text-white">
      <h2 class="text-2xl mt-5">On Repeat:<br>Most successive streams</h2>
      <div class="flex mt-10 flex-col">
-       <img id="most-successive-streams-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
+       <img id="most-successive-streams-track-image" class="${() => `w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)] ${state.extraFeatures.mostSuccessivePlays ? `` : `invisible`}`}" />
        <div class="px-4 py-4 overflow-hidden whitespace-wrap">
          <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
            <div class="">${() =>
@@ -917,6 +949,89 @@ state.features = [
       `
     }
  `),
+ // summary screen
+ buildFeature(`summary`, html`
+  <div class="h-full p-4 pt-12 flex flex-col justify-around">
+    <h2 class="text-2xl font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center mt-2 font-semibold text-gray-800 dark:text-gray-200">
+      <span>${() => state.auth?.config?.user?.name}'s</span>
+      <div class="w-full flex flex-col items-center">
+        <img class="h-12" src="${() => state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
+        <h3 class="-rotate-6 ml-4 -mt-2 text-2xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+      </div>
+      <span>Report</span>
+    </h2>
+
+    <div class="grid grid-cols-2 place-items-stretch gap-1.5 w-full mt-6 pb-20 text-gray-100">
+      <div class="overflow-hidden border-2 border-white/10 text-center p-1 flex flex-col justify-center items-center rounded-md col-span-2">
+        <!-- duration -->
+        <div class="text-xl"><span class="text-[#00A4DC] text-3xl font-semibold font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> minutes listened</div>
+      </div>
+      <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+        <!-- top song -->
+        <h4 class="">Top Song</h4>
+        <img id="summary-top-track-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+        <div class="text-balance">
+          <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.name}</span>
+          <span class="">by ${() => state.settings.useAlbumArtists ? state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.albumBaseInfo?.albumArtistBaseInfo?.name : state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.artistsBaseInfo?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+        </div>
+      </div>
+      <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+        <!-- top artist -->
+        <h4 class="">Top Artist</h4>
+        <img id="summary-top-artist-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+        <div class="text-balance">
+          <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</span>
+        </div>
+      </div>
+      ${() => state.extraFeatures.totalMusicDays ? html`
+        <div class="overflow-hidden border-2 border-white/10 p-1 text-center rounded-md grid place-content-center">
+          <!-- days listened to music -->
+          <div class="text-xl text-balance">Listened on <span class="font-semibold text-[#00A4DC] text-3xl font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalMusicDays)}</span> days</div>
+        </div>
+      ` : null}
+      <div class="overflow-hidden border-2 border-white/10 py-1 px-3 rounded-md">
+        <!-- stats 1 - unique items -->
+        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueTracksPlayed)}</span> unique songs</div>
+        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueArtistsPlayed)}</span> unique artists</div>
+        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueAlbumsPlayed)}</span> unique albums</div>
+      </div>
+      ${() => state.extraFeatures.mostSuccessivePlays ? html`
+        <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+          <!-- most successive plays -->
+          <h4 class="">Most Successive Streams</h4>
+          <img id="summary-most-successive-streams-track-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+          <div class="text-balance">
+            <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.generalStats.mostSuccessivePlays?.name}</span>
+            <span class="">by ${() => state.settings.useAlbumArtists ? state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name : state.rewindReport.generalStats.mostSuccessivePlays?.artists?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
+          </div>
+        </div>
+      ` : null}
+      <div class="overflow-hidden border-2 border-white/10 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around">
+        <!-- stats 1 - unique items -->
+        <div class="text-balance">Library Duration: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber((state.rewindReport?.libraryStats?.totalRuntime / 60.0 / 60.0 / 24.0).toFixed(1))}</span> days</div>
+        <div class="text-balance">Average song length: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds</div>
+      </div>
+      ${() => state.extraFeatures.listeningActivityDifference ? html`
+        <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md col-span-2">
+          <!-- stats 2 - listening activity difference (if positive) -->
+          <div class="text-center mb-2"><span class="font-semibold font-quicksand text-[#00A4DC] text-lg">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> more streams than last year</div>
+          <div class="flex flex-row flex-wrap justify-around gap-4">
+            ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? html`
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span><br>more songs</div>
+            ` : null}
+            ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? html`
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span><br>more artists</div>
+            ` : null}
+            ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? html`
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span><br>more albums</div>
+            ` : null}
+          </div>
+        </div>
+      ` : null}
+    </div>
+    
+  </div>
+  `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
  // outro
  buildFeature(`outro`, html`
   <div class="p-4">
@@ -961,7 +1076,7 @@ state.features = [
     </div>
 
     <button
-        class="px-4 py-2 rounded-xl text-base leading-6 bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
+        class="px-4 py-2 rounded-xl text-base leading-6 border border-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
         @click="${stopPropagation(() => {
 
           const closeJellyfinRewind = () => {
@@ -1453,7 +1568,6 @@ export function init(rewindReportData, jellyHelper, auth) {
   }
 
   state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable && !state.rewindReport.playbackReportDataMissing
-  state.extraFeatures.totalPlaytimeGraph = state.rewindReport.playbackReportAvailable
 
   console.log(`dataSource:`, state.settings.dataSource)
 
@@ -1498,7 +1612,7 @@ export function init(rewindReportData, jellyHelper, auth) {
 export function render() {
 
   console.info(`Rendering...`)
-  
+
   let content = html`
       ${() => {
         return state.featuresOpen ?
@@ -1682,7 +1796,7 @@ function buildFeature(featureName, content, classes) {
   console.log(`feature '${featureName}' created`)
   return (index) => html`
     <li @click="${(e) => handleFeatureClick(e)}" data-feature-name="${() => featureName}" class="${() => `${classes} cursor-pointer [-webkit-tap-highlight-color:_transparent] absolute top-0 left-0 w-full h-full overflow-auto pt-8 pb-4 transition-opacity duration-700 ${state.currentFeature === index ? `opacity-100` : `opacity-0 pointer-events-none`}`}">
-      <div>${content}</div>
+      <div class="h-full">${content}</div>
       </li>
       `
 }
@@ -1910,6 +2024,37 @@ function loadMostSuccessivePlaysTrackMedia() {
   // const mostSuccessivePlaysTrack = state.rewindReport.generalStats.mostSuccessivePlays.track
   // console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
   state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage, mostSuccessivePlaysTrackBackgroundImage], state.rewindReport.generalStats.mostSuccessivePlays?.image, `track`, state.settings.darkMode)
+
+}
+
+function loadSummary() {
+
+  console.log(`summary`)
+
+  // top song
+  const topSongPrimaryImage = document.querySelector(`#summary-top-track-image`);
+  console.log(`img:`, topSongPrimaryImage)
+  const topSong = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
+  console.log(`topSong:`, topSong)
+
+  // top artist
+  const topArtistPrimaryImage = document.querySelector(`#summary-top-artist-image`);
+  console.log(`img:`, topArtistPrimaryImage)
+  const topArtist = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
+  console.log(`topArtist:`, topArtist)
+
+  // most successive plays
+  const mostSuccessivePlaysTrackPrimaryImage = document.querySelector(`#summary-most-successive-streams-track-image`);
+  console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage)
+  const mostSuccessivePlaysTrack = state.rewindReport.generalStats?.mostSuccessivePlays?.track
+  console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
+
+  // load images
+  state.jellyHelper.loadImage([topSongPrimaryImage], topSong.image, `track`, state.settings.darkMode)
+  state.jellyHelper.loadImage([topArtistPrimaryImage], topArtist.images.primary, `artist`, state.settings.darkMode)
+  if (state.extraFeatures.mostSuccessivePlays) {
+    state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage], mostSuccessivePlaysTrack.image, `track`, state.settings.darkMode)
+  }
 
 }
 
