@@ -83,10 +83,11 @@ export async function deleteRewind() {
   }
 }
 
-export async function generateRewindReport({
-  progressCallback,
-  oldReport
-}) {
+export async function generateRewindReport(options = {}) {
+
+  options.progressCallback = options.progressCallback || function() {}
+  options.oldReport = options.oldReport || null
+  const { progressCallback, oldReport } = options
 
   let reportData
   try {

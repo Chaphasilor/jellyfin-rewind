@@ -67,7 +67,7 @@ state.featureSideEffects = {
         console.log(`animating totalMusicDays`)
         anime({
           targets: animators,
-          totalMusicDays: state.rewindReport.generalStats.totalMusicDays,
+          totalMusicDays: [0, state.rewindReport.generalStats.totalMusicDays],
           round: 1,
           easing: 'easeInOutExpo',
           delay: 750,
@@ -147,7 +147,7 @@ state.features = [
   buildFeature(`intro`, html`
     <div class="p-4">
 
-      <div class="mt-10 w-full flex flex-col items-center">
+      <div class="mt-4 w-full flex flex-col items-center">
         <img class="h-24" src="${() =>  state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
         <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
       </div>
@@ -155,18 +155,18 @@ state.features = [
 
       <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport?.year}!</h2>
 
-      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
         <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
 
-        <p class="">Feel free to share your Rewind on social media, I'd love to see your <span class="text-[#00A4DC]" @click="${stopPropagation()}">#JellyfinRewind</span> posts! If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>.</p>
+        <p class="">If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/issues" target="_blank" @click="${stopPropagation()}">GitHub</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a>.</p>
       </div>
 
       <div>
-        <button class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-300 mt-8 flex flex-row gap-4 items-center mx-auto" @click="${stopPropagation(() => showOverlayDataAccuracy())}">Accuracy Disclaimer</button> 
+        <button class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-600 dark:text-gray-300 mt-4 flex flex-row gap-4 items-center mx-auto" @click="${stopPropagation(() => showOverlayDataAccuracy())}">Accuracy Disclaimer</button> 
       </div>
 
       <button
-        class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
+        class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-8 flex flex-row gap-4 items-center mx-auto"
         @click="${stopPropagation(() => next())}"
       >
         <span>Let's Go!</span>
@@ -181,7 +181,7 @@ state.features = [
   // total playtime
   buildFeature(`total playtime`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-12">Your Total Playtime<br>of ${()=> state.rewindReport?.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlayDataAccuracy())}">
+      <h2 class="text-2xl font-medium mt-5">Your Total Playtime<br>of ${()=> state.rewindReport?.year}<span class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer" @click="${stopPropagation(() => showOverlayDataAccuracy())}">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 icon icon-tabler icon-tabler-asterisk" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
           <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
           <path d="M12 12l8 -4.5"></path>
@@ -328,13 +328,13 @@ state.features = [
   // days listened to music
   buildFeature(`days listened to music`, html`
     <div class="text-center">
-      <div class="mt-32 -rotate-6 font-quicksand text-sky-500 text-8xl"><span class="font-quicksand-bold">${() => state.extraFeatures.totalMusicDays ? showAsNumber(animators.totalMusicDays.toFixed(0)) : `???`}</span></div>
+      <div class="mt-16 -rotate-6 font-quicksand text-sky-500 text-8xl"><span class="font-quicksand-bold">${() => state.extraFeatures.totalMusicDays ? showAsNumber(animators.totalMusicDays.toFixed(0)) : `???`}</span></div>
 
-      <div class="mt-24 w-full px-10 flex flex-col items-center gap-6">
+      <div class="mt-16 w-full px-10 flex flex-col items-center gap-6">
         <div><span class="font-semibold text-xl">That's on how many days you listened to music through Jellyfin this year.</div>
         ${() => state.extraFeatures.totalMusicDays ? (
           state.rewindReport.generalStats.totalMusicDays < 364 ? html`
-            <div><span class="font-semibold text-sm text-center">What did you do on those ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
+            <div><span class="font-semibold text-sm text-center">What did you do on the ${(365 - state.rewindReport.generalStats.totalMusicDays).toFixed(0)} missing days?!</div>
               ` : html`
               <div><span class="font-semibold text-sm text-center">Good news: next year you can get one additional day!</div>
             `) : null
@@ -342,7 +342,7 @@ state.features = [
       </div>
 
       ${() => state.extraFeatures.totalMusicDays ? html`
-        <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
+        <div class="mt-24 w-full px-10 flex flex-col items-center gap-3">
           <div><span class="font-semibold text-xl">On those ${() => state.rewindReport.generalStats.totalMusicDays} days,<br>you listened to <span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.mean.toFixed(0))}</span> minutes per day on average.</div>
           <div><span class="font-semibold text-xl">That's <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0).toFixed(2))}</span> hours or <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber((state.rewindReport?.generalStats?.minutesPerDay?.mean / 60.0 / 24.0 * 100.0).toFixed(1))}%</span> of a day.</div>
           <div class="font-semibold text-sm px-8 pt-6">(Median value is <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.generalStats?.minutesPerDay?.median.toFixed(1))}</span> minutes, for those who care)</div>
@@ -477,7 +477,7 @@ state.features = [
         <div><span class="font-semibold text-xl mt-4">Impressive.</div>
       </div>
 
-      <div class="mt-20 w-full px-10 flex flex-col items-center gap-2">
+      <div class="mt-16 w-full px-10 flex flex-col items-center gap-2">
         <div><span class="font-semibold text-xl">Average song length: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds.</div>
         <div><span class="font-semibold -mt-1">(Median: <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.median.toFixed(0))}</span>)</div>
         <div><span class="font-semibold text-xl">Shortest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.min.toFixed(0))}</span> seconds.</div>
@@ -596,11 +596,11 @@ state.features = [
       <h2 class="text-2xl font-medium mt-10">Your Listening Habits</h2>
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
-      <div class="mt-40 w-full px-6 flex flex-col items-center gap-2">
+      <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
         <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> songs ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
       </div>
       
-      <div class="mt-32 w-full px-10 flex flex-col items-center gap-3">
+      <div class="mt-28 w-full px-10 flex flex-col items-center gap-3">
         <span class="font-semibold text-xl mb-3">Additionally, you listened to</span>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  songs.</div>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? `more` : `less`}  artists.</div>
@@ -673,7 +673,7 @@ state.features = [
       </ol>
     </div>
     <!-- continue as simple list -->
-    <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
+    <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-48">
       ${() => state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(5, 20).map((genre, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
@@ -951,8 +951,8 @@ state.features = [
  `),
  // summary screen
  buildFeature(`summary`, html`
-  <div class="h-full p-4 pt-12 flex flex-col justify-around">
-    <h2 class="text-2xl font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center mt-2 font-semibold text-gray-800 dark:text-gray-200">
+  <div class="h-full p-4 flex flex-col justify-around">
+    <h2 class="text-2xl pt-[4.5rem] font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center mt-2 font-semibold text-gray-800 dark:text-gray-200">
       <span>${() => state.auth?.config?.user?.name}'s</span>
       <div class="w-full flex flex-col items-center">
         <img class="h-12" src="${() => state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
@@ -961,58 +961,58 @@ state.features = [
       <span>Report</span>
     </h2>
 
-    <div class="grid grid-cols-2 place-items-stretch gap-1.5 w-full mt-6 pb-20 text-gray-100">
-      <div class="overflow-hidden border-2 border-white/10 text-center p-1 flex flex-col justify-center items-center rounded-md col-span-2">
+    <div class="grid grid-cols-2 place-items-stretch gap-1 w-full mt-6 pb-20 text-gray-800 dark:text-gray-100">
+      <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 text-center p-1 flex flex-col justify-center items-center rounded-md col-span-2">
         <!-- duration -->
-        <div class="text-xl"><span class="text-[#00A4DC] text-3xl font-semibold font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> minutes listened</div>
+        <div class="text-lg"><span class="text-[#00A4DC] text-2xl font-semibold font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> minutes listened</div>
       </div>
-      <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+      <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center">
         <!-- top song -->
-        <h4 class="">Top Song</h4>
-        <img id="summary-top-track-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+        <h4 class="text-xs">Top Song</h4>
+        <img id="summary-top-track-image" class="w-auto h-[5rem] my-1.5 rounded-md" />
         <div class="text-balance">
           <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.name}</span>
           <span class="">by ${() => state.settings.useAlbumArtists ? state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.albumBaseInfo?.albumArtistBaseInfo?.name : state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.artistsBaseInfo?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
         </div>
       </div>
-      <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+      <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center">
         <!-- top artist -->
-        <h4 class="">Top Artist</h4>
-        <img id="summary-top-artist-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+        <h4 class="text-xs">Top Artist</h4>
+        <img id="summary-top-artist-image" class="w-auto h-[5rem] my-1.5 rounded-md" />
         <div class="text-balance">
           <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.name}</span>
         </div>
       </div>
       ${() => state.extraFeatures.totalMusicDays ? html`
-        <div class="overflow-hidden border-2 border-white/10 p-1 text-center rounded-md grid place-content-center">
+        <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 text-center rounded-md grid place-content-center">
           <!-- days listened to music -->
           <div class="text-xl text-balance">Listened on <span class="font-semibold text-[#00A4DC] text-3xl font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalMusicDays)}</span> days</div>
         </div>
       ` : null}
-      <div class="overflow-hidden border-2 border-white/10 py-1 px-3 rounded-md">
+      <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md">
         <!-- stats 1 - unique items -->
-        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueTracksPlayed)}</span> unique songs</div>
-        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueArtistsPlayed)}</span> unique artists</div>
-        <div><span class="font-semibold text-[#00A4DC] text-lg font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueAlbumsPlayed)}</span> unique albums</div>
+        <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueTracksPlayed)}</span> unique songs</div>
+        <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueArtistsPlayed)}</span> unique artists</div>
+        <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueAlbumsPlayed)}</span> unique albums</div>
       </div>
       ${() => state.extraFeatures.mostSuccessivePlays ? html`
-        <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md text-center flex flex-col justify-end items-center">
+        <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center">
           <!-- most successive plays -->
-          <h4 class="">Most Successive Streams</h4>
-          <img id="summary-most-successive-streams-track-image" class="w-auto h-[5.5rem] my-1.5 rounded-md" />
+          <h4 class="text-xs">Most Successive Streams</h4>
+          <img id="summary-most-successive-streams-track-image" class="w-auto h-[5rem] my-1.5 rounded-md" />
           <div class="text-balance">
             <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.generalStats.mostSuccessivePlays?.name}</span>
             <span class="">by ${() => state.settings.useAlbumArtists ? state.rewindReport.generalStats.mostSuccessivePlays?.albumArtist?.name : state.rewindReport.generalStats.mostSuccessivePlays?.artists?.reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)}</span>
           </div>
         </div>
       ` : null}
-      <div class="overflow-hidden border-2 border-white/10 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around">
+      <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around">
         <!-- stats 1 - unique items -->
         <div class="text-balance">Library Duration: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber((state.rewindReport?.libraryStats?.totalRuntime / 60.0 / 60.0 / 24.0).toFixed(1))}</span> days</div>
         <div class="text-balance">Average song length: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds</div>
       </div>
       ${() => state.extraFeatures.listeningActivityDifference ? html`
-        <div class="overflow-hidden border-2 border-white/10 p-1 rounded-md col-span-2">
+        <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md col-span-2">
           <!-- stats 2 - listening activity difference (if positive) -->
           <div class="text-center mb-2"><span class="font-semibold font-quicksand text-[#00A4DC] text-lg">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> more streams than last year</div>
           <div class="flex flex-row flex-wrap justify-around gap-4">
@@ -1071,7 +1071,7 @@ state.features = [
 
     <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 text-gray-400 mt-3 w-5/6 mx-auto">
       <p class="">and <span class="font-bold text-orange-600">store it until next year</span> because it might help to show you even more insights next time around!</p>
-      <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank" @click="${stopPropagation()}">Twitter</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
+      <p class="">Oh and I'd love to hear your feedback on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/issues" target="_blank" @click="${stopPropagation()}">GitHub</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a>!<br>Feel free to let me know your suggestions or report bugs :)</p>
       <p class="relative">Thanks for using Jellyfin Rewind. See you next year &lt;3 <span class="absolute italic right-0 bottom-0">- Chaphasilor</span></p>
     </div>
 
@@ -1150,8 +1150,8 @@ function showIncompleteReportOverlay(onClose = () => {}) {
     title: `Incomplete Report`,
     key: `incomplete-report`,
     content: html`
-      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-5/6 mx-auto">
-        <p class="">The report you're about to download is incomplete and missing some data.</p>
+      <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 mt-10 w-full mx-auto text-balance text-center">
+        <p class="">The Rewind Report you're about to download is incomplete and missing some data.</p>
         <p class="">Please re-generate and download the report without reloading the page in-between.</p>
       </div>
 
@@ -1164,9 +1164,7 @@ function showIncompleteReportOverlay(onClose = () => {}) {
           button.disabled = true
           span.innerHTML = `Generating...`
           svg.classList.add(`animate-spin`)
-          window.generateRewindReport({
-            year: state.rewindReport?.year,
-          }).then((rewindReportData) => {
+          window.generateRewindReport().then((rewindReportData) => {
 
             span.innerHTML = `Regenerate and Download Report`
             svg.classList.remove(`animate-spin`)
@@ -1190,7 +1188,7 @@ function showIncompleteReportOverlay(onClose = () => {}) {
       </button>
 
       <button
-        class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-300 hover:bg-orange-400 text-white font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+        class="px-4 py-2 rounded-xl text-[1.2rem] border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
         @click="${stopPropagation(() => {
           window.downloadRewindReportData(state.rewindReportData, true)
           // closeOverlay(`overlay-incomplete-report`)

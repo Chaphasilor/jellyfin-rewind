@@ -117,7 +117,7 @@ watch(() => [
 ])
 
 const header = html`
-<div class="mt-10 w-full flex flex-col items-center mb-24">
+<div class="mt-6 w-full flex flex-col items-center mb-16">
   <img class="h-24" src="${() =>  state.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
   <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
 </div>
@@ -128,7 +128,7 @@ const viewStart = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
 
     <p class="">Hi there!</p>
     
@@ -139,7 +139,7 @@ const viewStart = html`
   </div>
 
   <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-16 flex flex-row gap-4 items-center mx-auto"
     @click="${() => state.currentView = `server`}"
   >
     <span>Log In</span>
@@ -272,7 +272,7 @@ const viewServer = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center px-2">
     <p class="">Type in the web address (URL) of your Jellyfin server in the field below.</p>
     <p class="">If you don't know the URL, you can open your Jellyfin app, open the menu/sidebar and click on "Select Server". It should display your server's URL and you can easily copy it!</p>
   </div>
@@ -312,11 +312,11 @@ const viewUser = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">That worked, amazing!</p>
     <p class="">Now, select the user account you want to see the Rewind for.</p>
 
-    <p class="text-sm -mt-1">You can also manually enter a username if your account isn't shown.<br>Alternatively, connecting via an access token is possible as well!</p>
+    <!-- <p class="text-sm -mt-1">You can also manually enter a username if your account isn't shown.<br>Alternatively, connecting via an access token is possible as well!</p> -->
   </div>
 
   <div class="mt-6 w-5/6 mx-auto">
@@ -358,7 +358,7 @@ const viewUser = html`
             state.currentView = `login`
           }}"
         >
-          <span class="text-base text-center w-full font-regular text-gray-900">Log in via auth token</span>
+          <span class="text-base text-center w-full font-regular text-gray-900">Log in with a token</span>
         </li>
       </div>
     </ul>
@@ -581,7 +581,7 @@ const viewLogin = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto text-balance text-center">
     <p class="">Almost there!</p>
     <p class="">Please enter your credentials to log into your server.<br>Your password will only be sent to your server.</p>
   </div>
@@ -649,13 +649,13 @@ const viewImportReport = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">Awesome, you're logged in!</p>
     <p class="">You can now import last year's Jellyfin Rewind report, if you have one.</p>
     <p class="">This will give you more, and more reliable, statistics about your listening activity.</p>
   </div>
 
-  <div class="w-full flex flex-col items-center text-center mt-24">
+  <div class="w-full flex flex-col items-center text-center mt-12">
     ${() =>
       !state.oldReport ? html`
         <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOldReport ? `saturation-50` : ``}`}">Import Last Year's Report</label>
@@ -678,15 +678,15 @@ const viewImportReport = html`
         }}">
 
         ${() => state.importingOldReport ? html`
-          <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-300">Importing, please wait a few seconds...</p>
-          ` : html`
-            <button
-              class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-16 flex flex-row gap-4 items-center mx-auto"
-              @click="${() => state.currentView = `load`}"
-            >
-              <span>Continue without last year's report</span>
-            </button>
-          `
+          <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
+        ` : html`
+          <button
+            class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto"
+            @click="${() => state.currentView = `load`}"
+          >
+            <span>Continue without last year's report</span>
+          </button>
+        `
         }
       ` : html`
         <button
@@ -773,9 +773,9 @@ const viewLoad = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">Your Rewind Report is now generating. This might take a few seconds.</p>
-    <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via Reddit so that I can look into it :)</p>
+    <p class="">Please be patient, and if nothing happens for more than 30s, reach out to me via <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/issues" target="_blank">GitHub</a> so that I can look into it :)</p>
   </div>
 
   ${() => progressBar}
@@ -783,7 +783,7 @@ const viewLoad = html`
   ${() =>
     state.rewindReport ? html`
     <button
-      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
       @click="${() => launchRewind()}"
       disabled="${() => !state.rewindReport || state.rewindGenerating}"
     >
@@ -808,7 +808,7 @@ const viewLoad = html`
 
 const buttonLogOut = html`
 <button
-  class="px-4 py-2 rounded-xl text-[1.2rem] bg-red-400 hover:bg-red-500 dark:bg-red-600 dark:hover:bg-red-700 text-white font-medium mt-20 flex flex-row gap-3 items-center mx-auto"
+  class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-20 flex flex-row gap-3 items-center mx-auto text-red-500"
   @click="${() => {
     state.auth.destroySession()
     deleteRewind()
@@ -829,7 +829,7 @@ const viewRevisit = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">Welcome back, ${() => state.auth.config?.user?.name}!</p>
     <p class="">${() =>
       !state.staleReport ? 
@@ -856,7 +856,7 @@ const viewRevisit = html`
   </button>
 
   <button
-    class="px-4 py-2 rounded-xl text-[1.2rem] bg-orange-400 hover:bg-orange-500 dark:bg-orange-500 dark:hover:bg-orange-600 opacity-80 text-white font-medium mt-32 flex flex-row gap-3 items-center mx-auto"
+    class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 opacity-80 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto"
     @click="${() => {
       state.currentView = `importReport` 
     }}"
@@ -882,7 +882,7 @@ const viewRewindGenerationError = html`
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
     <p class="">Sorry, we couldn't generate your Rewind Report.</p>
     <p class="">Please try again later.</p>
-    <p class="">If you keep seeing this message, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank">Reddit</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://twitter.com/Chaphasilor" target="_blank">Twitter</a> so that I can try to resolve the issue!</p>
+    <p class="">If you keep seeing this message, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/issues" target="_blank">GitHub</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank">Reddit</a> so that I can try to resolve the issue!</p>
   </div>
 
   <button
