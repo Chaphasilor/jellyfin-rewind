@@ -6,17 +6,26 @@
 
 ### How to use
 
-Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (http) from a "secure" website (http**s**).
+Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (HTTP) from a "secure" website (HTTP**S**), or requests from a non-private context (website not within your network) to a private context (Jellyfin server accessed over a local IP address within your network).  
+So make sure you're not using a local IP address (starts with `192.168.`) or mDNS hostname (something like `jellyfin.local`). If you use something like Tailscale as your VPN, you could use your server's Tailscale IP address.
 
-Therefore, **if you're unsure what your Jellyfin server is using, simply use the first link** (http)!
+If you're unsure what your Jellyfin server is using, but your Jellyfin server is accessible over the internet, simply use the first link (http)!  
+If that doesn't work, or your server **is NOT** accessible over the internet, you could self-host the Jellyfin Rewind website on your local network, for example on the same server that is running Jellyfin. For that, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the provided Docker image. The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.
 
 ### Links
 
-**HTTP** (works for both http and https Jellyfin servers, but some things might not work correctly):
+**Local Network / Self-Hosting**
+
+If your Jellyfin server is only accessible on your local network, you will need to self-host Jellyfin Rewind so that it's also accessible on your local network. Otherwise your browser will block the connection.  
+To do this, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the [provided Docker image here](https://hub.docker.com/r/chaphasilor/jellyfin-rewind/tags). The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.
+
+**HTTP** (works for both http and https Jellyfin servers, as long as they are accessible over the internet):
+
+*Make sure your browser shows "insecure" / no lock at the top after opening the link, otherwise connecting to your HTTP-only Jellyfin server might not work!*
 
 <http://jellyfin-rewind-http.chaphasilor.xyz>
 
-**HTTPS** (if your Jellyfin server has an https connection, this is the best experience):
+**HTTPS** (**only use this if your Jellyfin server has an https connection and is accessible over the internet**, this is the best experience):
 
 <https://jellyfin-rewind.chaphasilor.xyz>
 
