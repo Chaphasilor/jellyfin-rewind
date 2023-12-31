@@ -1076,7 +1076,7 @@ state.features = [
     </div>
 
     <button
-        class="px-4 py-2 rounded-xl text-base leading-6 border border-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
+        class="px-4 py-2 rounded-xl text-base leading-6 border-2 border-[#00A4DC] hover:bg-[#0085B2] text-gray-800 dark:text-gray-200 hover:text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
         @click="${stopPropagation(() => {
 
           const closeJellyfinRewind = () => {
@@ -1188,7 +1188,7 @@ function showIncompleteReportOverlay(onClose = () => {}) {
       </button>
 
       <button
-        class="px-4 py-2 rounded-xl text-[1.2rem] border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-regular mt-12 flex flex-row gap-4 items-center mx-auto"
+        class="px-4 py-2 rounded-xl text-[1.2rem] border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-regular mt-12 flex flex-row gap-4 items-center mx-auto hover:text-white"
         @click="${stopPropagation(() => {
           window.downloadRewindReportData(state.rewindReportData, true)
           // closeOverlay(`overlay-incomplete-report`)

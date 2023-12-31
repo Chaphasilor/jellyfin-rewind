@@ -370,8 +370,9 @@ function downloadRewindReportData(reportData, skipVerification) {
     const blob = new Blob([reportDataString], {type: `application/json`})
     const url = URL.createObjectURL(blob)
     const a = document.createElement(`a`)
+    console.log(`jellyfinRewind.auth.config:`, jellyfinRewind.auth.config)
     a.href = url
-    a.download = `jellyfin-rewind-report-${reportData.jellyfinRewindReport.year}_for-${jellyfinRewind.auth.config.user.name}-at-${jellyfinRewind.auth.config.serverInfo.name}_${new Date().toISOString().slice(0, 10)}.json`
+    a.download = `jellyfin-rewind-report-${reportData.jellyfinRewindReport.year}_for-${jellyfinRewind.auth.config.user.name}-at-${jellyfinRewind.auth.config.serverInfo.ServerName}_${new Date().toISOString().slice(0, 10)}.json`
     a.click()
   }
 
