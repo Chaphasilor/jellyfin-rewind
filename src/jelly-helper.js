@@ -11,10 +11,13 @@ export default class JellyHelper {
     if (!Array.isArray(elements)) {
       elements = [elements];
     }
+
+    elements = elements.filter(element => !!element)
     
     const blurhash = imageInfo?.blurhash
     const primaryTag = imageInfo?.primaryTag
     const parentItemId = imageInfo?.parentItemId
+    const resolution = 256
   
     if (blurhash) {
       const dataUri = blurhashToDataURI(blurhash)
@@ -42,9 +45,9 @@ export default class JellyHelper {
     }
   
     if (primaryTag && (parentItemId || type === `user`)) {
-      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}`
+      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       if (type === `user`) {
-        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}`
+        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       }
       fetch(url, {
         method: `GET`,
@@ -153,6 +156,143 @@ export default class JellyHelper {
     .then(json => {
       return json.Items
     })
+  }
+
+  async checkIfPlaybackReportingInstalled() {
+
+    const pluginsResponse = await fetch(`${this.auth.config.baseUrl}/Plugins`, {
+      method: `GET`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+    const pluginsJson = await pluginsResponse.json()
+
+    const playbackReportingPluginInstallation = pluginsJson.find(plugin => plugin.Name === `Playback Reporting`)
+    if (!playbackReportingPluginInstallation) {
+      return {
+        installed: false,
+        restartRequired: false,
+        disabled: false,
+      }
+    }
+
+    if (playbackReportingPluginInstallation.Status === `Restart`) {
+      return {
+        installed: true,
+        version: playbackReportingPluginInstallation.Version,
+        id: playbackReportingPluginInstallation.Id,
+        restartRequired: true,
+        disabled: false,
+      }
+    }
+
+    if (playbackReportingPluginInstallation.Status === `Disabled`) {
+      return {
+        installed: true,
+        version: playbackReportingPluginInstallation.Version,
+        id: playbackReportingPluginInstallation.Id,
+        restartRequired: false,
+        disabled: true,
+      }
+    }
+
+    const playbackReportingSettingsResponse = await fetch(`${this.auth.config.baseUrl}/System/Configuration/playback_reporting`, {
+      method: `GET`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+    const playbackReportingSettingsJson = await playbackReportingSettingsResponse.json()
+
+    let playbackReportingIgnoredUsersJson = []
+    try {
+      const playbackReportingIgnoredUsersResponse = await fetch(`${this.auth.config.baseUrl}/user_usage_stats/user_list`, {
+        method: `GET`,
+        headers: {
+          ...this.auth.config.defaultHeaders,
+        },
+      })
+      playbackReportingIgnoredUsersJson = await playbackReportingIgnoredUsersResponse.json()
+    } catch (err) {
+      console.warn(`Couldn't fetch playback reporting ignored users:`, err)
+    }
+
+    return {
+      installed: true,
+      version: playbackReportingPluginInstallation.Version,
+      id: playbackReportingPluginInstallation.Id,
+      restartRequired: false,
+      disabled: false,
+      settings: {
+        raw: playbackReportingSettingsJson,
+        retentionInterval: Number(playbackReportingSettingsJson.MaxDataAge),
+      },
+      ignoredUsers: playbackReportingIgnoredUsersJson.filter(user => user.in_list).map(user => ({ id: user.id, name: user.name })),
+    }
+    
+  }
+
+  // requires administrator account
+  async installPlaybackReportingPlugin() {
+
+    const response = await fetch(`${this.auth.config.baseUrl}/Packages/Installed/Playback%20Reporting?AssemblyGuid=5c53438191a343cb907a35aa02eb9d2c`, {
+      method: `POST`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+
+    if (response.status === 204) {
+      return true
+    } else {
+      throw new Error(`Couldn't install Playback Reporting plugin!`, await response.text())
+    }
+    
+  }
+
+  // requires administrator account
+  async enablePlaybackReportingPlugin(setup) {
+
+    const response = await fetch(`${this.auth.config.baseUrl}/Plugins/${setup.id}/${setup.version}/Enable`, {
+      method: `POST`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+
+    if (response.status === 204) {
+      return true
+    } else {
+      throw new Error(`Couldn't enable Playback Reporting plugin!`, await response.text())
+    }
+    
+  }
+
+  // requires administrator account
+  async updatePlaybackReportingSettings(settings) {
+
+    const response = await fetch(`${this.auth.config.baseUrl}/System/Configuration/playback_reporting`, {
+      method: `POST`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+        'Content-Type': `application/json`,
+      },
+      body: JSON.stringify(settings),
+    })
+    return response.status === 204
+  }
+
+  // requires admin permissions
+  async shutdownServer() {
+      
+    const response = await fetch(`${this.auth.config.baseUrl}/System/Shutdown`, {
+      method: `POST`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+    return response.ok
   }
 
 }

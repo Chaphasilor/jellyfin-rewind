@@ -59,7 +59,7 @@ export async function restoreAndPrepareRewind() {
       staleReport = true
     }
     // check if the report is for the previous year and it's after February
-    if (rewindReportData.jellyfinRewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+    if (rewindReportData.jellyfinRewindReport.year < new Date().getFullYear() && new Date().getMonth() > 1) {
       staleReport = true
     }
     
@@ -74,12 +74,29 @@ export async function restoreAndPrepareRewind() {
   }
 }
 
-export async function generateRewindReport(progressCallback) {
+export async function deleteRewind() {
+  try {
+    jellyfinRewind.deleteRewindReport()
+    console.info(`Rewind report deleted successfully!`)
+  } catch (err) {
+    console.error(`Couldn't delete Rewind report:`, err)
+  }
+}
+
+export async function generateRewindReport(options = {}) {
+
+  options.progressCallback = options.progressCallback || function() {}
+  options.oldReport = options.oldReport || null
+  const { progressCallback, oldReport } = options
 
   let reportData
   try {
     
-    reportData = await window.jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR), progressCallback)
+    reportData = await window.jellyfinRewind.generateRewindReport({
+      year: Number(import.meta.env.VITE_TARGET_YEAR),
+      progressCallback: progressCallback,
+      oldReport: oldReport,
+    })
     console.info(`Report generated successfully!`)
     
   } catch (err) {

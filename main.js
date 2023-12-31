@@ -59,6 +59,7 @@ window.onload = async () => {
 
   window.jellyfinRewind = jellyfinRewind
   
+  console.log(`target year:`, import.meta.env.VITE_TARGET_YEAR)
   console.log(`commit hash:`, __COMMITHASH__)
 
   if (jellyfinRewind.auth.restoreSession()) {
@@ -269,7 +270,7 @@ function init() {
         staleReport = true
       }
       // check if the report is for the previous year and it's after February
-      if (rewindReportData.jellyfinRewindReport.year !== new Date().getFullYear() && new Date().getMonth() > 1) {
+      if (rewindReportData.jellyfinRewindReport.year < new Date().getFullYear() && new Date().getMonth() > 1) {
         staleReport = true
       }
       
@@ -307,7 +308,9 @@ async function generateRewindReport() {
   try {
     
     loadingSpinner.classList.remove(`hidden`)
-    reportData = await jellyfinRewind.generateRewindReport(Number(import.meta.env.VITE_TARGET_YEAR))
+    reportData = await jellyfinRewind.generateRewindReport({
+      year: Number(import.meta.env.VITE_TARGET_YEAR)
+    })
     console.info(`Report generated successfully!`)
     loadingSpinner.classList.add(`hidden`)
     

@@ -100,11 +100,14 @@ export default class Auth {
       }),
     })
 
-    const json = await response.json()
-    
     if (response.status !== 200) {
-      throw new Error(`Authentication failed: ${response.json()}`);
+      if (response.status === 401) {
+        throw new Error(`Login failed. Wrong password?`)
+      }
+      throw new Error(`Authentication failed: ${await response.text()}`);
     }
+    
+    const json = await response.json()
     
     this.config.user = {
       token: json.AccessToken,
@@ -112,6 +115,7 @@ export default class Auth {
       name: json.User.Name,
       primaryImageTag: json.User.PrimaryImageTag,
       sessionId: json.SessionInfo.Id,
+      isAdmin: json.User.Policy.IsAdministrator,
     };
 
     this.setDefaultHeaders(this.config.user.token);
@@ -143,6 +147,7 @@ export default class Auth {
       name: json.Name,
       primaryImageTag: json.PrimaryImageTag,
       sessionId: null,
+      isAdmin: json.Policy.IsAdministrator,
     };
 
     this.setDefaultHeaders(this.config.user.token);
