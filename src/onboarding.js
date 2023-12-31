@@ -71,11 +71,17 @@ export async function init(auth) {
     state.rewindReport = restored.rewindReportData
     state.staleReport = restored.staleReport
     console.log(`state.auth.config.user:`, state.auth.config.user)
-    state.currentView = `revisit`
+    if (state.auth?.config?.user) {
+      await checkPlaybackReportingSetup(`revisit`)
+    } else {
+      state.currentView = `revisit`
+    }
   } catch (err) {
-    if (state.auth.config.user) {
+    if (state.auth?.config?.user) {
       // determine which view to show
       await checkPlaybackReportingSetup()
+    } else {
+      state.currentView = `start`
     }
   }
 
@@ -104,7 +110,7 @@ export function render() {
   const onboardingElement = document.querySelector(`#onboarding`)
 
   html`
-  <div class="">
+  <div class="md:max-w-3xl mx-auto">
     ${() => state.views[state.currentView]}
     ${() => state.connectionHelpDialogOpen ? connectionHelpDialog : null}
     ${() => state.playbackReportingDialogOpen ? playbackReportingDialog : null}
@@ -400,7 +406,7 @@ async function loginAuthToken()  {
   }
 }
 
-function inspectPlaybackReportingSetup(playbackReportingSetup) {
+function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
 
   const inspection = {
     valid: true,
@@ -418,7 +424,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
         @click="${async () => {
           try {
             await window.helper.installPlaybackReportingPlugin()
-            checkPlaybackReportingSetup()
+            checkPlaybackReportingSetup(nextScreen)
           } catch (err) {
             console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
           }
@@ -436,7 +442,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
           try {
             await window.helper.shutdownServer()
             setTimeout(() => {
-              checkPlaybackReportingSetup()
+              checkPlaybackReportingSetup(nextScreen)
             }, 5000)
           } catch (err) {
             console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
@@ -455,7 +461,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
         @click="${async () => {
           try {
             await window.helper.enablePlaybackReportingPlugin(playbackReportingSetup)
-            checkPlaybackReportingSetup()
+            checkPlaybackReportingSetup(nextScreen)
           } catch (err) {
             console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
           }
@@ -471,7 +477,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
     if (window.helper && state.auth.config.user.isAdmin) {
       inspection.action = html`
         <button
-          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+          class="px-3 py-2 my-1 mx-auto rounded-lg text-white font-semibold bg-[#00A4DC] hover:bg-[#0085B2] "
           @click="${async () => {
             try {
               const newSettings = {
@@ -479,13 +485,13 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
                 MaxDataAge: "-1",
               }
               await window.helper.updatePlaybackReportingSettings(newSettings)
-              checkPlaybackReportingSetup()
+              checkPlaybackReportingSetup(nextScreen)
             } catch (err) {
               console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
             }
-          }}">Set retention interval<br>to forever</button>
+          }}">Set retention interval to forever</button>
         <button
-          class="px-2 py-1 mt-1 mx-auto rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto"
+          class="px-2 py-1 mt-1 mx-auto rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
           @click="${async () => {
             try {
               const newSettings = {
@@ -493,7 +499,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
                 MaxDataAge: 24,
               }
               await window.helper.updatePlaybackReportingSettings(newSettings)
-              checkPlaybackReportingSetup()
+              checkPlaybackReportingSetup(nextScreen)
             } catch (err) {
               console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
             }
@@ -506,6 +512,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
     // if (window.helper && state.auth.config.user.isAdmin) {
       inspection.action = html`
       <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Playback Reporting Settings!</a>
+      <button class="px-2 py-1 rounded-lg text-sm font-semibold border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 hover:text-white" @click="${() => checkPlaybackReportingSetup(nextScreen)}">Check Again</button>
       `
     // }
   }
@@ -514,11 +521,11 @@ function inspectPlaybackReportingSetup(playbackReportingSetup) {
   
 } 
 
-async function checkPlaybackReportingSetup() {
+async function checkPlaybackReportingSetup(nextScreen = `importReport`) {
 
   // there's nothing we can do without the helper
   if (!window.helper) {
-    state.currentView = `importReport`
+    state.currentView = nextScreen
   }
 
   try {
@@ -526,7 +533,7 @@ async function checkPlaybackReportingSetup() {
     const playbackReportingSetup = await window.helper.checkIfPlaybackReportingInstalled()
     console.log(`playbackReportingSetup:`, playbackReportingSetup)
 
-    const inspection = inspectPlaybackReportingSetup(playbackReportingSetup)
+    const inspection = inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen)
     console.log(`inspection:`, inspection)
 
     
@@ -534,12 +541,12 @@ async function checkPlaybackReportingSetup() {
       state.currentView = `playbackReportingIssues`
       state.playbackReportingInspectionResult = inspection
     } else {
-      state.currentView = `importReport`
+      state.currentView = nextScreen
     }
     
   } catch (err) {
     console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
-    state.currentView = `importReport`
+    state.currentView = nextScreen
   }
   
 }
@@ -549,25 +556,25 @@ const viewPlaybackReportingIssues = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-5/6 mx-auto">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">It seems like the Playback Reporting plugin isn't set up correctly.</p>
     <p class="">The following problem was detected:</p>
   </div>
 
-  <div class="w-full px-6 flex flex-col gap-3 items-center text-center mt-10 text-gray-300">
+  <div class="w-full px-6 flex flex-col gap-3 items-center text-center mt-10 text-gray-700 dark:text-gray-300 text-balance text-center">
     <p class="w-full text-lg text-balance font-semibold text-red-500 dark:text-red-400">${() => state.playbackReportingInspectionResult?.issue}</p>
     ${() => state.playbackReportingInspectionResult?.action}
   </div>
 
   <button
-    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-12 flex flex-row gap-4 items-center mx-auto"
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 text-balance text-center mt-12 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.playbackReportingDialogOpen = true}"
   >
-    <span>More Information about<br>why this is important</span>
+    <span>More Information about why this is important</span>
   </button>
 
   <button
-    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-24 flex flex-row gap-4 items-center mx-auto"
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-24 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.currentView = `importReport`}"
   >
     <span>Continue anyway</span>
@@ -681,7 +688,7 @@ const viewImportReport = html`
           <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
         ` : html`
           <button
-            class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto"
+            class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
             @click="${() => state.currentView = `load`}"
           >
             <span>Continue without last year's report</span>
@@ -808,7 +815,7 @@ const viewLoad = html`
 
 const buttonLogOut = html`
 <button
-  class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-20 flex flex-row gap-3 items-center mx-auto text-red-500"
+  class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-20 flex flex-row gap-3 items-center mx-auto text-red-500 hover:text-white"
   @click="${() => {
     state.auth.destroySession()
     deleteRewind()
@@ -856,7 +863,7 @@ const viewRevisit = html`
   </button>
 
   <button
-    class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 opacity-80 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto"
+    class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto hover:text-white"
     @click="${() => {
       state.currentView = `importReport` 
     }}"

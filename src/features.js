@@ -1616,7 +1616,7 @@ export function render() {
         return state.featuresOpen ?
           html`
           <div class="fixed top-0 left-0 w-[100vw] h-[100vh] bg-white flex flex-row justify-center">
-            <div class="absolute w-full md:max-w-4xl h-full">
+            <div class="absolute w-full md:max-w-3xl h-full">
               <div class="absolute top-0 left-0 z-[5] w-full h-10 flex flex-row justify-between bg-gray-700/30">
                 <ul class="px-2 py-4 z-[100] w-full h-full flex flex-row gap-1.5 justify-between">
                   ${() => {
