@@ -174,16 +174,14 @@ const connectionHelpDialog = html`
       </div>
       <div class="w-full h-full overflow-x-auto p-4">
         <div class="flex flex-col items-start gap-2">
-          <p>Make sure your using the same protocol (https or http) as your server is using.</p>
-          <p>Make sure you're not using a local IP address or mDNS hostname. For example, you could use your server's Tailscale IP address, if you use Tailscale as your VPN.</p>
-          <p>Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (http) from a "secure" website (http<span class="font-semibold">s</span>).</p>
-          <p>Therefore, <span class="font-semibold">if you're unsure what your Jellyfin server is using, simply use the first link</span> (http)!</p>
-          <p>Here are the links to the Jellyfin Rewind website:</p>
-          <p><span class="font-semibold">HTTP</span><br>(works for both http and https Jellyfin servers, but some things might not work correctly):<br><a class="text-[#00A4DC]" href="http://jellyfin-rewind-http.chaphasilor.xyz">http://jellyfin-rewind-http.chaphasilor.xyz</a></p>
-          <p><span class="font-semibold">HTTPS</span><br>(if your Jellyfin server has an https connection, this is the best experience):<br><a class="text-[#00A4DC]" href="https://jellyfin-rewind.chaphasilor.xyz">https://jellyfin-rewind.chaphasilor.xyz</a></p>
-          <!-- TODO add more -->
-          <br>
-          <p>Advanced users can also <a class="text-[#00A4DC]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases" target="_blank">download the zip-archive</a> and use a local web server to serve the files, because local IPs/domains are treated differently by browsers.</p>
+          
+          <p>Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (HTTP) from a "secure" website (HTTP<span class="font-semibold">S</span>), or requests from a non-private context (website not within your network) to a private context (Jellyfin server accessed over a local IP address within your network).</p>
+          ${() => window.location.protocol === `https:` ? html`
+            <p>Make sure that your Jellyfin server is accessible via <b>HTTPS</b>. If your server is only available via regular HTTP, try going to <a class="text-[#00A4DC]" href="http://jellyfin-rewind-http.chaphasilor.xyz">http://jellyfin-rewind-http.chaphasilor.xyz</a></p>
+          ` : null}
+          <p>So make sure you're not using a local IP address (starts with <span class="font-mono">192.168.</span>) or mDNS hostname (something like <span class="font-mono">jellyfin.local</span>). If you use something like Tailscale as your VPN, you could use your server's Tailscale IP address.</p>
+          <p>Therefore, <span class="font-semibold">if you're unsure what your Jellyfin server is using, but your Jellyfin server is accessible over the internet, simply use the first link</span> (http)!</p>
+          <p>If your server <span class="font-semibold">is NOT</span> accessible over the internet, you could self-host the Jellyfin Rewind website on your local network, for example on the same server that is running Jellyfin. For that, check out the <a class="text-[#00A4DC]" href="https://github.com/Chaphasilor/jellyfin-rewind/releases" target="_blank">GitHub releases page</a> and either download the zip-archive or use the provided Docker image. The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.</p>
         </div>
       </div>
     </div>
@@ -259,7 +257,7 @@ async function connect() {
     <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
       <p class="">There was an error while connecting to the server.</p>
       <p class="">Please check the URL and try again.</p>
-      <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 dark:text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
+      <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
     </div>
     `
 

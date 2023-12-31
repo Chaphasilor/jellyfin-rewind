@@ -25,3 +25,4 @@ dist-ssr
 
 .env*
 reddit-post.md
+dist-self-host/
