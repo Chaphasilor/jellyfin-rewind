@@ -19,18 +19,18 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
       // }
       
       const track = new Track({
-        name: item.Name,
+        name: item.Name || `Unknown Song`,
         id: item.Id,
         artistsBaseInfo: item.ArtistItems.map(artist => ({id: artist.Id, name: artist.Name || `Unknown Artist`})),
         albumBaseInfo: {
           id: item.AlbumId, 
-          name: item.Album,
+          name: item.Album || `Unknown Album`,
           albumArtistBaseInfo: {
             id: item.AlbumArtists?.[0]?.Id || ``,
             name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
           },
         },
-        genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name})) || [],
+        genreBaseInfo: item.GenreItems?.map(genre => ({id: genre.Id, name: genre.Name || `Unknown Genre`})) || [],
         image: new PrimaryImage({
           parentItemId: item.ImageTags?.Primary ? item.Id : item.AlbumId,
           primaryTag: item.ImageTags?.Primary ? item.ImageTags.Primary : item.AlbumPrimaryImageTag,
