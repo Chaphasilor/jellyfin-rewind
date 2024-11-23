@@ -22,6 +22,7 @@
     "@arrow-js/core": "^1.0.0-alpha.9",
     "animejs": "^3.2.2",
     "blurhash": "^2.0.5",
-    "chart.js": "^4.4.0"
+    "chart.js": "^4.4.0",
+    "motion": "^11.11.17"
   }
 }
