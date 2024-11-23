@@ -20,7 +20,8 @@ export const state = reactive({
   rewindGenerating: false,
   rewindReport: null,
   oldReport: null,
-  importingOldReport: false,
+  importingExistingReport: false,
+  importingLastYearsReport: false,
   staleReport: false,
   progress: 0,
   auth: null,
@@ -41,7 +42,8 @@ export async function init(auth) {
     user: viewUser,
     login: viewLogin,
     playbackReportingIssues: viewPlaybackReportingIssues,
-    importReport: viewImportReport,
+    importReportForViewing: viewImportReportForViewing,
+    importLastYearsReport: viewImportLastYearsReport,
     load: viewLoad,
     revisit: viewRevisit,
     rewindGenerationError: viewRewindGenerationError,
@@ -153,6 +155,13 @@ const viewStart = html`
       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
       <path d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"></path>
     </svg>
+  </button>
+
+  <button
+    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-4 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.currentView = `importReportForViewing`}"
+  >
+    <span>Import an Existing Report Instead</span>
   </button>
 
 </div>
@@ -376,7 +385,7 @@ async function login()  {
   const password = document.querySelector(`#onboarding-password`).value
   try {
     let userInfo = await loginViaPassword(state.auth, username, password)
-    // state.currentView = `importReport`
+    // state.currentView = `importLastYearsReport`
     checkPlaybackReportingSetup()
   } catch (err) {
     console.error(`Error while logging in:`, err)
@@ -392,7 +401,7 @@ async function loginAuthToken()  {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
     let userInfo = await loginViaAuthToken(state.auth, username, token)
-    // state.currentView = `importReport`
+    // state.currentView = `importLastYearsReport`
     checkPlaybackReportingSetup()
   } catch (err) {
     console.error(`Error while logging in:`, err)
@@ -519,7 +528,7 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   
 } 
 
-async function checkPlaybackReportingSetup(nextScreen = `importReport`) {
+async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`) {
 
   // there's nothing we can do without the helper
   if (!window.helper) {
@@ -573,7 +582,7 @@ const viewPlaybackReportingIssues = html`
 
   <button
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-24 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    @click="${() => state.currentView = `importReport`}"
+    @click="${() => state.currentView = `importLastYearsReport`}"
   >
     <span>Continue anyway</span>
   </button>
@@ -649,7 +658,73 @@ const viewLogin = html`
 </div>
 `
 
-const viewImportReport = html`
+const viewImportReportForViewing = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+    <p class="">Have an existing Jellyfin Rewind report?</p>
+    <p class="">You can import it to take another look!</p>
+  </div>
+
+  <div class="w-full flex flex-col items-center text-center mt-12">
+    ${() =>
+      !state.rewindReport ? html`
+        <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingExistingReport ? `saturation-50` : ``}`}">Import Report</label>
+        <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
+          console.info(`Importing file...`)
+          const input = e.target
+          try {
+            state.importingExistingReport = true
+            input.disabled = true
+            state.rewindReport = await importRewindReport(e.target.files[0])
+            console.log(`state.rewindReport:`, state.rewindReport)
+            launchRewind()
+            // state.currentView = `load`
+            // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
+            // console.log(`featureDelta:`, featureDelta)
+          } catch (err) {
+            console.error(`Error while importing rewind report:`, err)
+          }
+          input.disabled = false
+          state.importingExistingReport = false
+        }}">
+
+        ${() => state.importingExistingReport ? html`
+          <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
+        ` : html`
+          <button
+            class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+            @click="${() => state.currentView = `start`}"
+          >
+            <span>Connect to a server instead</span>
+          </button>
+        `
+        }
+      ` : html`
+        <button
+          class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+          @click="${() => launchRewind()}"
+        >
+          <span>Open Rewind Report!</span>
+          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+            <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+            <circle cx="15" cy="9" r="1"></circle>
+          </svg> -->
+        </button>
+      `
+    }
+  </div>
+
+  ${() => buttonLogOut}
+
+</div>
+`
+
+const viewImportLastYearsReport = html`
 <div class="p-4">
 
   ${() => header}
@@ -663,12 +738,12 @@ const viewImportReport = html`
   <div class="w-full flex flex-col items-center text-center mt-12">
     ${() =>
       !state.oldReport ? html`
-        <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOldReport ? `saturation-50` : ``}`}">Import Last Year's Report</label>
+        <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingLastYearsReport ? `saturation-50` : ``}`}">Import Last Year's Report</label>
         <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
           console.info(`Importing file...`)
           const input = e.target
           try {
-            state.importingOldReport = true
+            state.importingLastYearsReport = true
             input.disabled = true
             state.oldReport = await importRewindReport(e.target.files[0])
             console.log(`state.oldReport:`, state.oldReport)
@@ -679,10 +754,10 @@ const viewImportReport = html`
             console.error(`Error while importing rewind report:`, err)
           }
           input.disabled = false
-          state.importingOldReport = false
+          state.importingLastYearsReport = false
         }}">
 
-        ${() => state.importingOldReport ? html`
+        ${() => state.importingLastYearsReport ? html`
           <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
         ` : html`
           <button
@@ -698,7 +773,7 @@ const viewImportReport = html`
           class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
           @click="${() => state.currentView = `load`}"
         >
-          <span>Generate Rewind!</span>
+          <span>Generate Rewind Report!</span>
           <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
             <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
             <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
@@ -863,7 +938,7 @@ const viewRevisit = html`
   <button
     class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto hover:text-white"
     @click="${() => {
-      state.currentView = `importReport` 
+      state.currentView = `importLastYearsReport` 
     }}"
   >
     <span>Regenerate Rewind</span>
