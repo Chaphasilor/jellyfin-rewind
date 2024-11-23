@@ -1,6 +1,6 @@
 import { reactive, watch, html, } from '@arrow-js/core'
 import Chart from 'chart.js/auto';
-import anime from 'animejs/lib/anime.es.js';
+import { animate, scroll, stagger, circOut } from "motion"
 
 const mainElement = document.querySelector('main');
 
@@ -65,14 +65,15 @@ state.featureSideEffects = {
     enter: () => {
       if (state.extraFeatures.totalMusicDays) {
         console.log(`animating totalMusicDays`)
-        anime({
-          targets: animators,
-          totalMusicDays: [0, state.rewindReport.generalStats.totalMusicDays],
-          round: 1,
-          easing: 'easeInOutExpo',
-          delay: 750,
-          duration: 3000,
-        });
+        animate(0, state.rewindReport.generalStats.totalMusicDays, {
+          onUpdate: latest => {
+            animators.totalMusicDays = latest
+            console.log(`value updated`)
+          },
+          duration: 5,
+          delay: 0.75,
+          ease: `circInOut`,
+        })
       }
       // showPlaytimeByMonthChart()
     },
@@ -99,7 +100,13 @@ state.featureSideEffects = {
   10: {
   },
   11: {
-    enter: playTopGenres,
+    enter: () => {
+      playTopGenres()
+      
+      // slide in top genres
+      let topCategories = document.querySelectorAll(`#top-genres-main-feature li`)
+      animate(topCategories, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+    },
   },
   12: {
     load: () => {
@@ -640,7 +647,7 @@ state.features = [
   buildFeature(`top generes of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Genres<br>of the year</h2>
-      <ol class="flex flex-col gap-2 p-6 dark:text-black">
+      <ol id="top-genres-main-feature" class="flex flex-col gap-2 p-6 dark:text-black">
         ${() => state.rewindReport.genres?.[state.settings.rankingMetric]?.slice(0, 5).map((genre, index) => html`
           <li class="relative z-[10] flex flex-row items-center gap-4 overflow-hidden px-4 py-3 rounded-xl" style="${`background-color: ${stringToColor(genre.name)}`}">
 
