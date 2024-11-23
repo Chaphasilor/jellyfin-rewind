@@ -59,7 +59,7 @@ export default class Auth {
 
     const deviceProfile = {
       clientName: `Jellyfin Rewind`,
-      clientVersion: `0.1.0`,
+      clientVersion: `0.2024.0`,
       deviceName: `Chrome`,
       deviceId: `90a83627-401a-4f19-bf93-be8ccf521b27`,
     }
