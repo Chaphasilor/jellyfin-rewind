@@ -44,6 +44,7 @@ export async function init(auth) {
     playbackReportingIssues: viewPlaybackReportingIssues,
     importReportForViewing: viewImportReportForViewing,
     importLastYearsReport: viewImportLastYearsReport,
+    launchExistingReport: viewLaunchExistingReport,
     load: viewLoad,
     revisit: viewRevisit,
     rewindGenerationError: viewRewindGenerationError,
@@ -670,7 +671,7 @@ const viewImportReportForViewing = html`
 
   <div class="w-full flex flex-col items-center text-center mt-12">
     ${() =>
-      !state.rewindReport ? html`
+      html`
         <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingExistingReport ? `saturation-50` : ``}`}">Import Report</label>
         <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
           console.info(`Importing file...`)
@@ -680,7 +681,7 @@ const viewImportReportForViewing = html`
             input.disabled = true
             state.rewindReport = await importRewindReport(e.target.files[0])
             console.log(`state.rewindReport:`, state.rewindReport)
-            launchRewind()
+            state.currentView = `launchExistingReport`
             // state.currentView = `load`
             // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
             // console.log(`featureDelta:`, featureDelta)
@@ -702,24 +703,37 @@ const viewImportReportForViewing = html`
           </button>
         `
         }
-      ` : html`
-        <button
-          class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-          @click="${() => launchRewind()}"
-        >
-          <span>Open Rewind Report!</span>
-          <!-- <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
-            <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
-            <circle cx="15" cy="9" r="1"></circle>
-          </svg> -->
-        </button>
       `
     }
   </div>
 
-  ${() => buttonLogOut}
+</div>
+`
+
+const viewLaunchExistingReport = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+    <p class="">Your Rewind Report has been imported and is ready to view!</p>
+  </div>
+
+  <button
+    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => launchRewind()}"
+    disabled="${() => !state.rewindReport || state.rewindGenerating}"
+  >
+    <span>${() => state.rewindGenerating ? `Generating...` : `Launch Rewind!`}</span>
+    ${() => !state.rewindGenerating ? html`
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2] icon icon-tabler icon-tabler-rocket" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M4 13a8 8 0 0 1 7 7a6 6 0 0 0 3 -5a9 9 0 0 0 6 -8a3 3 0 0 0 -3 -3a9 9 0 0 0 -8 6a6 6 0 0 0 -5 3"></path>
+        <path d="M7 14a6 6 0 0 0 -3 6a6 6 0 0 0 6 -3"></path>
+        <circle cx="15" cy="9" r="1"></circle>
+      </svg>
+    ` : null}
+  </button>
 
 </div>
 `
@@ -789,7 +803,6 @@ const viewImportLastYearsReport = html`
 
 </div>
 `
-
 
 const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
