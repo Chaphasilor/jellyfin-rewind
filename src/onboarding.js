@@ -38,6 +38,7 @@ export async function init(auth) {
   
   state.views = reactive({
     start: viewStart,
+    placeholder: viewPlaceholder,
     server: viewServer,
     user: viewUser,
     login: viewLogin,
@@ -84,7 +85,7 @@ export async function init(auth) {
       // determine which view to show
       await checkPlaybackReportingSetup()
     } else {
-      state.currentView = `start`
+      state.currentView = `placeholder`
     }
   }
 
@@ -163,6 +164,33 @@ const viewStart = html`
     @click="${() => state.currentView = `importReportForViewing`}"
   >
     <span>Import an Existing Report Instead</span>
+  </button>
+
+</div>
+`
+
+const viewPlaceholder = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+
+    <p class="">Hi there!</p>
+    
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2024</span> will launch on <span class="text-white">December 31st, 2024</span> (if all goes well).</p>
+    <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
+    <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
+    
+    <p class="font-light text-base italic">If you want to review your stats from last year, you can now import your old report for viewing. The media itself probably won't load, but everything else should be there!</p>
+
+  </div>
+
+  <button
+    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-4 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.currentView = `importReportForViewing`}"
+  >
+    <span>View An Old Report</span>
   </button>
 
 </div>
