@@ -1809,13 +1809,16 @@ function buildFeature(featureName, content, classes) {
 function handleFeatureClick(event) {
   // call `previous()` or `next()` depending on which side of the feature was clicked
   console.log(event)
-  let featureElement = event.target.closest(`[data-feature-name]`)
+  if (!event) {
+    return
+  }
+  let featureElement = event?.target?.closest?.(`[data-feature-name]`)
   console.log(`featureElement:`, featureElement)
-  console.log(`event.clientX:`, event.clientX)
-  console.log(`featureElement.offsetLeft:`, featureElement.offsetLeft)
-  console.log(`featureElement.getBoundingClientRect().x:`, featureElement.getBoundingClientRect().x)
+  console.log(`event.clientX:`, event?.clientX)
+  console.log(`featureElement.offsetLeft:`, featureElement?.offsetLeft)
+  console.log(`featureElement.getBoundingClientRect().x:`, featureElement?.getBoundingClientRect?.()?.x)
 
-  if ((event.clientX - featureElement.getBoundingClientRect().x) < featureElement.offsetWidth / 3) {
+  if ((event?.clientX - featureElement?.getBoundingClientRect?.()?.x) < featureElement?.offsetWidth / 3) {
     previous()
   } else {
     next()

@@ -19,7 +19,7 @@
     "vite": "^5.0.4"
   },
   "dependencies": {
-    "@arrow-js/core": "^1.0.0-alpha.10",
+    "@arrow-js/core": "1.0.0-alpha.9",
     "blurhash": "^2.0.5",
     "chart.js": "^4.4.6",
     "motion": "^11.11.17"
