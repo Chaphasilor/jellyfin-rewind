@@ -66,7 +66,7 @@ export default class Auth {
 
     const token = `MediaBrowser Client="${deviceProfile.clientName}", Device="${deviceProfile.deviceName}", DeviceId="${deviceProfile.deviceId}", Version="${deviceProfile.clientVersion}", Token="${accessToken}"`;
 
-    this.config.defaultHeaders['X-Emby-Authorization'] = token;
+    this.config.defaultHeaders['Authorization'] = token;
   }
 
   async fetchUsers() {
@@ -138,7 +138,7 @@ export default class Auth {
     const json = await response.json()
     
     if (response.status !== 200) {
-      throw new Error(`Authentication failed: ${response.json()}`);
+      throw new Error(`Authentication failed: ${JSON.stringify(json)}`);
     }
     
     this.config.user = {

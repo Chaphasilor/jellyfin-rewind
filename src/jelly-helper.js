@@ -295,6 +295,18 @@ export default class JellyHelper {
     return response.ok
   }
 
+  // requires admin permissions
+  async restartServer() {
+      
+    const response = await fetch(`${this.auth.config.baseUrl}/System/Restart`, {
+      method: `POST`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+      },
+    })
+    return response.ok
+  }
+
 }
 
 function blurhashToDataURI(blurhash) {

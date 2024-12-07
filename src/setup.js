@@ -9,7 +9,7 @@ export async function connectToServer(auth, serverUrl) {
     console.info(`Users:`, userInfo)
   } catch (err) {
     console.error(`Error while connecting to the server:`, err)
-    throw new Error(`Error while connecting to the server. Make sure your using the same protocol (https or http) as your server is using. Make sure you're not using a local IP address or mDNS hostname. For example, you could use your server's Tailscale IP address, if you use Tailscale as your VPN.`)
+    throw new Error(`Error while connecting to the server. Make sure your using the same protocol (https or http) as your server is using. Make sure you're not using a local IP address or mDNS hostname. For example, you could use your server's Tailscale IP address, if you use Tailscale as your VPN. Original Error: ${err}`)
   }
   return userInfo
 }

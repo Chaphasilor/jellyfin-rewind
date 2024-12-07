@@ -24,6 +24,8 @@ export const state = reactive({
   importingLastYearsReport: false,
   staleReport: false,
   progress: 0,
+  waitingForRestart: false,
+  playbackReportingInspectionAttempts: 0,
   auth: null,
   error: null,
   playbackReportingInspectionResult: null,
@@ -52,6 +54,7 @@ export async function init(auth) {
   })
 
   state.auth = auth
+  state.server.url = state.auth?.config?.baseUrl
   
   // MediaQueryList
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
@@ -85,7 +88,11 @@ export async function init(auth) {
       // determine which view to show
       await checkPlaybackReportingSetup()
     } else {
-      state.currentView = `placeholder`
+      if (JSON.parse(import.meta.env.VITE_SHOW_PLACEHOLDER)) {
+        state.currentView = `placeholder`
+      } else {
+        state.currentView = `start`
+      }
     }
   }
 
@@ -150,7 +157,13 @@ const viewStart = html`
 
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-16 flex flex-row gap-4 items-center mx-auto"
-    @click="${() => state.currentView = `server`}"
+    @click="${() => {
+      if ((state.auth?.config?.baseUrl?.length ?? 0) > 0) {
+        connect(state.auth?.config?.baseUrl)
+      }
+      
+      state.currentView = `server`
+    }}"
   >
     <span>Log In</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -243,11 +256,11 @@ const playbackReportingDialog = html`
       </div>
       <div class="w-full h-full overflow-x-auto p-4">
         <div class="flex flex-col items-start gap-2">
-          <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like 2023 only!<span></p>
+          <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that things like the total playtime are only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like ${import.meta.env.VITE_TARGET_YEAR} only!<span></p>
           <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
           <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? (You'll have to be logged in as an admin user.)</p>
           ${() => state.server.url !== `` ? html`
-            <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+            <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#/dashboard/plugins/5c53438191a343cb907a35aa02eb9d2c?name=Playback%20Reporting`}" target="_blank">Open Plugins Page!</a>
             ` : html`
             <button
               class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
@@ -280,9 +293,13 @@ const playbackReportingDialog = html`
 </div>
 `
 
-async function connect() {
+async function connect(url) {
   state.error = null
-  state.server.url = document.querySelector(`#onboarding-server-url`).value
+  if (url) {
+    state.server.url = url
+  } else {
+    state.server.url = document.querySelector(`#onboarding-server-url`).value
+  }
   // remove trailing slash
   state.server.url = state.server.url.replace(/\/$/, ``)
   try {
@@ -294,7 +311,7 @@ async function connect() {
     state.error = html`
     <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
       <p class="">There was an error while connecting to the server.</p>
-      <p class="">Please check the URL and try again.</p>
+      <p class="font-mono">${err.toString()}</p>
       <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
     </div>
     `
@@ -429,7 +446,7 @@ async function login()  {
 async function loginAuthToken()  {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
-    let userInfo = await loginViaAuthToken(state.auth, username, token)
+    let userInfo = await loginViaAuthToken(state.auth, token)
     // state.currentView = `importLastYearsReport`
     checkPlaybackReportingSetup()
   } catch (err) {
@@ -470,21 +487,22 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   } else if (playbackReportingSetup.restartRequired) {
     inspection.valid = false
     inspection.issue = `The Playback Reporting plugin is installed, but the Jellyfin server needs to be restarted in order to activate it.`
+    state.waitingForRestart = false
     if (window.helper && state.auth.config.user.isAdmin) {
       inspection.action = html`
       <button
         class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
         @click="${async () => {
           try {
-            await window.helper.shutdownServer()
+            await window.helper.restartServer()
+            state.waitingForRestart = true
             setTimeout(() => {
               checkPlaybackReportingSetup(nextScreen)
-            }, 5000)
+            }, 8000)
           } catch (err) {
             console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
           }
-        }}">Shut down Jellyfin Server</button>
-      <p class="italic">For most setups, the server will <b>automatically restart</b> after shutting it down.</p>
+        }}">${() => state.waitingForRestart ? `Server is restarting...` : `Restart Jellyfin Server`}</button>
       `
     }
   } else if (playbackReportingSetup.disabled) {
@@ -572,6 +590,7 @@ async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`)
     const inspection = inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen)
     console.log(`inspection:`, inspection)
 
+    state.waitingForRestart = false
     
     if (!inspection.valid) {
       state.currentView = `playbackReportingIssues`
@@ -582,9 +601,15 @@ async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`)
     
   } catch (err) {
     console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
-    state.currentView = nextScreen
+    if (state.playbackReportingInspectionAttempts > 3) {
+      state.currentView = nextScreen
+    } else {
+      setTimeout(() => {
+        checkPlaybackReportingSetup(nextScreen)
+      }, 5000)
+    }
   }
-  
+
 }
 
 const viewPlaybackReportingIssues = html`
