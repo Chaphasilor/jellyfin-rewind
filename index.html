@@ -7,11 +7,11 @@
 
     <!-- Open Graph -->
     <meta property="og:site_name" content="Jellyfin Rewind" />
-    <meta property="og:title" content="Jellyfin Rewind - Review Your Music of 2023" />
+    <meta property="og:title" content="Jellyfin Rewind - Review Your Music of 2024" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://jellyfin-rewind.chaphasilor.xyz/" />
     <meta property="og:image" content="https://jellyfin-rewind.chaphasilor.xyz/media/banner-light.png" />
-    <meta property="og:description" content="Review Your Music of 2023. A 'Spotify Wrapped'-like app made for people who use Jellyfin for listening to music!" />
+    <meta property="og:description" content="Review Your Music of 2024. A 'Spotify Wrapped'-like app made for people who use Jellyfin for listening to music!" />
     <meta property="og:locale" content="en_US" />
 
     <!-- umami -->
@@ -24,64 +24,6 @@
     <div id="app"></div>
 
     <div id="onboarding"></div>
-
-    <div class="p-2 hidden">
-
-      <div class="flex flex-row hidden gap-4" id="logged-in-info">
-        <div class="flex flex-col">
-          <span>Signed in as '<span id="logged-in-user"></span>'</span>
-          <span>at Jellyfin Server '<span id="logged-in-server"></span>'</span>
-        </div>
-        <button class="border-2 mb-2 border-red-600 rounded-md p-3 hover:bg-red-200" type="button" id="log-out">Log out</button>
-      </div>
-      
-      <div id="server-config">
-        <label for="serverUrl">Server URL:</label>
-        <input class="border border-gray-500 text-black p-1 rounded" type="text" name="serverUrl" id="serverUrl">
-        <button class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" id="connectToServer" type="button">Connect!</button>
-      </div>
-    
-      <ul id="user-select" class="hidden flex flex-col p-2 gap-3">
-      </ul>
-    
-      <div id="user-login" class="hidden">
-  
-        <span id="username-input" class="hidden">
-          <label for="username">Username:</label>
-          <input class="border border-gray-500 text-black p-1 rounded" type="text" name="username" id="username">
-        </span>
-  
-        <span id="password-input" class="hidden">
-          <label for="password">Password:</label>
-          <input class="border border-gray-500 text-black p-1 rounded" type="password" name="password" id="password">
-        </span>
-      
-        <span id="auth-token-input" class="hidden">
-          <label for="auth-token">Auth Token:</label>
-          <input class="border border-gray-500 text-black p-1 rounded" type="text" name="auth-token" id="auth-token">
-        </span>
-      
-        <button id="authenticateUser" class="border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200" type="button">Log In!</button>
-      </div>
-    
-      <div class="flex flex-row place-items-center">
-        <div class="flex flex-row gap-2">
-          <button id="show-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">Show My Rewind</button>
-          <button id="generate-report" class="hidden border-2 border-blue-600 rounded-md p-3 hover:bg-blue-200">(Re-)Generate Rewind</button>
-        </div>
-        <svg id="loading-spinner" class="hidden animate-spin inline-block ml-2 text-blue-900 icon icon-tabler icon-tabler-refresh"
-        width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg">
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M20 11a8.1 8.1 0 0 0 -15.5 -2m-.5 -4v4h4"></path>
-          <path d="M4 13a8.1 8.1 0 0 0 15.5 2m.5 4v-4h-4"></path>
-       </svg>
-      </div>
-
-      <span id="info"></span>
-    
-      <textarea class="ml-4 mt-8 w-11/12 border border-gray-500 p-1 hidden" name="output" id="output" cols="80" rows="40"></textarea>
-  
-    </div>
 
     <main id="features">
     </main>
