@@ -163,7 +163,7 @@ state.features = [
       <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport?.year}!</h2>
 
       <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
-        <p class="">This is your personal overview over your listening habits of the past year. See your most-listened songs, artists and albums, as well as other awesome stats!</p>
+        <p class="">This is your personal overview over your listening habits of the past year. See your most-listened tracks, artists and albums, as well as other awesome stats!</p>
 
         <p class="">If you have any questions or feedback, please reach out to me on <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://github.com/Chaphasilor/jellyfin-rewind/issues" target="_blank" @click="${stopPropagation()}">GitHub</a> or <a class="text-[#00A4DC] hover:text-[#0085B2]" href="https://reddit.com/u/Chaphasilor" target="_blank" @click="${stopPropagation()}">Reddit</a>.</p>
       </div>
@@ -228,10 +228,10 @@ state.features = [
       </div>
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
-  // top song
-  buildFeature(`top song`, html`
+  // top track
+  buildFeature(`top track`, html`
     <div class="text-center text-white">
-      <h2 class="text-2xl mt-5">Your Top Song<br>of ${() => state.rewindReport?.year}:</h2>
+      <h2 class="text-2xl mt-5">Your Top Track<br>of ${() => state.rewindReport?.year}:</h2>
       <div class="flex mt-10 flex-col">
         <img id="top-track-image" class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]" />
         <div class="px-4 py-4 overflow-hidden whitespace-wrap">
@@ -255,10 +255,10 @@ state.features = [
       <img id="top-track-background-image" class="w-full h-full" />
     </div>
   `),
-  // top songs of the year
-  buildFeature(`top songs of the year`, html`
+  // top tracks of the year
+  buildFeature(`top tracks of the year`, html`
     <div class="text-center">
-      <h2 class="text-2xl font-medium mt-5">Your Top Songs<br>of the year</h2>
+      <h2 class="text-2xl font-medium mt-5">Your Top Tracks<br>of the year</h2>
       <ol class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5).map((track, index) => html`
           <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
@@ -389,7 +389,7 @@ state.features = [
       </div>
       <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
-        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique songs <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
+        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique tracks <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">
@@ -420,7 +420,7 @@ state.features = [
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
                 </svg>
-                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(artist.uniqueTracks)}</span> songs</div>
+                <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(artist.uniqueTracks)}</span> tracks</div>
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                   <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                   <circle cx="12" cy="12" r="4"></circle>
@@ -477,15 +477,15 @@ state.features = [
       </div>
       
       <div class="mt-16 w-full px-10 flex flex-col items-center gap-3">
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.favorite)}</span> favorite songs.</div>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.total)}</span> unique songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.favorite)}</span> favorite tracks.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.tracks?.total)}</span> unique tracks.</div>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.albums?.total)}</span> albums.</div>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.artists?.total)}</span> artists.</div>
         <div><span class="font-semibold text-xl mt-4">Impressive.</div>
       </div>
 
       <div class="mt-16 w-full px-10 flex flex-col items-center gap-2">
-        <div><span class="font-semibold text-xl">Average song length: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds.</div>
+        <div><span class="font-semibold text-xl">Average track length: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds.</div>
         <div><span class="font-semibold -mt-1">(Median: <span class="text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.median.toFixed(0))}</span>)</div>
         <div><span class="font-semibold text-xl">Shortest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.min.toFixed(0))}</span> seconds.</div>
         <div><span class="font-semibold text-xl">Longest: <span class="text-2xl text-sky-500 font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.max.toFixed(0))}</span> seconds.</div>
@@ -604,12 +604,12 @@ state.features = [
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
       <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
-        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> songs ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> tracks ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
       </div>
       
       <div class="mt-28 w-full px-10 flex flex-col items-center gap-3">
         <span class="font-semibold text-xl mb-3">Additionally, you listened to</span>
-        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  songs.</div>
+        <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? `more` : `less`}  tracks.</div>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? `more` : `less`}  artists.</div>
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? `more` : `less`}  albums.</div>
       </div>
@@ -664,7 +664,7 @@ state.features = [
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
                     </svg>
-                    <div><span class="font-semibold text-black">${() => showAsNumber(genre.uniqueTracks)}</span> songs</div>
+                    <div><span class="font-semibold text-black">${() => showAsNumber(genre.uniqueTracks)}</span> tracks</div>
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
                       <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
                       <circle cx="12" cy="12" r="4"></circle>
@@ -709,7 +709,7 @@ state.features = [
    // least skipped
   buildFeature(`least skipped`, html`
     <div class="text-center">
-      <h2 class="text-2xl mt-5">Til the end:<br>Songs you never skipped</h2>
+      <h2 class="text-2xl mt-5">Til the end:<br>Tracks you never skipped</h2>
       ${() => !state.extraFeatures.leastSkippedTracks ? html`
         <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
           <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
@@ -811,7 +811,7 @@ state.features = [
    // most skipped
   buildFeature(`most skipped`, html`
     <div class="text-center">
-      <h2 class="text-2xl mt-5">Sick of it:<br>Songs you skipped the most</h2>
+      <h2 class="text-2xl mt-5">Sick of it:<br>Tracks you skipped the most</h2>
       ${() => !state.extraFeatures.mostSkippedTracks ? html`
         <div class="absolute top-0 left-0 w-full h-full flex flex-col items-center bg-black/40 justify-center gap-12">
           <div class="bg-white/60 dark:bg-[#000B25]/60 flex flex-col items-center justify-center gap-12 px-12 pt-20 pb-12 rounded-xl">
@@ -974,8 +974,8 @@ state.features = [
         <div class="text-lg"><span class="text-[#00A4DC] text-2xl font-semibold font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.totalPlaybackDurationMinutes[state.settings.dataSource].toFixed(0))}</span> minutes listened</div>
       </div>
       <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center">
-        <!-- top song -->
-        <h4 class="text-xs">Top Song</h4>
+        <!-- top track -->
+        <h4 class="text-xs">Top Track</h4>
         <img id="summary-top-track-image" class="w-auto h-[5rem] my-1.5 rounded-md" />
         <div class="text-balance">
           <span class="text-[#00A4DC] font-semibold font-quicksand">${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]?.name}</span>
@@ -998,7 +998,7 @@ state.features = [
       ` : null}
       <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md">
         <!-- stats 1 - unique items -->
-        <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueTracksPlayed)}</span> unique songs</div>
+        <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueTracksPlayed)}</span> unique tracks</div>
         <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueArtistsPlayed)}</span> unique artists</div>
         <div><span class="font-semibold text-[#00A4DC] font-quicksand">${() => showAsNumber(state.rewindReport.generalStats.uniqueAlbumsPlayed)}</span> unique albums</div>
       </div>
@@ -1016,7 +1016,7 @@ state.features = [
       <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around">
         <!-- stats 1 - unique items -->
         <div class="text-balance">Library Duration: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber((state.rewindReport?.libraryStats?.totalRuntime / 60.0 / 60.0 / 24.0).toFixed(1))}</span> days</div>
-        <div class="text-balance">Average song length: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds</div>
+        <div class="text-balance">Average track length: <span class="font-semibold text-[#00A4DC] text-2xl font-quicksand">${() => showAsNumber(state.rewindReport?.libraryStats?.trackLength?.mean.toFixed(0))}</span> seconds</div>
       </div>
       ${() => state.extraFeatures.listeningActivityDifference ? html`
         <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md col-span-2">
@@ -1024,7 +1024,7 @@ state.features = [
           <div class="text-center mb-2"><span class="font-semibold font-quicksand text-[#00A4DC] text-lg">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> more streams than last year</div>
           <div class="flex flex-row flex-wrap justify-around gap-4">
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span><br>more songs</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span><br>more tracks</div>
             ` : null}
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? html`
               <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span><br>more artists</div>
@@ -1215,7 +1215,7 @@ function showOverlayDataAccuracy() {
     title: `About the accuracy of this report`,
     content: html`
       <div class="flex flex-col items-start gap-2">
-        <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport?.year} without plugins!<span></p>
+        <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that things like the total playtime are only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to ${() => state.rewindReport?.year} without plugins!<span></p>
         <p>However, if you have the <span class="font-semibold">"Playback Reporting"</span> plugin installed, <span class="font-semibold">significantly more information can be collected</span>, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. <span class="font-semibold">Offline playback is not recorded at all</span>.</p>
         <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? Your Jellyfin Rewind isn't going anywhere!</p>
         ${() => state.auth.config?.user?.isAdmin ? html`
@@ -1226,7 +1226,7 @@ function showOverlayDataAccuracy() {
         `}
         <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
         ${() => state.auth.config?.user?.isAdmin ? html`
-          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a>
+          <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#/configurationpage?name=playback_report_settings`}" target="_blank">Open Settings</a>
         ` : html`
           <a disabled class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0">Open Settings!</a>
           <p class="font-medium mb-6">You're not logged in with an administrator account, but you need to be an admin in order to install plugins. If you are logged into Jellyfin with an admin account and already have the Playback Reporting plugin installed, you can <a class="text-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">click here to open the plugin settings</a>. If nothing happens or Jellyfin just keeps loading, that means the logged-in account is not an administrator.</p>
@@ -1345,7 +1345,7 @@ ${() =>
   <li class="flex flex-row justify-between">
   ${() => buildOptionChooser({
       title: `Rank by...`,
-      description: `Choose which metric should be used for ranking the top songs, artists, albums, genres, etc.`,
+      description: `Choose which metric should be used for ranking the top tracks, artists, albums, genres, etc.`,
       settingsKey: `rankingMetric`,
       options: [
         {
@@ -1364,12 +1364,12 @@ ${() =>
   <li class="flex flex-row justify-between">
     ${() => buildOptionChooser({
       title: `Artist Type`,
-      description: `Toggle between (song) artists and album artists`,
+      description: `Toggle between (track) artists and album artists`,
       settingsKey: `useAlbumArtists`,
       options: [
         {
-          name: `(Song) Artists`,
-          description: `Using (song) artists`,
+          name: `(Track) Artists`,
+          description: `Using (track) artists`,
           value: false,
         },
         {
@@ -1922,12 +1922,12 @@ function destroyPlayTimeByMonthChart() {
 
 function loadTopTrackMedia() {
 
-  const topSongPrimaryImage = document.querySelector(`#top-track-image`);
-  const topSongBackgroundImage = document.querySelector(`#top-track-background-image`);
-  console.log(`img:`, topSongPrimaryImage)
-  const topSongByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
-  console.log(`topSongByDuration:`, topSongByDuration)
-  state.jellyHelper.loadImage([topSongPrimaryImage, topSongBackgroundImage], topSongByDuration.image, `track`, state.settings.darkMode)
+  const topTrackPrimaryImage = document.querySelector(`#top-track-image`);
+  const topTrackBackgroundImage = document.querySelector(`#top-track-background-image`);
+  console.log(`img:`, topTrackPrimaryImage)
+  const topTrackByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
+  console.log(`topTrackByDuration:`, topTrackByDuration)
+  state.jellyHelper.loadImage([topTrackPrimaryImage, topTrackBackgroundImage], topTrackByDuration.image, `track`, state.settings.darkMode)
 
 }
 
@@ -1935,13 +1935,13 @@ function loadTopTracksMedia() {
 
   console.log(`topTracksMedia`)
 
-  const topSongs = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5)
+  const topTracks = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5)
 
-  topSongs.forEach((song, index) => {
-    const songPrimaryImage = document.querySelector(`#top-tracks-image-${index}`);
-    const songBackgroundImage = document.querySelector(`#top-tracks-background-image-${index}`);
-    console.log(`img:`, songPrimaryImage)
-    state.jellyHelper.loadImage([songPrimaryImage, songBackgroundImage], song.image, `track`, state.settings.darkMode)
+  topTracks.forEach((track, index) => {
+    const trackPrimaryImage = document.querySelector(`#top-tracks-image-${index}`);
+    const trackBackgroundImage = document.querySelector(`#top-tracks-background-image-${index}`);
+    console.log(`img:`, trackPrimaryImage)
+    state.jellyHelper.loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`, state.settings.darkMode)
   })
   
 }
@@ -1951,9 +1951,9 @@ function loadTopArtistMedia() {
   const topArtistPrimaryImage = document.querySelector(`#top-artist-image`);
   const topArtistBackgroundImage = document.querySelector(`#top-artist-background-image`);
   console.log(`img:`, topArtistPrimaryImage)
-  const topSongByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
-  console.log(`topSongByDuration:`, topSongByDuration)
-  state.jellyHelper.loadImage([topArtistPrimaryImage, topArtistBackgroundImage], topSongByDuration.images.primary, `artist`, state.settings.darkMode)
+  const topTrackByDuration = state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]
+  console.log(`topTrackByDuration:`, topTrackByDuration)
+  state.jellyHelper.loadImage([topArtistPrimaryImage, topArtistBackgroundImage], topTrackByDuration.images.primary, `artist`, state.settings.darkMode)
 
 }
 
@@ -1998,13 +1998,13 @@ function loadLeastSkippedTracksMedia() {
 
   console.log(`leastSkippedTracksMedia`)
 
-  const topSongs = state.rewindReport.tracks?.[`leastSkipped`]?.slice(0, 5)
+  const topTracks = state.rewindReport.tracks?.[`leastSkipped`]?.slice(0, 5)
 
-  topSongs.forEach((song, index) => {
-    const songPrimaryImage = document.querySelector(`#least-skipped-tracks-image-${index}`);
-    const songBackgroundImage = document.querySelector(`#least-skipped-tracks-background-image-${index}`);
-    console.log(`img:`, songPrimaryImage)
-    state.jellyHelper.loadImage([songPrimaryImage, songBackgroundImage], song.image, `track`, state.settings.darkMode)
+  topTracks.forEach((track, index) => {
+    const trackPrimaryImage = document.querySelector(`#least-skipped-tracks-image-${index}`);
+    const trackBackgroundImage = document.querySelector(`#least-skipped-tracks-background-image-${index}`);
+    console.log(`img:`, trackPrimaryImage)
+    state.jellyHelper.loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`, state.settings.darkMode)
   })
   
 }
@@ -2013,13 +2013,13 @@ function loadMostSkippedTracksMedia() {
 
   console.log(`mostSkippedTracksMedia`)
 
-  const topSongs = state.rewindReport.tracks?.[`mostSkipped`]?.slice(0, 5)
+  const topTracks = state.rewindReport.tracks?.[`mostSkipped`]?.slice(0, 5)
 
-  topSongs.forEach((song, index) => {
-    const songPrimaryImage = document.querySelector(`#most-skipped-tracks-image-${index}`);
-    const songBackgroundImage = document.querySelector(`#most-skipped-tracks-background-image-${index}`);
-    console.log(`img:`, songPrimaryImage)
-    state.jellyHelper.loadImage([songPrimaryImage, songBackgroundImage], song.image, `track`, state.settings.darkMode)
+  topTracks.forEach((track, index) => {
+    const trackPrimaryImage = document.querySelector(`#most-skipped-tracks-image-${index}`);
+    const trackBackgroundImage = document.querySelector(`#most-skipped-tracks-background-image-${index}`);
+    console.log(`img:`, trackPrimaryImage)
+    state.jellyHelper.loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`, state.settings.darkMode)
   })
   
 }
@@ -2039,11 +2039,11 @@ function loadSummary() {
 
   console.log(`summary`)
 
-  // top song
-  const topSongPrimaryImage = document.querySelector(`#summary-top-track-image`);
-  console.log(`img:`, topSongPrimaryImage)
-  const topSong = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
-  console.log(`topSong:`, topSong)
+  // top track
+  const topTrackPrimaryImage = document.querySelector(`#summary-top-track-image`);
+  console.log(`img:`, topTrackPrimaryImage)
+  const topTrack = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
+  console.log(`topTrack:`, topTrack)
 
   // top artist
   const topArtistPrimaryImage = document.querySelector(`#summary-top-artist-image`);
@@ -2058,7 +2058,7 @@ function loadSummary() {
   console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack)
 
   // load images
-  state.jellyHelper.loadImage([topSongPrimaryImage], topSong.image, `track`, state.settings.darkMode)
+  state.jellyHelper.loadImage([topTrackPrimaryImage], topTrack.image, `track`, state.settings.darkMode)
   state.jellyHelper.loadImage([topArtistPrimaryImage], topArtist.images.primary, `artist`, state.settings.darkMode)
   if (state.extraFeatures.mostSuccessivePlays) {
     state.jellyHelper.loadImage([mostSuccessivePlaysTrackPrimaryImage], mostSuccessivePlaysTrack.image, `track`, state.settings.darkMode)
@@ -2069,22 +2069,22 @@ function loadSummary() {
 
 function playTopTrack() {
 
-  const topSongByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
-  console.log(`topSongByDuration:`, topSongByDuration)
-  fadeToNextTrack(topSongByDuration)
+  const topTrackByDuration = state.rewindReport.tracks?.[state.settings.rankingMetric]?.[0]
+  console.log(`topTrackByDuration:`, topTrackByDuration)
+  fadeToNextTrack(topTrackByDuration)
 
 }
 
 // plays a random track from the top 5 tracks (excluding the top track)
 function playTopTracks() {
 
-  const topSongs = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(1, 5) // first track excluded
-  const randomSongId = Math.floor(Math.random() * topSongs.length)
-  const randomSong = topSongs[randomSongId]
-  showPlaying(`#top-tracks-visualizer`, randomSongId+1, 5)
+  const topTracks = state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(1, 5) // first track excluded
+  const randomTrackId = Math.floor(Math.random() * topTracks.length)
+  const randomTrack = topTracks[randomTrackId]
+  showPlaying(`#top-tracks-visualizer`, randomTrackId+1, 5)
 
-  console.log(`randomSong:`, randomSong)
-  fadeToNextTrack(randomSong)
+  console.log(`randomTrack:`, randomTrack)
+  fadeToNextTrack(randomTrack)
   
 }
 
@@ -2173,26 +2173,26 @@ async function playTopGenres() {
 // plays a random track from the 5 least skipped tracks
 function playLeastSkippedTracks() {
 
-  const leastSkippedSongs = state.rewindReport.tracks?.[`leastSkipped`]?.slice(0, 5) // first track excluded
-  const randomSongId = Math.floor(Math.random() * leastSkippedSongs.length)
-  const randomSong = leastSkippedSongs[randomSongId]
-  showPlaying(`#least-skipped-tracks-visualizer`, randomSongId, 5)
+  const leastSkippedTracks = state.rewindReport.tracks?.[`leastSkipped`]?.slice(0, 5) // first track excluded
+  const randomTrackId = Math.floor(Math.random() * leastSkippedTracks.length)
+  const randomTrack = leastSkippedTracks[randomTrackId]
+  showPlaying(`#least-skipped-tracks-visualizer`, randomTrackId, 5)
 
-  console.log(`randomSong:`, randomSong)
-  fadeToNextTrack(randomSong)
+  console.log(`randomTrack:`, randomTrack)
+  fadeToNextTrack(randomTrack)
   
 }
 
 // plays a random track from the 5 most skipped tracks
 function playMostSkippedTracks() {
 
-  const mostSkippedSongs = state.rewindReport.tracks?.[`mostSkipped`]?.slice(0, 5) // first track excluded
-  const randomSongId = Math.floor(Math.random() * mostSkippedSongs.length)
-  const randomSong = mostSkippedSongs[randomSongId]
-  showPlaying(`#most-skipped-tracks-visualizer`, randomSongId, 5)
+  const mostSkippedTracks = state.rewindReport.tracks?.[`mostSkipped`]?.slice(0, 5) // first track excluded
+  const randomTrackId = Math.floor(Math.random() * mostSkippedTracks.length)
+  const randomTrack = mostSkippedTracks[randomTrackId]
+  showPlaying(`#most-skipped-tracks-visualizer`, randomTrackId, 5)
 
-  console.log(`randomSong:`, randomSong)
-  fadeToNextTrack(randomSong)
+  console.log(`randomTrack:`, randomTrack)
+  fadeToNextTrack(randomTrack)
   
 }
 
