@@ -1608,6 +1608,8 @@ export function init(rewindReportData, jellyHelper, auth) {
     }
   });
 
+  document.addEventListener(`keydown`, handleArrowKeys)
+
   state.settings.darkMode = darkModePreference.matches
 
   console.log(`init finished`)
@@ -1821,6 +1823,20 @@ function handleFeatureClick(event) {
   if ((event?.clientX - featureElement?.getBoundingClientRect?.()?.x) < featureElement?.offsetWidth / 3) {
     previous()
   } else {
+    next()
+  }
+}
+
+function handleArrowKeys(event) {
+  // call `previous()` or `next()` depending on which side of the feature was clicked
+  console.log(event)
+  if (!event) {
+    return
+  }
+
+  if (event.key?.toLowerCase?.() === `arrowleft`) {
+    previous()
+  } else if (event.key?.toLowerCase?.() === `arrowright`) {
     next()
   }
 }

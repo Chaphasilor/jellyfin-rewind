@@ -45,9 +45,9 @@ export default class JellyHelper {
     }
   
     if (primaryTag && (parentItemId || type === `user`)) {
-      let url = `${this.auth.config.baseUrl}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
+      let url = `${this.auth.config.serverInfo.PublicAddress}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       if (type === `user`) {
-        url = `${this.auth.config.baseUrl}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
       }
       fetch(url, {
         method: `GET`,
@@ -116,7 +116,7 @@ export default class JellyHelper {
       'EnableRemoteMedia': `true`,
     }
 
-    element.src = `${this.auth.config.baseUrl}/Audio/${audioInfo.id}/universal?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join(`&`)}`
+    element.src = `${this.auth.config.serverInfo.PublicAddress}/Audio/${audioInfo.id}/universal?${Object.entries(params).map(([key, value]) => `${key}=${value}`).join(`&`)}`
     await element.load()
   }
 
@@ -127,16 +127,16 @@ export default class JellyHelper {
     
     switch (groupType) {
       case `artist`:
-        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ArtistIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${this.auth.config.user.id}/Items?ArtistIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
         break;
       case `album`:
-        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
         break;
       case `genre`:
-        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?GenreIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${this.auth.config.user.id}/Items?GenreIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
         break;
       case `playlist`:
-        url = `${this.auth.config.baseUrl}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${this.auth.config.user.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`
         break;
     
       default:
@@ -160,7 +160,7 @@ export default class JellyHelper {
 
   async checkIfPlaybackReportingInstalled() {
 
-    const pluginsResponse = await fetch(`${this.auth.config.baseUrl}/Plugins`, {
+    const pluginsResponse = await fetch(`${this.auth.config.serverInfo.PublicAddress}/Plugins`, {
       method: `GET`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -197,7 +197,7 @@ export default class JellyHelper {
       }
     }
 
-    const playbackReportingSettingsResponse = await fetch(`${this.auth.config.baseUrl}/System/Configuration/playback_reporting`, {
+    const playbackReportingSettingsResponse = await fetch(`${this.auth.config.serverInfo.PublicAddress}/System/Configuration/playback_reporting`, {
       method: `GET`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -207,7 +207,7 @@ export default class JellyHelper {
 
     let playbackReportingIgnoredUsersJson = []
     try {
-      const playbackReportingIgnoredUsersResponse = await fetch(`${this.auth.config.baseUrl}/user_usage_stats/user_list`, {
+      const playbackReportingIgnoredUsersResponse = await fetch(`${this.auth.config.serverInfo.PublicAddress}/user_usage_stats/user_list`, {
         method: `GET`,
         headers: {
           ...this.auth.config.defaultHeaders,
@@ -236,7 +236,7 @@ export default class JellyHelper {
   // requires administrator account
   async installPlaybackReportingPlugin() {
 
-    const response = await fetch(`${this.auth.config.baseUrl}/Packages/Installed/Playback%20Reporting?AssemblyGuid=5c53438191a343cb907a35aa02eb9d2c`, {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/Packages/Installed/Playback%20Reporting?AssemblyGuid=5c53438191a343cb907a35aa02eb9d2c`, {
       method: `POST`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -254,7 +254,7 @@ export default class JellyHelper {
   // requires administrator account
   async enablePlaybackReportingPlugin(setup) {
 
-    const response = await fetch(`${this.auth.config.baseUrl}/Plugins/${setup.id}/${setup.version}/Enable`, {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/Plugins/${setup.id}/${setup.version}/Enable`, {
       method: `POST`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -272,7 +272,7 @@ export default class JellyHelper {
   // requires administrator account
   async updatePlaybackReportingSettings(settings) {
 
-    const response = await fetch(`${this.auth.config.baseUrl}/System/Configuration/playback_reporting`, {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/System/Configuration/playback_reporting`, {
       method: `POST`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -286,7 +286,7 @@ export default class JellyHelper {
   // requires admin permissions
   async shutdownServer() {
       
-    const response = await fetch(`${this.auth.config.baseUrl}/System/Shutdown`, {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/System/Shutdown`, {
       method: `POST`,
       headers: {
         ...this.auth.config.defaultHeaders,
@@ -298,7 +298,7 @@ export default class JellyHelper {
   // requires admin permissions
   async restartServer() {
       
-    const response = await fetch(`${this.auth.config.baseUrl}/System/Restart`, {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/System/Restart`, {
       method: `POST`,
       headers: {
         ...this.auth.config.defaultHeaders,

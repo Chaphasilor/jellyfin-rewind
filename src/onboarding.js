@@ -2,6 +2,7 @@ import { reactive, watch, html, } from '@arrow-js/core'
 
 import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind, deleteRewind } from './setup';
 import { getFeatureDelta, importRewindReport } from './delta';
+import { importOfflinePlayback, Play } from './offline-import';
 
 export const state = reactive({
   currentView: `start`,
@@ -20,8 +21,10 @@ export const state = reactive({
   rewindGenerating: false,
   rewindReport: null,
   oldReport: null,
+  offlinePlayback: null,
   importingExistingReport: false,
   importingLastYearsReport: false,
+  importingOfflinePlayback: false,
   staleReport: false,
   progress: 0,
   waitingForRestart: false,
@@ -48,6 +51,7 @@ export async function init(auth) {
     importReportForViewing: viewImportReportForViewing,
     importLastYearsReport: viewImportLastYearsReport,
     launchExistingReport: viewLaunchExistingReport,
+    importOfflinePlayback: viewImportOfflinePlayback,
     load: viewLoad,
     revisit: viewRevisit,
     rewindGenerationError: viewRewindGenerationError,
@@ -173,10 +177,10 @@ const viewStart = html`
   </button>
 
   <button
-    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-4 flex flex-row gap-4 items-center mx-auto"
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.currentView = `importReportForViewing`}"
   >
-    <span>Import an Existing Report Instead</span>
+     <span>Import an Existing Report Instead</span>
   </button>
 
 </div>
@@ -575,10 +579,11 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   
 } 
 
-async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`) {
+// async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`) {
+async function checkPlaybackReportingSetup(nextScreen = `importOfflinePlayback`) {
 
   // there's nothing we can do without the helper
-  if (!window.helper) {
+  if (!window.helper || !!state.auth?.config?.user?.isAdmin) {
     state.currentView = nextScreen
   }
 
@@ -601,6 +606,7 @@ async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`)
     
   } catch (err) {
     console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
+    state.playbackReportingInspectionAttempts++
     if (state.playbackReportingInspectionAttempts > 3) {
       state.currentView = nextScreen
     } else {
@@ -733,6 +739,8 @@ const viewImportReportForViewing = html`
             state.importingExistingReport = true
             input.disabled = true
             state.rewindReport = await importRewindReport(e.target.files[0])
+            state.auth.config.serverInfo = state.rewindReport.jellyfinRewindReport.server
+            console.log(`state.auth.serverInfo:`, state.auth.serverInfo)
             console.log(`state.rewindReport:`, state.rewindReport)
             state.currentView = `launchExistingReport`
             // state.currentView = `load`
@@ -787,6 +795,53 @@ const viewLaunchExistingReport = html`
       </svg>
     ` : null}
   </button>
+
+</div>
+`
+
+const viewImportOfflinePlayback = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+    <p class="">We noticed you've been using Finamp's beta version to listen to music</p>
+    <p class="">Finamp keeps track of your playback history even when you're not connected to your server, and you can now import that history!</p>
+    <p class="">Imported plays will only be added to the Playback Reporting addon's database, but can then used to generate a more accurate Rewind report for you in the following steps.</p>
+  </div>
+
+  <div class="w-full flex flex-col items-center text-center mt-12">
+    <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOfflinePlayback ? `saturation-50` : ``}`}">Import Offline Playback History</label>
+    <input type="file" id="import-file" class="hidden" accept=".txt,.json,.jsonl" @change="${async (e) => {
+      console.info(`Importing offline playback...`)
+      const input = e.target
+      try {
+        state.importingOfflinePlayback = true
+        input.disabled = true
+        state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
+        console.log(`state.offlinePlayback:`, state.offlinePlayback)
+        state.currentView = `importLastYearsReport`
+      } catch (err) {
+        console.error(`Error while importing offline playback data:`, err)
+      }
+      input.disabled = false
+      state.importingOfflinePlayback = false
+    }}">
+
+    ${() => state.importingOfflinePlayback ? html`
+      <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
+    ` : html`
+      <button
+        class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+        @click="${() => state.currentView = `importLastYearsReport`}"
+      >
+        <span>Continue without your offline playback history</span>
+      </button>
+    `
+    }
+  </div>
+
+  ${() => buttonLogOut}
 
 </div>
 `
