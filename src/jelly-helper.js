@@ -44,11 +44,17 @@ export default class JellyHelper {
       })
     }
   
-    if (primaryTag && (parentItemId || type === `user`)) {
-      let url = `${this.auth.config.serverInfo.PublicAddress}/Items/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
+    if (parentItemId || type === `user`) {
+      let url = `${this.auth.config.serverInfo.PublicAddress}/Items/${parentItemId}/Images/Primary?MaxWidth=${resolution}&MaxHeight=${resolution}`
+
       if (type === `user`) {
-        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${parentItemId}/Images/Primary?tag=${primaryTag}&MaxWidth=${resolution}&MaxHeight=${resolution}`
+        url = `${this.auth.config.serverInfo.PublicAddress}/Users/${parentItemId}/Images/Primary?MaxWidth=${resolution}&MaxHeight=${resolution}`
       }
+
+      if (primaryTag) {
+        url += `&tag=${primaryTag}`
+      }
+
       fetch(url, {
         method: `GET`,
         headers: {
