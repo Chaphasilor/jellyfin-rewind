@@ -1049,16 +1049,18 @@ state.features = [
       ${() => state.extraFeatures.listeningActivityDifference ? html`
         <div class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md col-span-2">
           <!-- stats 2 - listening activity difference (if positive) -->
-          <div class="text-center mb-2"><span class="font-semibold font-quicksand text-[#00A4DC] text-lg">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> more streams than last year</div>
+        ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] > 0 ? html`
+         <div class="text-center mb-2"><span class="font-semibold font-quicksand text-[#00A4DC] text-lg">${() => showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0))}</span> more streams than last year</div>
+         ` : null}
           <div class="flex flex-row flex-wrap justify-around gap-4">
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span><br>more tracks</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span> more tracks</div>
             ` : null}
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span><br>more artists</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span> more artists</div>
             ` : null}
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span><br>more albums</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span> more albums</div>
             ` : null}
           </div>
         </div>

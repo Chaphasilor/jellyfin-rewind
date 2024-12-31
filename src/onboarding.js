@@ -593,7 +593,7 @@ async function checkPlaybackReportingSetup(nextScreen) {
   }
 
   // check if eligible for offline playback import
-  if (await checkIfOfflinePlaybackImportAvailable(state.auth)) {
+  if (await checkIfOfflinePlaybackImportAvailable(state.auth) && nextScreen !== `revisit`) {
     state.currentView = `importOfflinePlayback`
     return
   }
