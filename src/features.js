@@ -389,7 +389,7 @@ state.features = [
       </div>
       <div class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3">
         <div>Streamed <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.playCount[state.settings.dataSource])}</span> times.</div>
-        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniqueTracks)}</span> unique tracks <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
+        <div>Listened to <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.uniquePlayedTracks[state.settings.dataSource])}</span> unique tracks <br>for <span class="font-semibold">${() => showAsNumber(state.rewindReport.artists?.[state.settings.rankingMetric]?.[0]?.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes.</div>
       </div>
     </div>
     <div class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]">

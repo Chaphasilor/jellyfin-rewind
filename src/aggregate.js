@@ -164,6 +164,11 @@ export function generateArtistInfo(topTrackInfo, artistInfo) {
             average: cur.playCount?.average,
           },
           uniqueTracks: new Set([{id: cur.id, name: cur.name}]),
+          uniquePlayedTracks: {
+            jellyfin: new Set(cur.playCount?.jellyfin > 0 ? [{id: cur.id, name: cur.name}] : []),
+            playbackReport: new Set(cur.playCount?.playbackReport > 0 ? [{id: cur.id, name: cur.name}] : []),
+            average: new Set(cur.playCount?.average > 0 ? [{id: cur.id, name: cur.name}] : []),
+          },
           plays: cur.plays,
           lastPlayed: cur.lastPlayed,
           totalPlayDuration: {
@@ -179,6 +184,15 @@ export function generateArtistInfo(topTrackInfo, artistInfo) {
         acc[artistId].playCount.playbackReport += Number(cur.playCount?.playbackReport)
         acc[artistId].playCount.average = Math.ceil(((acc[artistId]?.playCount?.jellyfin || 0) + (acc[artistId]?.playCount?.playbackReport || 0))/2)
         acc[artistId].uniqueTracks.add({id: cur.id, name: cur.name})
+        if (cur.playCount?.jellyfin > 0) {
+          acc[artistId].uniquePlayedTracks.jellyfin.add({id: cur.id, name: cur.name})
+        }
+        if (cur.playCount?.playbackReport > 0) {
+          acc[artistId].uniquePlayedTracks.playbackReport.add({id: cur.id, name: cur.name})
+        }
+        if (cur.playCount?.average > 0) {
+          acc[artistId].uniquePlayedTracks.average.add({id: cur.id, name: cur.name})
+        }
         acc[artistId].plays.concat(cur.plays)
         acc[artistId].lastPlayed = (acc[artistId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[artistId]?.lastPlayed || 0) : cur.lastPlayed
         acc[artistId].totalPlayDuration.jellyfin += Number(cur.totalPlayDuration.jellyfin)
@@ -191,6 +205,11 @@ export function generateArtistInfo(topTrackInfo, artistInfo) {
 
   Object.entries(topArtistInfo).forEach(([artistId, artist]) => {
     artist.uniqueTracks = Array.from(artist.uniqueTracks)
+    artist.uniquePlayedTracks = {
+      jellyfin: Array.from(artist.uniquePlayedTracks.jellyfin),
+      playbackReport: Array.from(artist.uniquePlayedTracks.playbackReport),
+      average: Array.from(artist.uniquePlayedTracks.average),
+    }
   })
   
   return topArtistInfo
@@ -212,6 +231,11 @@ export function generateGenreInfo(topTrackInfo) {
             average: cur.playCount?.average,
           },
           uniqueTracks: new Set([{id: cur.id, name: cur.name}]),
+          uniquePlayedTracks: {
+            jellyfin: new Set(cur.playCount?.jellyfin > 0 ? [{id: cur.id, name: cur.name}] : []),
+            playbackReport: new Set(cur.playCount?.playbackReport > 0 ? [{id: cur.id, name: cur.name}] : []),
+            average: new Set(cur.playCount?.average > 0 ? [{id: cur.id, name: cur.name}] : []),
+          },
           plays: cur.plays,
           lastPlayed: cur.lastPlayed,
           totalPlayDuration: {
@@ -226,6 +250,15 @@ export function generateGenreInfo(topTrackInfo) {
         acc[genreId].playCount.playbackReport += Number(cur.playCount?.playbackReport)
         acc[genreId].playCount.average = Math.ceil(((acc[genreId]?.playCount?.jellyfin || 0) + (acc[genreId]?.playCount?.playbackReport || 0))/2)
         acc[genreId].uniqueTracks.add({id: cur.id, name: cur.name})
+        if (cur.playCount?.jellyfin > 0) {
+          acc[genreId].uniquePlayedTracks.jellyfin.add({id: cur.id, name: cur.name})
+        }
+        if (cur.playCount?.playbackReport > 0) {
+          acc[genreId].uniquePlayedTracks.playbackReport.add({id: cur.id, name: cur.name})
+        }
+        if (cur.playCount?.average > 0) {
+          acc[genreId].uniquePlayedTracks.average.add({id: cur.id, name: cur.name})
+        }
         acc[genreId].plays.concat(cur.plays)
         acc[genreId].lastPlayed = (acc[genreId]?.lastPlayed || 0) > cur.lastPlayed ? (acc[genreId]?.lastPlayed || 0) : cur.lastPlayed
         acc[genreId].totalPlayDuration.jellyfin += Number(cur.totalPlayDuration.jellyfin)
@@ -238,6 +271,11 @@ export function generateGenreInfo(topTrackInfo) {
 
   Object.entries(topGenreInfo).forEach(([genreId, genre]) => {
     genre.uniqueTracks = Array.from(genre.uniqueTracks)
+    genre.uniquePlayedTracks = {
+      jellyfin: Array.from(genre.uniquePlayedTracks.jellyfin),
+      playbackReport: Array.from(genre.uniquePlayedTracks.playbackReport),
+      average: Array.from(genre.uniquePlayedTracks.average),
+    }
   })
   
   return topGenreInfo
