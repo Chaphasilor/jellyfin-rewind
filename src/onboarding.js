@@ -34,6 +34,7 @@ export const state = reactive({
   playbackReportingInspectionResult: null,
   connectionHelpDialogOpen: false,
   playbackReportingDialogOpen: false,
+  finampOfflineExportDialogOpen: false,
   featuresInitialized: false,
   darkMode: null,
   selectedAction: null,
@@ -81,6 +82,7 @@ export async function init(auth) {
   
     state.rewindReport = restored.rewindReportData
     state.staleReport = restored.staleReport
+    console.log(`state.rewindReport:`, state.rewindReport)
     console.log(`state.auth.config.user:`, state.auth.config.user)
     if (state.auth?.config?.user) {
       await checkPlaybackReportingSetup(`revisit`)
@@ -129,6 +131,7 @@ export function render() {
     ${() => state.views[state.currentView]}
     ${() => state.connectionHelpDialogOpen ? connectionHelpDialog : null}
     ${() => state.playbackReportingDialogOpen ? playbackReportingDialog : null}
+    ${() => state.finampOfflineExportDialogOpen ? finampOfflineExportDialog : null}
   </div>
   `(onboardingElement)
 }
@@ -289,6 +292,43 @@ const playbackReportingDialog = html`
           }
           <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
           <p>I will try to again offer a way to import ${() => state.rewindReport?.year}'s Rewind data into Jellyfin Rewind ${() => state.rewindReport?.year+1}, so that more information can be used and the used data can be properly limited to the current year only.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`
+const finampOfflineExportDialog = html`
+<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+  <div @click="${() => state.finampOfflineExportDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+    <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
+      <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
+        <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">Importing Offline Plays from Finamp (Beta)</h3>
+        <button @click="${() => state.finampOfflineExportDialogOpen = false}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="w-full h-full overflow-x-auto p-4">
+        <div class="flex flex-col items-start gap-2">
+          <p>If you're using Finamp's beta version, you can easily export your offline plays to a file, and then import that file here into Jellyfin Rewind. Just follow these steps:</p>
+          <ol>
+            <li>1. Open Finamp</li>
+            <li>2. Open the side menu / drawer</li>
+            <li>3. Go to the "Playback History" screen</li>
+            <li>4. Click the "Share" icon at the top right</li>
+            <li>5. Save the file, for example by sharing it to a file manager or sending it to yourself via email</li>
+          </ol>
+          <p>Once you're ready, click the button below, and then click the "Import Offline Playback History" button and select the file you just exported</p>
+          <button
+            class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+            @click="${() => {
+              state.finampOfflineExportDialogOpen = false
+            }}">Close help dialog</button>
+          <p>I'll try to make this less complicated next year...</p>
         </div>
       </div>
     </div>
@@ -823,6 +863,13 @@ const viewImportOfflinePlayback = html`
     <p class="text-orange-500">Make sure to only import this once!</p>
   </div>
 
+  <button
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
+    @click="${() => state.finampOfflineExportDialogOpen = true}"
+  >
+    <span>How can I import my offline plays?</span>
+  </button>
+
   <div class="w-full flex flex-col items-center text-center mt-12">
     <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOfflinePlayback ? `saturation-50` : ``}`}">Import Offline Playback History</label>
     <input type="file" id="import-file" class="hidden" accept=".txt,.json,.jsonl" @change="${async (e) => {
@@ -1076,7 +1123,7 @@ const viewRevisit = html`
   <button
     class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto hover:text-white"
     @click="${() => {
-      state.currentView = `importLastYearsReport` 
+      checkPlaybackReportingSetup() 
     }}"
   >
     <span>Regenerate Rewind</span>
