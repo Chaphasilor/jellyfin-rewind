@@ -1604,11 +1604,11 @@ export function init(rewindReportData, jellyHelper, auth) {
 
   console.log(`dataSource:`, state.settings.dataSource)
 
-  if (state.settings.dataSource === `playbackReport`) {
-    state.settings.rankingMetric = `duration`
-  } else {
-    state.settings.rankingMetric = `playCount`
-  }
+  // if (state.settings.dataSource === `playbackReport`) {
+  //   state.settings.rankingMetric = `duration`
+  // } else {
+  //   state.settings.rankingMetric = `playCount`
+  // }
 
   if (state.settings.dataSource === `jellyfin`) {
     state.extraFeatures.leastSkippedTracks = false
