@@ -178,11 +178,9 @@ state.features = [
   buildFeature(`intro`, html`
     <div class="p-4">
 
-      <div class="mt-4 w-full flex flex-col items-center">
-        <img class="h-24" src="${() =>  state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
-        <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+      <div class="mt-6 w-full flex flex-col items-center mb-16">
+        <img class="h-40" src="${() =>  state.settings.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
       </div>
-
 
       <h2 class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200">Welcome to<br>Jellyfin Rewind ${() => state.rewindReport?.year}!</h2>
 

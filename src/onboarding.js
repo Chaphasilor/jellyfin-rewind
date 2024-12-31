@@ -139,8 +139,7 @@ watch(() => [
 
 const header = html`
 <div class="mt-6 w-full flex flex-col items-center mb-16">
-  <img class="h-24" src="${() =>  state.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
-  <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+  <img class="h-40" src="${() =>  state.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
 </div>
 `
 
@@ -932,7 +931,7 @@ const viewImportLastYearsReport = html`
 
 const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
-  <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-icon-transparent.svg" />
+  <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-rewind-icon.svg" />
   <div class="w-full flex flex-row gap-2 items-center bg-white dark:bg-[#101010] rounded-full">
     <div
       class="h-full rounded-full bg-fixed bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]"
