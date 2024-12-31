@@ -30,6 +30,9 @@ export async function getFeatureDelta(oldReport, newReport) {
     playbackReport: newReport.jellyfinRewindReport.generalStats.totalPlays.playbackReport - oldReport.jellyfinRewindReport.generalStats.totalPlays.playbackReport,
   }
 
+  // favorites difference
+  const favoriteDifference = (newReport.jellyfinRewindReport?.libraryStats?.tracks?.favorite ?? 0) - (oldReport.jellyfinRewindReport?.libraryStats?.tracks?.favorite ?? 0)
+
   const listeningActivityDifference = {
     uniquePlays: uniquePlays,
     totalPlays: totalPlays,
@@ -37,6 +40,7 @@ export async function getFeatureDelta(oldReport, newReport) {
 
   return {
     listeningActivityDifference,
+    favoriteDifference,
   }
   
 }

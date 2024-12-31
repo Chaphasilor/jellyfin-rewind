@@ -614,6 +614,10 @@ state.features = [
         <div><span class="font-semibold text-xl"><span class="text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums)) : `???`}</span> ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? `more` : `less`}  albums.</div>
       </div>
 
+      <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
+        <div class="font-semibold text-xl">You ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.favoriteDifference >= 0) ? `added` : `removed`} <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.favoriteDifference)) : `???`}</span> favorites.</div>
+      </div>
+
       ${() => state.extraFeatures.listeningActivityDifference ? html`
         <div class="mt-16 w-full px-10">
           ${() => state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0 ? html`
