@@ -284,6 +284,18 @@ export default class JellyHelper {
   }
 
   // requires admin permissions
+  async fetchDevices() {
+    const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/Devices`, {
+      method: `GET`,
+      headers: {
+        ...this.auth.config.defaultHeaders,
+        'Content-Type': `application/json`,
+      },
+    })
+    return await response.json()
+  }
+
+  // requires admin permissions
   async shutdownServer() {
       
     const response = await fetch(`${this.auth.config.serverInfo.PublicAddress}/System/Shutdown`, {

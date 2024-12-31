@@ -1,3 +1,5 @@
+import { loadItemInfo } from "./rewind";
+
 export function importOfflinePlayback(fileHandle) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -6,6 +8,21 @@ export function importOfflinePlayback(fileHandle) {
       console.log(`Parsing offline data`)
       const offlinePlaybackData = await parseOfflinePlaybackData(reader.result)
       console.log(`offlinePlaybackData:`, offlinePlaybackData)
+
+      // fetch item data to get track durations
+      const itemInfo = await loadItemInfo(offlinePlaybackData.map(play => play.itemId))
+      console.log(`itemInfo:`, itemInfo)
+      if (itemInfo[`Items`]?.length > 0) {
+        // create map of item ID and duration for reduced time complexity
+        const itemDurations = itemInfo[`Items`].reduce((all, cur) => {
+          all[cur[`Id`]] = !isNaN(Math.round(cur[`RunTimeTicks`] / 10000000)) ? Math.round(cur[`RunTimeTicks`] / 10000000) : 0
+          return all
+        }, {})
+        // enrich offline plays with fetched track durations 
+        for (const index in offlinePlaybackData) {
+          offlinePlaybackData[index].playDuration = itemDurations[offlinePlaybackData[index].itemId]
+        }
+      }
       
       resolve(offlinePlaybackData);
     };
@@ -60,13 +77,15 @@ async function parseFinampOfflinePlaybackData(contentLines) {
       try {
         const parsedLine = JSON.parse(line)
         return new Play({
-          timestamp: parsedLine[`timestamp`],
+          timestamp: new Date(Number(parsedLine[`timestamp`]) * 1000),
           itemId: parsedLine[`item_id`],
           title: parsedLine[`title`],
           artist: parsedLine[`artist`],
           album: parsedLine[`album`],
           userId: parsedLine[`user_id`],
           musicBrainzId: parsedLine[`track_mbid`],
+          client: `Finamp`,
+          //TODO add device information to exported offline plays file
         })
       } catch (err) {
         return null
@@ -76,6 +95,63 @@ async function parseFinampOfflinePlaybackData(contentLines) {
 
   return plays
   
+}
+
+const uploadOfflinePlaybackQuery = (offlinePlays, auth) => {
+  return `
+  INSERT INTO PlaybackActivity
+  (DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration)
+  VALUES
+    ${offlinePlays.map(play => 
+      `( '${play.timestamp.toISOString().slice(0, 19).replace(`T`, ` `)}.0000000', '${auth.config.user.id}', '${play.itemId}', 'Audio', '${play.artist.replaceAll(`'`, `''`)} - ${play.title.replaceAll(`'`, `''`)} (${play.album.replaceAll(`'`, `''`)})', 'OfflinePlay', '${play.client.replaceAll(`'`, `''`)}', '${play.device.replaceAll(`'`, `''`)}', ${play.playDuration})`
+    ).join(`,`)}
+  `
+}
+  // GROUP BY ItemId -- don't group so that we can filter out wrong durations
+  // LIMIT 200
+
+export async function uploadOfflinePlayback(offlinePlays, auth) {
+
+  console.info(`Importing offline playback to server`)
+  
+  const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {
+    method: 'POST',
+    headers: {
+      ...auth.config.defaultHeaders,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      "CustomQueryString": uploadOfflinePlaybackQuery(offlinePlays, auth),
+    })
+  })
+  const json = await response.json()
+  
+  if (json[`message`]?.toLowerCase?.()?.includes?.(`query executed`)) {
+    console.info(`Successfully imported offline playback to server`)
+    return json
+  } else {
+    console.error(`Error while importing offline playback to server:`, json[`message`])
+    throw new Error(`Error while importing offline playback to server: ${json[`message`]}`)
+  }
+
+}
+
+export async function checkIfOfflinePlaybackImportAvailable() {
+  try {
+    const devices = await window.helper.fetchDevices()
+    const finampBetaMatch = devices[`Items`].find(device => {
+      if (device[`AppName`] === `Finamp`) {
+        const versionString = device[`AppVersion`]
+        const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
+        const [, major, minor, patch] = versionString.match(versionRegex) || [];
+        return Number(major) > 0 || Number(minor) >= 9
+      }
+    })
+    return finampBetaMatch
+  } catch (err) {
+    console.error(`Error while checking if offline playback import is available:`, err)
+  }
+  return false
 }
 
 export class Play {
@@ -88,6 +164,9 @@ export class Play {
     album,
     userId,
     musicBrainzId,
+    playDuration,
+    client,
+    device,
   }) {
     this.timestamp = timestamp
     this.itemId = itemId
@@ -96,6 +175,9 @@ export class Play {
     this.album = album
     this.userId = userId
     this.musicBrainzId = musicBrainzId
+    this.playDuration = playDuration
+    this.client = client
+    this.device = device ?? `Unknown Device`
   }
   
 }

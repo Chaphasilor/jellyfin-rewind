@@ -2,7 +2,7 @@ import { reactive, watch, html, } from '@arrow-js/core'
 
 import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind, deleteRewind } from './setup';
 import { getFeatureDelta, importRewindReport } from './delta';
-import { importOfflinePlayback, Play } from './offline-import';
+import { checkIfOfflinePlaybackImportAvailable, importOfflinePlayback, Play, uploadOfflinePlayback } from './offline-import';
 
 export const state = reactive({
   currentView: `start`,
@@ -579,14 +579,27 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   
 } 
 
-// async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`) {
-async function checkPlaybackReportingSetup(nextScreen = `importOfflinePlayback`) {
-
+async function checkPlaybackReportingSetup(nextScreen) {
+  
   // there's nothing we can do without the helper
-  if (!window.helper || !!state.auth?.config?.user?.isAdmin) {
-    state.currentView = nextScreen
+  if (!window.helper) {
+    state.currentView = nextScreen ?? `importLastYearsReport`
+    return
   }
 
+  if (!state.auth?.config?.user?.isAdmin) {
+    state.currentView = nextScreen ?? `importLastYearsReport`
+    return
+  }
+
+  // check if eligible for offline playback import
+  if (await checkIfOfflinePlaybackImportAvailable(state.auth)) {
+    state.currentView = `importOfflinePlayback`
+    return
+  }
+
+  nextScreen = nextScreen ?? `importLastYearsReport`
+    
   try {
 
     const playbackReportingSetup = await window.helper.checkIfPlaybackReportingInstalled()
@@ -805,9 +818,10 @@ const viewImportOfflinePlayback = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
-    <p class="">We noticed you've been using Finamp's beta version to listen to music</p>
+    <p class="">We noticed you've been using Finamp's beta version to listen to music.</p>
     <p class="">Finamp keeps track of your playback history even when you're not connected to your server, and you can now import that history!</p>
     <p class="">Imported plays will only be added to the Playback Reporting addon's database, but can then used to generate a more accurate Rewind report for you in the following steps.</p>
+    <p class="text-orange-500">Make sure to only import this once!</p>
   </div>
 
   <div class="w-full flex flex-col items-center text-center mt-12">
@@ -820,6 +834,10 @@ const viewImportOfflinePlayback = html`
         input.disabled = true
         state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
         console.log(`state.offlinePlayback:`, state.offlinePlayback)
+
+        // import plays to server
+        await uploadOfflinePlayback(state.offlinePlayback, state.auth)
+        
         state.currentView = `importLastYearsReport`
       } catch (err) {
         console.error(`Error while importing offline playback data:`, err)
@@ -831,11 +849,12 @@ const viewImportOfflinePlayback = html`
     ${() => state.importingOfflinePlayback ? html`
       <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
     ` : html`
+      <p class="mt-12 px-10 text-balance font-semibold text-gray-600 dark:text-gray-300">Already imported your offline plays or don't have any?</p>
       <button
-        class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+        class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
         @click="${() => state.currentView = `importLastYearsReport`}"
       >
-        <span>Continue without your offline playback history</span>
+        <span>Continue without importing</span>
       </button>
     `
     }
@@ -852,7 +871,6 @@ const viewImportLastYearsReport = html`
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
-    <p class="">Awesome, you're logged in!</p>
     <p class="">You can now import last year's Jellyfin Rewind report, if you have one.</p>
     <p class="">This will give you more, and more reliable, statistics about your listening activity.</p>
   </div>

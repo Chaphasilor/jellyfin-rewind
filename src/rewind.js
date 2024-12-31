@@ -213,7 +213,7 @@ function indexAlbums(albumInfoJSON) {
   return items
 }
 
-async function loadItemInfo(items) {
+export async function loadItemInfo(items) {
 
   const params = {
     // 'SortBy': `Album,SortName`,
@@ -222,7 +222,7 @@ async function loadItemInfo(items) {
     'Recursive': `true`,
     'Fields': `AudioInfo,ParentId,Ak,Genres`,
     'EnableImageTypes': `Primary`,
-    // 'Ids': [...new Set(items.map(item => item.ItemId))].join(','),
+    'Ids': !!items ? [...new Set(items)].join(',') : undefined,
   }
 
   const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')
