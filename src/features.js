@@ -59,7 +59,13 @@ state.featureSideEffects = {
   },
   3: {
     load: loadTopTracksMedia,
-    enter: playTopTracks,
+    enter: () => {
+      playTopTracks()
+      
+      // slide in top tracks
+      let topItems = document.querySelectorAll(`#top-tracks-main-feature li`)
+      animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+    },
   },
   4: {
     enter: () => {
@@ -85,7 +91,13 @@ state.featureSideEffects = {
   },
   6: {
     load: loadTopArtistsMedia,
-    enter: playTopArtists,
+    enter: () => {
+      playTopArtists()
+      
+      // slide in top artists
+      let topItems = document.querySelectorAll(`#top-artists-main-feature li`)
+      animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+    },
   },
   7: {
   },
@@ -95,7 +107,13 @@ state.featureSideEffects = {
   },
   9: {
     load: loadTopAlbumsMedia,
-    enter: playTopAlbums,
+    enter: () => {
+      playTopAlbums()
+      
+      // slide in top albums
+      let topItems = document.querySelectorAll(`#top-albums-main-feature li`)
+      animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+    },
   },
   10: {
   },
@@ -104,8 +122,8 @@ state.featureSideEffects = {
       playTopGenres()
       
       // slide in top genres
-      let topCategories = document.querySelectorAll(`#top-genres-main-feature li`)
-      animate(topCategories, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+      let topItems = document.querySelectorAll(`#top-genres-main-feature li`)
+      animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
     },
   },
   12: {
@@ -117,6 +135,9 @@ state.featureSideEffects = {
     enter: () => {
       if (state.extraFeatures.leastSkippedTracks) {
         playLeastSkippedTracks()
+        // slide in least skipped tracks
+        let topItems = document.querySelectorAll(`#least-skipped-tracks-main-feature li`)
+        animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
       }
     },
   },
@@ -129,6 +150,9 @@ state.featureSideEffects = {
     enter: () => {
       if (state.extraFeatures.mostSkippedTracks) {
         playMostSkippedTracks()
+        // slide in most skipped tracks
+        let topItems = document.querySelectorAll(`#most-skipped-tracks-main-feature li`)
+        animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
       }
     }
   },
@@ -259,7 +283,7 @@ state.features = [
   buildFeature(`top tracks of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Tracks<br>of the year</h2>
-      <ol class="flex flex-col gap-2 p-6">
+      <ol id="top-tracks-main-feature" class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.tracks?.[state.settings.rankingMetric]?.slice(0, 5).map((track, index) => html`
           <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
@@ -400,7 +424,7 @@ state.features = [
   buildFeature(`top artists of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Artists<br>of the year</h2>
-      <ol class="flex flex-col gap-2 p-6">
+      <ol id="top-artists-main-feature" class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.artists?.[state.settings.rankingMetric]?.slice(0, 5).map((artist, index) => html`
           <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
@@ -525,7 +549,7 @@ state.features = [
   buildFeature(`top albums of the year`, html`
     <div class="text-center">
       <h2 class="text-2xl font-medium mt-5">Your Top Albums<br>of the year</h2>
-      <ol class="flex flex-col gap-2 p-6">
+      <ol id="top-albums-main-feature" class="flex flex-col gap-2 p-6">
         ${() => state.rewindReport.albums?.[state.settings.rankingMetric]?.slice(0, 5).map((album, index) => html`
           <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
             <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
@@ -730,7 +754,7 @@ state.features = [
           </div>
         </div>
         ` : html`
-        <ol class="flex flex-col gap-2 p-6">
+        <ol id="least-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
           ${() => state.rewindReport.tracks?.[`leastSkipped`]?.slice(0, 5).map((track, index) => html`
             <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
               <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
@@ -832,7 +856,7 @@ state.features = [
           </div>
         </div>
         ` : html`
-        <ol class="flex flex-col gap-2 p-6">
+        <ol id="most-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
           ${() => state.rewindReport.tracks?.[`mostSkipped`]?.slice(0, 5).map((track, index) => html`
             <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
               <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
