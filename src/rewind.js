@@ -67,6 +67,10 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
   playbackReportJSON.notFound = [] // deleted or otherwise not found items that should still contribute to the general stats
   for (const index in playbackReportJSON.items) {
     const item = playbackReportJSON.items[index] //!!! don't use this as a left-hand expression
+
+    if (Number(item.PlayDuration) < 0) {
+      console.error(`item duration:`, item)
+    }
     const itemInfo = indexedItemInfo[item.ItemId]
     if (!itemInfo) {
       console.warn(`Item info not found: ${item.ItemId} (${item.ItemName})`)
@@ -78,20 +82,21 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
     // adjust playback duration if necessary
 
     let playbackReportDuration = Number(item.PlayDuration)
-    if (isNaN(playbackReportDuration)) {
+    if (isNaN(playbackReportDuration) || playbackReportDuration < 0) {
       playbackReportDuration = 0
     }
     const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000) // get duration in seconds
     
-    if (playbackReportDuration > jellyfinItemDuration + 1) {
-      console.debug(`Wrong duration for ${item.ItemId} (${item.ItemName}), adjusting from ${playbackReportDuration} to ${jellyfinItemDuration}`)
+    playbackReportJSON.items[index].PlayDuration = playbackReportDuration
+    if (playbackReportJSON.items[index].PlayDuration > jellyfinItemDuration + 1) {
+      console.debug(`Wrong duration for ${item.ItemId} (${item.ItemName}), adjusting from ${playbackReportJSON.items[index].PlayDuration} to ${jellyfinItemDuration}`)
       playbackReportJSON.items[index].PlayDuration = jellyfinItemDuration
       playbackReportJSON.items[index].FullySkipped = false
       playbackReportJSON.items[index].PartiallySkipped = false
-    } else if (playbackReportDuration < (jellyfinItemDuration - 1) * 0.3) {
+    } else if (playbackReportJSON.items[index].PlayDuration < (jellyfinItemDuration - 1) * 0.3) {
       playbackReportJSON.items[index].FullySkipped = true
       playbackReportJSON.items[index].PartiallySkipped = true
-    } else if (playbackReportDuration < (jellyfinItemDuration - 1) * 0.7) {
+    } else if (playbackReportJSON.items[index].PlayDuration < (jellyfinItemDuration - 1) * 0.7) {
       playbackReportJSON.items[index].FullySkipped = false
       playbackReportJSON.items[index].PartiallySkipped = true
     }
@@ -213,7 +218,7 @@ function indexAlbums(albumInfoJSON) {
   return items
 }
 
-async function loadItemInfo(items) {
+export async function loadItemInfo(items) {
 
   const params = {
     // 'SortBy': `Album,SortName`,
@@ -222,7 +227,7 @@ async function loadItemInfo(items) {
     'Recursive': `true`,
     'Fields': `AudioInfo,ParentId,Ak,Genres`,
     'EnableImageTypes': `Primary`,
-    // 'Ids': [...new Set(items.map(item => item.ItemId))].join(','),
+    'Ids': !!items ? [...new Set(items)].join(',') : undefined,
   }
 
   const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')

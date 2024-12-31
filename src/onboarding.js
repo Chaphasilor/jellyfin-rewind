@@ -2,6 +2,7 @@ import { reactive, watch, html, } from '@arrow-js/core'
 
 import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind, deleteRewind } from './setup';
 import { getFeatureDelta, importRewindReport } from './delta';
+import { checkIfOfflinePlaybackImportAvailable, importOfflinePlayback, Play, uploadOfflinePlayback } from './offline-import';
 
 export const state = reactive({
   currentView: `start`,
@@ -20,15 +21,20 @@ export const state = reactive({
   rewindGenerating: false,
   rewindReport: null,
   oldReport: null,
+  offlinePlayback: null,
   importingExistingReport: false,
   importingLastYearsReport: false,
+  importingOfflinePlayback: false,
   staleReport: false,
   progress: 0,
+  waitingForRestart: false,
+  playbackReportingInspectionAttempts: 0,
   auth: null,
   error: null,
   playbackReportingInspectionResult: null,
   connectionHelpDialogOpen: false,
   playbackReportingDialogOpen: false,
+  finampOfflineExportDialogOpen: false,
   featuresInitialized: false,
   darkMode: null,
   selectedAction: null,
@@ -46,12 +52,14 @@ export async function init(auth) {
     importReportForViewing: viewImportReportForViewing,
     importLastYearsReport: viewImportLastYearsReport,
     launchExistingReport: viewLaunchExistingReport,
+    importOfflinePlayback: viewImportOfflinePlayback,
     load: viewLoad,
     revisit: viewRevisit,
     rewindGenerationError: viewRewindGenerationError,
   })
 
   state.auth = auth
+  state.server.url = state.auth?.config?.baseUrl
   
   // MediaQueryList
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
@@ -74,6 +82,7 @@ export async function init(auth) {
   
     state.rewindReport = restored.rewindReportData
     state.staleReport = restored.staleReport
+    console.log(`state.rewindReport:`, state.rewindReport)
     console.log(`state.auth.config.user:`, state.auth.config.user)
     if (state.auth?.config?.user) {
       await checkPlaybackReportingSetup(`revisit`)
@@ -85,7 +94,11 @@ export async function init(auth) {
       // determine which view to show
       await checkPlaybackReportingSetup()
     } else {
-      state.currentView = `placeholder`
+      if (JSON.parse(import.meta.env.VITE_SHOW_PLACEHOLDER)) {
+        state.currentView = `placeholder`
+      } else {
+        state.currentView = `start`
+      }
     }
   }
 
@@ -118,6 +131,7 @@ export function render() {
     ${() => state.views[state.currentView]}
     ${() => state.connectionHelpDialogOpen ? connectionHelpDialog : null}
     ${() => state.playbackReportingDialogOpen ? playbackReportingDialog : null}
+    ${() => state.finampOfflineExportDialogOpen ? finampOfflineExportDialog : null}
   </div>
   `(onboardingElement)
 }
@@ -128,8 +142,7 @@ watch(() => [
 
 const header = html`
 <div class="mt-6 w-full flex flex-col items-center mb-16">
-  <img class="h-24" src="${() =>  state.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
-  <h3 class="-rotate-6 ml-4 -mt-2 text-5xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+  <img class="h-40" src="${() =>  state.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
 </div>
 `
 
@@ -150,7 +163,13 @@ const viewStart = html`
 
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-16 flex flex-row gap-4 items-center mx-auto"
-    @click="${() => state.currentView = `server`}"
+    @click="${() => {
+      if ((state.auth?.config?.baseUrl?.length ?? 0) > 0) {
+        connect(state.auth?.config?.baseUrl)
+      }
+      
+      state.currentView = `server`
+    }}"
   >
     <span>Log In</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -160,10 +179,10 @@ const viewStart = html`
   </button>
 
   <button
-    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-4 flex flex-row gap-4 items-center mx-auto"
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.currentView = `importReportForViewing`}"
   >
-    <span>Import an Existing Report Instead</span>
+     <span>Import an Existing Report Instead</span>
   </button>
 
 </div>
@@ -243,11 +262,11 @@ const playbackReportingDialog = html`
       </div>
       <div class="w-full h-full overflow-x-auto p-4">
         <div class="flex flex-col items-start gap-2">
-          <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that e.g. the total playtime is only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like 2023 only!<span></p>
+          <p>Jellyfin doesn't save any information about played tracks other than the number of times they were played. This means that things like the total playtime are only an approximation. It also means that it is <span class="font-semibold">not possible to limit the data to a specific time frame, like ${import.meta.env.VITE_TARGET_YEAR} only!<span></p>
           <p>However, if you have the "Playback Reporting" plugin installed, significantly more information can be collected, such as the date and durations of each playback. This results in better stats, although it isn't perfect either. Playback reporting depends on applications properly reporting the current playback states, and currently most music players that are compatible with Jellyfin seem to struggle with this in one way or another. Especially offline playback is challenging, because the players have to "simulate" the playback after the device reconnects to the server.</p>
           <p>Still, the best solution is to install the Playback Reporting plugin into your Jellyfin server if you haven't done so already. It won't take longer than 2 minutes, so why not do it right now? (You'll have to be logged in as an admin user.)</p>
           ${() => state.server.url !== `` ? html`
-            <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`}" target="_blank">Open Plugins Page!</a>
+            <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#/dashboard/plugins/5c53438191a343cb907a35aa02eb9d2c?name=Playback%20Reporting`}" target="_blank">Open Plugins Page!</a>
             ` : html`
             <button
               class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
@@ -279,10 +298,51 @@ const playbackReportingDialog = html`
   </div>
 </div>
 `
+const finampOfflineExportDialog = html`
+<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+  <div @click="${() => state.finampOfflineExportDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
+    <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
+      <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
+        <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">Importing Offline Plays from Finamp (Beta)</h3>
+        <button @click="${() => state.finampOfflineExportDialogOpen = false}" class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-x" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="w-full h-full overflow-x-auto p-4">
+        <div class="flex flex-col items-start gap-2">
+          <p>If you're using Finamp's beta version, you can easily export your offline plays to a file, and then import that file here into Jellyfin Rewind. Just follow these steps:</p>
+          <ol>
+            <li>1. Open Finamp</li>
+            <li>2. Open the side menu / drawer</li>
+            <li>3. Go to the "Playback History" screen</li>
+            <li>4. Click the "Share" icon at the top right</li>
+            <li>5. Save the file, for example by sharing it to a file manager or sending it to yourself via email</li>
+          </ol>
+          <p>Once you're ready, click the button below, and then click the "Import Offline Playback History" button and select the file you just exported</p>
+          <button
+            class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
+            @click="${() => {
+              state.finampOfflineExportDialogOpen = false
+            }}">Close help dialog</button>
+          <p>I'll try to make this less complicated next year...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`
 
-async function connect() {
+async function connect(url) {
   state.error = null
-  state.server.url = document.querySelector(`#onboarding-server-url`).value
+  if (url) {
+    state.server.url = url
+  } else {
+    state.server.url = document.querySelector(`#onboarding-server-url`).value
+  }
   // remove trailing slash
   state.server.url = state.server.url.replace(/\/$/, ``)
   try {
@@ -294,7 +354,7 @@ async function connect() {
     state.error = html`
     <div class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-500 dark:text-red-400 mt-10 w-5/6 mx-auto">
       <p class="">There was an error while connecting to the server.</p>
-      <p class="">Please check the URL and try again.</p>
+      <p class="font-mono">${err.toString()}</p>
       <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
     </div>
     `
@@ -429,7 +489,7 @@ async function login()  {
 async function loginAuthToken()  {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
-    let userInfo = await loginViaAuthToken(state.auth, username, token)
+    let userInfo = await loginViaAuthToken(state.auth, token)
     // state.currentView = `importLastYearsReport`
     checkPlaybackReportingSetup()
   } catch (err) {
@@ -470,21 +530,22 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   } else if (playbackReportingSetup.restartRequired) {
     inspection.valid = false
     inspection.issue = `The Playback Reporting plugin is installed, but the Jellyfin server needs to be restarted in order to activate it.`
+    state.waitingForRestart = false
     if (window.helper && state.auth.config.user.isAdmin) {
       inspection.action = html`
       <button
         class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
         @click="${async () => {
           try {
-            await window.helper.shutdownServer()
+            await window.helper.restartServer()
+            state.waitingForRestart = true
             setTimeout(() => {
               checkPlaybackReportingSetup(nextScreen)
-            }, 5000)
+            }, 8000)
           } catch (err) {
             console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
           }
-        }}">Shut down Jellyfin Server</button>
-      <p class="italic">For most setups, the server will <b>automatically restart</b> after shutting it down.</p>
+        }}">${() => state.waitingForRestart ? `Server is restarting...` : `Restart Jellyfin Server`}</button>
       `
     }
   } else if (playbackReportingSetup.disabled) {
@@ -557,13 +618,27 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   
 } 
 
-async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`) {
-
+async function checkPlaybackReportingSetup(nextScreen) {
+  
   // there's nothing we can do without the helper
   if (!window.helper) {
-    state.currentView = nextScreen
+    state.currentView = nextScreen ?? `importLastYearsReport`
+    return
   }
 
+  if (!state.auth?.config?.user?.isAdmin) {
+    state.currentView = nextScreen ?? `importLastYearsReport`
+    return
+  }
+
+  // check if eligible for offline playback import
+  if (await checkIfOfflinePlaybackImportAvailable(state.auth) && nextScreen !== `revisit`) {
+    state.currentView = `importOfflinePlayback`
+    return
+  }
+
+  nextScreen = nextScreen ?? `importLastYearsReport`
+    
   try {
 
     const playbackReportingSetup = await window.helper.checkIfPlaybackReportingInstalled()
@@ -572,6 +647,7 @@ async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`)
     const inspection = inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen)
     console.log(`inspection:`, inspection)
 
+    state.waitingForRestart = false
     
     if (!inspection.valid) {
       state.currentView = `playbackReportingIssues`
@@ -582,9 +658,16 @@ async function checkPlaybackReportingSetup(nextScreen = `importLastYearsReport`)
     
   } catch (err) {
     console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
-    state.currentView = nextScreen
+    state.playbackReportingInspectionAttempts++
+    if (state.playbackReportingInspectionAttempts > 3) {
+      state.currentView = nextScreen
+    } else {
+      setTimeout(() => {
+        checkPlaybackReportingSetup(nextScreen)
+      }, 5000)
+    }
   }
-  
+
 }
 
 const viewPlaybackReportingIssues = html`
@@ -708,6 +791,8 @@ const viewImportReportForViewing = html`
             state.importingExistingReport = true
             input.disabled = true
             state.rewindReport = await importRewindReport(e.target.files[0])
+            state.auth.config.serverInfo = state.rewindReport.jellyfinRewindReport.server
+            console.log(`state.auth.serverInfo:`, state.auth.serverInfo)
             console.log(`state.rewindReport:`, state.rewindReport)
             state.currentView = `launchExistingReport`
             // state.currentView = `load`
@@ -766,13 +851,72 @@ const viewLaunchExistingReport = html`
 </div>
 `
 
+const viewImportOfflinePlayback = html`
+<div class="p-4">
+
+  ${() => header}
+
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+    <p class="">We noticed you've been using Finamp's beta version to listen to music.</p>
+    <p class="">Finamp keeps track of your playback history even when you're not connected to your server, and you can now import that history!</p>
+    <p class="">Imported plays will only be added to the Playback Reporting addon's database, but can then used to generate a more accurate Rewind report for you in the following steps.</p>
+    <p class="text-orange-500">Make sure to only import this once!</p>
+  </div>
+
+  <button
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
+    @click="${() => state.finampOfflineExportDialogOpen = true}"
+  >
+    <span>How can I import my offline plays?</span>
+  </button>
+
+  <div class="w-full flex flex-col items-center text-center mt-12">
+    <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOfflinePlayback ? `saturation-50` : ``}`}">Import Offline Playback History</label>
+    <input type="file" id="import-file" class="hidden" accept=".txt,.json,.jsonl" @change="${async (e) => {
+      console.info(`Importing offline playback...`)
+      const input = e.target
+      try {
+        state.importingOfflinePlayback = true
+        input.disabled = true
+        state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
+        console.log(`state.offlinePlayback:`, state.offlinePlayback)
+
+        // import plays to server
+        await uploadOfflinePlayback(state.offlinePlayback, state.auth)
+        
+        state.currentView = `importLastYearsReport`
+      } catch (err) {
+        console.error(`Error while importing offline playback data:`, err)
+      }
+      input.disabled = false
+      state.importingOfflinePlayback = false
+    }}">
+
+    ${() => state.importingOfflinePlayback ? html`
+      <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
+    ` : html`
+      <p class="mt-12 px-10 text-balance font-semibold text-gray-600 dark:text-gray-300">Already imported your offline plays or don't have any?</p>
+      <button
+        class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
+        @click="${() => state.currentView = `importLastYearsReport`}"
+      >
+        <span>Continue without importing</span>
+      </button>
+    `
+    }
+  </div>
+
+  ${() => buttonLogOut}
+
+</div>
+`
+
 const viewImportLastYearsReport = html`
 <div class="p-4">
 
   ${() => header}
 
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
-    <p class="">Awesome, you're logged in!</p>
     <p class="">You can now import last year's Jellyfin Rewind report, if you have one.</p>
     <p class="">This will give you more, and more reliable, statistics about your listening activity.</p>
   </div>
@@ -834,7 +978,7 @@ const viewImportLastYearsReport = html`
 
 const progressBar = html`
 <div class="w-5/6 mx-auto mt-10 flex h-8 flex-row gap-4 justify-left">
-  <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-icon-transparent.svg" />
+  <img class="${() => `inline h-full ${state.progress < 1 ? `animate-spin` : ``}`}" src="/media/jellyfin-rewind-icon.svg" />
   <div class="w-full flex flex-row gap-2 items-center bg-white dark:bg-[#101010] rounded-full">
     <div
       class="h-full rounded-full bg-fixed bg-gradient-to-r from-[#AA5CC3] to-[#00A4DC]"
@@ -979,7 +1123,7 @@ const viewRevisit = html`
   <button
     class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto hover:text-white"
     @click="${() => {
-      state.currentView = `importLastYearsReport` 
+      checkPlaybackReportingSetup() 
     }}"
   >
     <span>Regenerate Rewind</span>

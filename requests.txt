@@ -39,3 +39,9 @@ WHERE ItemType="Audio"
   AND datetime(DateCreated) >= datetime('2022-01-01') AND datetime(DateCreated) <= datetime('2022-12-31')
 ORDER BY DateCreated ASC
 LIMIT 30
+
+INSERT INTO PlaybackActivity
+  (DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration)
+  VALUES
+    ( '2024-12-29 17:55:07.0000000', 'c0ffee', '22ed98039ef8db9016f64bba02b36ad5', 'Audio', 'Crankdat, Ace Aura - The Feeling (The Feeling)', 'OfflinePlay', 'Finamp', 'Unknown', 420),
+    ( '2024-12-29 17:55:12.0000000', 'c0ffee', 'e5262768cd8d18bf6c25dff4a97f2fda', 'Audio', 'Fabian Mazur - Buckwild (The FifthGuys & Coffeeshop Remix) (Buckwild (The FifthGuys & Coffeeshop Remix))', 'OfflinePlay', 'Finamp', 'Unknown', 420)

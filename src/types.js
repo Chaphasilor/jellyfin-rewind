@@ -22,13 +22,14 @@ export class BackdropImage {
 }
 
 export class Artist {
-  constructor({ id, name, tracks, images, playCount, uniqueTracks, plays, lastPlayed, totalPlayDuration }) {
+  constructor({ id, name, tracks, images, playCount, uniqueTracks, uniquePlayedTracks, plays, lastPlayed, totalPlayDuration }) {
     this.name = name
     this.id = id
     this.tracks = tracks
     this.images = images
     this.playCount = playCount
     this.uniqueTracks = uniqueTracks
+    this.uniquePlayedTracks = uniquePlayedTracks
     this.plays = plays
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration
@@ -46,6 +47,11 @@ export class Artist {
       images: this.images,
       playCount: this.playCount,
       uniqueTracks: this.uniqueTracks.length,
+      uniquePlayedTracks: {
+        jellyfin: this.uniquePlayedTracks.jellyfin.length,
+        playbackReport: this.uniquePlayedTracks.playbackReport.length,
+        average: this.uniquePlayedTracks.average.length,
+      },
       plays: this.plays.length,
       lastPlayed: this.lastPlayed,
       totalPlayDuration: this.totalPlayDuration,
@@ -138,13 +144,14 @@ export class Track {
 }
 
 export class Genre {
-  constructor({ id, name, tracks, image, playCount, uniqueTracks, plays, lastPlayed, totalPlayDuration }) {
+  constructor({ id, name, tracks, image, playCount, uniqueTracks, uniquePlayedTracks, plays, lastPlayed, totalPlayDuration }) {
     this.name = name
     this.id = id
     this.tracks = tracks
     this.image = image
     this.playCount = playCount
     this.uniqueTracks = uniqueTracks
+    this.uniquePlayedTracks = uniquePlayedTracks
     this.plays = plays
     this.lastPlayed = lastPlayed
     this.totalPlayDuration = totalPlayDuration
@@ -162,6 +169,11 @@ export class Genre {
       image: this.image,
       playCount: this.playCount,
       uniqueTracks: this.uniqueTracks.length,
+      uniquePlayedTracks: {
+        jellyfin: this.uniquePlayedTracks.jellyfin.length,
+        playbackReport: this.uniquePlayedTracks.playbackReport.length,
+        average: this.uniquePlayedTracks.average.length,
+      },
       plays: this.plays.length,
       lastPlayed: this.lastPlayed,
       totalPlayDuration: this.totalPlayDuration
