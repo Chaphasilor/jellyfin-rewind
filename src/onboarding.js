@@ -2,7 +2,7 @@ import { reactive, watch, html, } from '@arrow-js/core'
 
 import { connectToServer, generateRewindReport, initializeFeatureStory, loginViaAuthToken, loginViaPassword, restoreAndPrepareRewind, deleteRewind } from './setup';
 import { getFeatureDelta, importRewindReport } from './delta';
-import { checkIfOfflinePlaybackImportAvailable, importOfflinePlayback, Play, uploadOfflinePlayback } from './offline-import';
+import { checkIfOfflinePlaybackImportAvailable, importOfflinePlayback, Play, uploadOfflinePlaybackBatched } from './offline-import';
 
 export const state = reactive({
   currentView: `start`,
@@ -880,9 +880,10 @@ const viewImportOfflinePlayback = html`
         input.disabled = true
         state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
         console.log(`state.offlinePlayback:`, state.offlinePlayback)
+        console.log(`missing playDurations:`, state.offlinePlayback.filter(x => !x.playDuration))
 
         // import plays to server
-        await uploadOfflinePlayback(state.offlinePlayback, state.auth)
+        await uploadOfflinePlaybackBatched(state.offlinePlayback, state.auth)
         
         state.currentView = `importLastYearsReport`
       } catch (err) {

@@ -245,6 +245,26 @@ export async function loadItemInfo(items) {
 
 }
 
+export async function loadItemInfoBatched(items) {
+
+  let combinedResponse = null
+  const batchSize = 200
+  let response
+  for (let batchIndex = 0; batchIndex < Math.ceil(items.length / batchSize); batchIndex++) {
+    console.info(`Fetching item batch info`)
+    response = await loadItemInfo(items.slice(batchSize*batchIndex, batchSize*(batchIndex+1)), auth)
+    if (!combinedResponse) {
+      combinedResponse = response
+    } else {
+      combinedResponse.Items.push(...response.Items)
+    }
+    console.log(`combinedResponse.Items.length:`, combinedResponse.Items.length)
+  }
+
+  return combinedResponse
+
+}
+
 async function loadArtistInfo(items) {
 
   const params = {
