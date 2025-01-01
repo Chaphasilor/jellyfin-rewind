@@ -552,7 +552,8 @@ async function generateRewindReport({
     
     if (oldReport) {
       const featureDelta = await getFeatureDelta(oldReport, { jellyfinRewindReport })
-  
+      
+      jellyfinRewindReport.oldReportYear = oldReport.jellyfinRewindReport?.year
       jellyfinRewindReport.featureDelta = featureDelta
     }
     
