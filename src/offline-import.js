@@ -1,4 +1,4 @@
-import { loadItemInfo } from "./rewind";
+import { loadItemInfo, loadItemInfoBatched } from "./rewind";
 
 export function importOfflinePlayback(fileHandle) {
   return new Promise((resolve, reject) => {
@@ -10,7 +10,7 @@ export function importOfflinePlayback(fileHandle) {
       console.log(`offlinePlaybackData:`, offlinePlaybackData)
 
       // fetch item data to get track durations
-      const itemInfo = await loadItemInfo(offlinePlaybackData.map(play => play.itemId))
+      const itemInfo = await loadItemInfoBatched(offlinePlaybackData.map(play => play.itemId))
       console.log(`itemInfo:`, itemInfo)
       if (itemInfo[`Items`]?.length > 0) {
         // create map of item ID and duration for reduced time complexity
@@ -103,17 +103,28 @@ const uploadOfflinePlaybackQuery = (offlinePlays, auth) => {
   (DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration)
   VALUES
     ${offlinePlays.map(play => 
-      `( '${play.timestamp.toISOString().slice(0, 19).replace(`T`, ` `)}.0000000', '${auth.config.user.id}', '${play.itemId}', 'Audio', '${play.artist.replaceAll(`'`, `''`)} - ${play.title.replaceAll(`'`, `''`)} (${play.album.replaceAll(`'`, `''`)})', 'OfflinePlay', '${play.client.replaceAll(`'`, `''`)}', '${play.device.replaceAll(`'`, `''`)}', ${play.playDuration})`
+      `( '${play.timestamp.toISOString().slice(0, 19).replace(`T`, ` `)}.0000000', '${auth.config.user.id}', '${play.itemId}', 'Audio', '${play.artist?.replaceAll?.(`'`, `''`)} - ${play.title?.replaceAll?.(`'`, `''`)} (${play.album?.replaceAll?.(`'`, `''`)})', 'OfflinePlay', '${play.client?.replaceAll?.(`'`, `''`)}', '${play.device.replaceAll(`'`, `''`)}', ${play.playDuration ?? 0})`
     ).join(`,`)}
   `
 }
   // GROUP BY ItemId -- don't group so that we can filter out wrong durations
   // LIMIT 200
 
-export async function uploadOfflinePlayback(offlinePlays, auth) {
+export async function uploadOfflinePlaybackBatched(offlinePlays, auth) {
 
   console.info(`Importing offline playback to server`)
   
+  const batchSize = 100
+  for (let batchIndex = 0; batchIndex < Math.ceil(offlinePlays.length / batchSize); batchIndex++) {
+    console.info(`Importing batch`)
+    await uploadOfflinePlayback(offlinePlays.slice(batchSize*batchIndex, batchSize*(batchIndex+1)), auth)
+  }
+
+}
+
+async function uploadOfflinePlayback(offlinePlays, auth) {
+  
+  console.log(`offlinePlays:`, offlinePlays)
   const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {
     method: 'POST',
     headers: {

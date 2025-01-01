@@ -626,7 +626,7 @@ state.features = [
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
       <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
-        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> tracks ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> tracks ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.featureDelta?.year}.</div>
       </div>
       
       <div class="mt-28 w-full px-10 flex flex-col items-center gap-3">
@@ -985,11 +985,10 @@ state.features = [
  // summary screen
  buildFeature(`summary`, html`
   <div class="h-full p-4 flex flex-col justify-around">
-    <h2 class="text-2xl pt-[4.5rem] font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center mt-2 font-semibold text-gray-800 dark:text-gray-200">
+    <h2 class="text-2xl mt-8 font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center font-semibold text-gray-800 dark:text-gray-200">
       <span>${() => state.auth?.config?.user?.name}'s</span>
       <div class="w-full flex flex-col items-center">
-        <img class="h-12" src="${() => state.settings.darkMode ? '/media/jellyfin-banner-dark.svg' : '/media/jellyfin-banner-light.svg'}" alt="Jellyfin Rewind Logo">
-        <h3 class="-rotate-6 ml-4 -mt-2 text-2xl font-quicksand font-medium text-[#00A4DC]">Rewind</h3>
+        <img class="h-20" src="${() => state.settings.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
       </div>
       <span>Report</span>
     </h2>
@@ -1052,13 +1051,13 @@ state.features = [
          ` : null}
           <div class="flex flex-row flex-wrap justify-around gap-4">
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span> more tracks</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks))}</span><br/>more tracks</div>
             ` : null}
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span> more artists</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists))}</span><br/>more artists</div>
             ` : null}
             ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums >= 0) ? html`
-              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span> more albums</div>
+              <div class="text-center"><span class="text-lg text-[#00A4DC] font-semibold font-quicksand">${() =>showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums))}</span><br/>more albums</div>
             ` : null}
           </div>
         </div>
