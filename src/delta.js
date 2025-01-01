@@ -41,6 +41,7 @@ export async function getFeatureDelta(oldReport, newReport) {
   return {
     listeningActivityDifference,
     favoriteDifference,
+    year: oldReport.jellyfinRewindReport.year,
   }
   
 }

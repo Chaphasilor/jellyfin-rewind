@@ -626,7 +626,7 @@ state.features = [
       <h3 class="text-2xl font-medium">...compared to last year!</h3>
       
       <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
-        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> tracks ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.year}.</div>
+        <div class="font-semibold text-xl">This year, you played <span class="font-semibold text-3xl text-sky-500 font-quicksand">${() => state.extraFeatures.listeningActivityDifference ? showAsNumber(Math.abs(state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource]).toFixed(0)) : `???`}</span> tracks ${() => (!state.extraFeatures.listeningActivityDifference || state.rewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[state.settings.dataSource] >= 0) ? `more` : `less`} than in ${() => state.rewindReport?.featureDelta?.year}.</div>
       </div>
       
       <div class="mt-28 w-full px-10 flex flex-col items-center gap-3">
