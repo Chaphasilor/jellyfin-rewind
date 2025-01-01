@@ -103,7 +103,7 @@ const uploadOfflinePlaybackQuery = (offlinePlays, auth) => {
   (DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration)
   VALUES
     ${offlinePlays.map(play => 
-      `( '${play.timestamp.toISOString().slice(0, 19).replace(`T`, ` `)}.0000000', '${auth.config.user.id}', '${play.itemId}', 'Audio', '${play.artist.replaceAll(`'`, `''`)} - ${play.title.replaceAll(`'`, `''`)} (${play.album.replaceAll(`'`, `''`)})', 'OfflinePlay', '${play.client.replaceAll(`'`, `''`)}', '${play.device.replaceAll(`'`, `''`)}', ${play.playDuration})`
+      `( '${play.timestamp.toISOString().slice(0, 19).replace(`T`, ` `)}.0000000', '${auth.config.user.id}', '${play.itemId}', 'Audio', '${play.artist.replaceAll(`'`, `''`)} - ${play.title.replaceAll(`'`, `''`)} (${play.album?.replaceAll(`'`, `''`) ?? ''})', 'OfflinePlay', '${play.client.replaceAll(`'`, `''`)}', '${play.device.replaceAll(`'`, `''`)}', ${play.playDuration ?? 0})`
     ).join(`,`)}
   `
 }
@@ -114,6 +114,7 @@ export async function uploadOfflinePlayback(offlinePlays, auth) {
 
   console.info(`Importing offline playback to server`)
   
+
   const response = await fetch(`${auth.config.baseUrl}/user_usage_stats/submit_custom_query?stamp=${Date.now()}`, {
     method: 'POST',
     headers: {

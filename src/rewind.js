@@ -219,31 +219,55 @@ function indexAlbums(albumInfoJSON) {
 }
 
 export async function loadItemInfo(items) {
+  const uniqueIds = [...new Set(items ?? [])];
 
-  const params = {
-    // 'SortBy': `Album,SortName`,
-    // 'SortOrder': `Ascending`,
-    'IncludeItemTypes': `Audio`,
-    'Recursive': `true`,
-    'Fields': `AudioInfo,ParentId,Ak,Genres`,
-    'EnableImageTypes': `Primary`,
-    'Ids': !!items ? [...new Set(items)].join(',') : undefined,
+  // split items into chunks so we don't get a URI Too Long error
+  const idChunkSize = 200;
+  const idChunks = [];
+  for (let i = 0; i < uniqueIds.length; i += idChunkSize) {
+    idChunks.push(uniqueIds.slice(i, i + idChunkSize));
   }
 
-  const queryParams = Object.entries(params).map(([key, value]) => `${key}=${value}`).join('&')
+  if (idChunks.length === 0) {
+    // if no items were passed, still make sure we do one fetch
+    idChunks.push(undefined);
+  }
 
-  const response = await fetch(`${auth.config.baseUrl}/Users/${auth.config.user.id}/Items?${queryParams}`, {
-    method: 'GET',
-    headers: {
-      ...auth.config.defaultHeaders,
-      'Content-Type': 'application/json',
-    },
-  })
+  const combinedItems = [];
 
-  const json = await response.json()
-  return json
+  for (const idChunk of idChunks) {
+    const params = {
+      // 'SortBy': `Album,SortName`,
+      // 'SortOrder': `Ascending`,
+      IncludeItemTypes: `Audio`,
+      Recursive: `true`,
+      Fields: `AudioInfo,ParentId,Ak,Genres`,
+      EnableImageTypes: `Primary`,
+      Ids: idChunk,
+    };
 
+    const queryParams = Object.entries(params)
+      .map(([key, value]) => `${key}=${value}`)
+      .join("&");
+
+    const response = await fetch(
+      `${auth.config.baseUrl}/Users/${auth.config.user.id}/Items?${queryParams}`,
+      {
+        method: "GET",
+        headers: {
+          ...auth.config.defaultHeaders,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    const json = await response.json();
+    combinedItems.push(...json.Items);
+  }
+
+  return { Items: combinedItems };
 }
+
 
 async function loadArtistInfo(items) {
 
