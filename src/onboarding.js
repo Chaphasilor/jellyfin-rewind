@@ -216,7 +216,7 @@ const viewPlaceholder = html`
 `
 
 const connectionHelpDialog = html`
-<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+<div class="fixed top-0 left-0 w-full h-full px-6 py-32 md:py-24 lg:py-28 xl:py-32">
   <div @click="${() => state.connectionHelpDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
     <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
       <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
@@ -247,7 +247,7 @@ const connectionHelpDialog = html`
 `
 
 const playbackReportingDialog = html`
-<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+<div class="fixed top-0 left-0 w-full h-full px-6 py-32 md:py-24 lg:py-28 xl:py-32">
   <div @click="${() => state.playbackReportingDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
     <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
       <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
@@ -299,7 +299,7 @@ const playbackReportingDialog = html`
 </div>
 `
 const finampOfflineExportDialog = html`
-<div class="fixed top-0 left-0 w-full h-full px-6 py-16 md:py-32 lg:py-48 xl:py-64">
+<div class="fixed top-0 left-0 w-full h-full px-6 py-32 md:py-24 lg:py-28 xl:py-32">
   <div @click="${() => state.finampOfflineExportDialogOpen = false}" class="absolute top-0 left-0 w-full h-full bg-black/20"></div>
     <div class="w-full h-full bg-white/80 dark:bg-black/90 dark:text-white pb-20 backdrop-blur dark:backdrop-blur-sm rounded-xl">
       <div class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2">
