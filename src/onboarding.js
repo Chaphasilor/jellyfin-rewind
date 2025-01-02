@@ -466,6 +466,8 @@ const viewUser = html`
     </ul>
   </div>
 
+  ${() => buttonLogOut}
+
 </div>
 `
 
@@ -856,7 +858,7 @@ const viewImportOfflinePlayback = html`
 
   ${() => header}
 
-  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
+  <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-4 w-full mx-auto text-balance text-center">
     <p class="">We noticed you've been using Finamp's beta version to listen to music.</p>
     <p class="">Finamp keeps track of your playback history even when you're not connected to your server, and you can now import that history!</p>
     <p class="">Imported plays will only be added to the Playback Reporting addon's database, but can then used to generate a more accurate Rewind report for you in the following steps.</p>
@@ -864,7 +866,7 @@ const viewImportOfflinePlayback = html`
   </div>
 
   <button
-    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
+    class="px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-4 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.finampOfflineExportDialogOpen = true}"
   >
     <span>How can I import my offline plays?</span>
@@ -896,7 +898,7 @@ const viewImportOfflinePlayback = html`
     ${() => state.importingOfflinePlayback ? html`
       <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
     ` : html`
-      <p class="mt-12 px-10 text-balance font-semibold text-gray-600 dark:text-gray-300">Already imported your offline plays or don't have any?</p>
+      <p class="mt-4 px-10 text-balance font-semibold text-gray-600 dark:text-gray-300">Already imported your offline plays or don't have any?</p>
       <button
         class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
         @click="${() => state.currentView = `importLastYearsReport`}"
@@ -1075,9 +1077,9 @@ const viewLoad = html`
 const buttonLogOut = html`
 <button
   class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-20 flex flex-row gap-3 items-center mx-auto text-red-500 hover:text-white"
-  @click="${() => {
-    state.auth.destroySession()
-    deleteRewind()
+  @click="${async () => {
+    await state.auth.destroySession()
+    await deleteRewind()
     state.currentView = `start`
   }}"
 >
