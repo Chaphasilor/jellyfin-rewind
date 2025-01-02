@@ -64,6 +64,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
         },
         isFavorite: item.UserData?.IsFavorite,
+        lastPlay: playbackReportItem?.LastPlay || new Date(),
       })
 
       track.skips.score.jellyfin = (track.skips.total + 1) * 2 / track.playCount.jellyfin
@@ -434,6 +435,24 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   delete totalStats.libraryStats.trackLength.lengths
   
   return totalStats
+}
+
+export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }) {
+  let topItems
+  if (!Array.isArray(itemInfo)) {
+    topItems = Object.values(itemInfo)
+  } else {
+    topItems = [...itemInfo]
+  }
+
+  var today = new Date();
+  
+  topItems.sort((a, b) => {
+    const result = (((today - b.lastPlay) / 86400000) + (b.playCount[dataSource] * 20)) - (((today - a.lastPlay) / 86400000) + (a.playCount[dataSource] * 20))
+    return result
+  })
+
+  return topItems.slice(0, 5)
 }
 
 export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limit = 25, dataSource = `average` }) {

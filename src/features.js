@@ -118,6 +118,14 @@ state.featureSideEffects = {
   10: {
   },
   11: {
+    load: loadForgottenFavoritesMedia,
+    enter: () => {
+      playTopForgotten()
+      let topItems = document.querySelectorAll(`#top-forgotten-main-feature li`)
+      animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+    },
+  },
+  12: {
     enter: () => {
       playTopGenres()
       
@@ -126,7 +134,7 @@ state.featureSideEffects = {
       animate(topItems, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
     },
   },
-  12: {
+  13: {
     load: () => {
       if (state.extraFeatures.leastSkippedTracks) {
         loadLeastSkippedTracksMedia()
@@ -141,7 +149,7 @@ state.featureSideEffects = {
       }
     },
   },
-  13: {
+  14: {
     load: () => {
       if (state.extraFeatures.mostSkippedTracks) {
         loadMostSkippedTracksMedia()
@@ -156,7 +164,7 @@ state.featureSideEffects = {
       }
     }
   },
-  14: {
+  15: {
     load: () => {
       if (state.extraFeatures.mostSuccessivePlays) {
         loadMostSuccessivePlaysTrackMedia()
@@ -168,7 +176,7 @@ state.featureSideEffects = {
       }
     }
   },
-  15: {
+  16: {
     load: loadSummary,
     enter: playTopTrack,
   },
@@ -669,6 +677,8 @@ state.features = [
 
     </div>
   `, `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
+  buildFeature(`forgotten favorites`, forgottenFavoritesPageContent(), `bg-[#00A4DC]/10 dark:bg-[#000B25] dark:text-white`),
+  
   // top generes of the year
   buildFeature(`top generes of the year`, html`
     <div class="text-center">
@@ -1409,6 +1419,52 @@ ${() =>
   </li>
 </ul>
 `
+function forgottenFavoritesPageContent() {
+  
+  return html`
+  <div class="text-center">
+    <h2 class="text-2xl font-medium mt-5">Forgotten Favorites</h2>
+    <h3 class="text-2xl font-medium">These songs started off hot, but cooled off quick!</h3>
+
+    <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
+      ${() => state.rewindReport.tracks?.[`forgottenFavortiteTracks`]?.map((track, index) => html`
+        <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
+          <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
+            <img id="${() => `forgotten-tracks-image-${index}`}" class="w-full h-full" />
+            <div id="${() => `forgotten-tracks-visualizer-${index}`}" class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"></div>
+          </div>
+          <div class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md">
+            <div class="flex flex-col gap-0.25 items-start">
+              <div class="flex flex-row w-full justify-start items-center whitespace-nowrap">
+                <span class="font-semibold text-base mr-2">${() => index + 1}.</span>
+                <span class="font-semibold text-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
+              </div>
+                <span class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden">by ${() =>
+                  state.settings.useAlbumArtists ?
+                    track.albumBaseInfo.albumArtistBaseInfo.name :
+                    track.artistsBaseInfo
+                      .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                }</span>
+            </div>
+            <div class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs">
+              <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(track.playCount[state.settings.dataSource])}</span> streams</div>
+              <div><span class="font-semibold text-black dark:text-white">Last Played ${() => new Date(track.lastPlay).toLocaleDateString()}</span></div>
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+                <circle cx="12" cy="12" r="4"></circle>
+              </svg>
+              <div><span class="font-semibold text-black dark:text-white">${() => showAsNumber(track.totalPlayDuration[state.settings.dataSource].toFixed(0))}</span> minutes</div>
+            </div>
+          </div>
+          <div class="absolute -left-2 blur-xl saturate-200 brightness-100 w-full h-full z-[-1]">
+            <img id="${() => `forgotten-tracks-background-image-${index}`}" class="w-full h-full" />
+          </div>
+        </li>
+      `.key(track.id)
+      )}
+    </ol>
+  </div>`
+}
 
 function stopPropagation(f) {
   if (!f || typeof f !== `function`) {
@@ -1728,7 +1784,7 @@ export async function openFeatures() {
   state.featuresOpen = true
   // request fullscreen
   try {
-    await document.querySelector(`body`).requestFullscreen()
+    // await document.querySelector(`body`).requestFullscreen()
   } catch (err) {
     console.warn(`Fullscreen permission denied`, err)
   }
@@ -1989,6 +2045,16 @@ function loadTopTracksMedia() {
   
 }
 
+function loadForgottenFavoritesMedia() {
+  const topTracks = state.rewindReport.tracks?.forgottenFavortiteTracks
+
+  topTracks.forEach((track, index) => {
+    const trackPrimaryImage = document.querySelector(`#forgotten-tracks-image-${index}`);
+    const trackBackgroundImage = document.querySelector(`#forgotten-tracks-background-image-${index}`);
+    state.jellyHelper.loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`, state.settings.darkMode)
+  })
+}
+
 function loadTopArtistMedia() {
 
   const topArtistPrimaryImage = document.querySelector(`#top-artist-image`);
@@ -2220,6 +2286,19 @@ function playLeastSkippedTracks() {
   const randomTrackId = Math.floor(Math.random() * leastSkippedTracks.length)
   const randomTrack = leastSkippedTracks[randomTrackId]
   showPlaying(`#least-skipped-tracks-visualizer`, randomTrackId, 5)
+
+  console.log(`randomTrack:`, randomTrack)
+  fadeToNextTrack(randomTrack)
+  
+}
+
+// plays a random track from the 5 forgotten favorites
+function playTopForgotten() {
+
+  const forgottenFavorites = state.rewindReport.tracks?.[`forgottenFavortiteTracks`]?.slice(0, 5) // first track excluded
+  const randomTrackId = Math.floor(Math.random() * forgottenFavorites.length)
+  const randomTrack = forgottenFavorites[randomTrackId]
+  showPlaying(`#forgotten-tracks-visualizer`, randomTrackId, 5)
 
   console.log(`randomTrack:`, randomTrack)
   fadeToNextTrack(randomTrack)
