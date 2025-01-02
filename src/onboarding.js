@@ -182,7 +182,7 @@ const viewStart = html`
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
     @click="${() => state.currentView = `importReportForViewing`}"
   >
-     <span>Import an Existing Report Instead</span>
+     <span>View an Existing Report Instead</span>
   </button>
 
 </div>
@@ -955,6 +955,16 @@ const viewImportLastYearsReport = html`
           >
             <span>Continue without last year's report</span>
           </button>
+
+          ${() => !state.auth.config.user.isAdmin ? html`
+            <button
+              class="px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
+              @click="${() => state.currentView = `importOfflinePlayback`}"
+            >
+              <span>Using Finamp's beta? Import offline playback now!</span>
+            </button>
+        ` : null}
+
         `
         }
       ` : html`
