@@ -118,6 +118,7 @@ state.featureSideEffects = {
   10: {
   },
   11: {
+    skip: false,
     load: loadForgottenFavoritesMedia,
     enter: () => {
       playTopForgotten()
@@ -1425,11 +1426,11 @@ function forgottenFavoritesPageContent() {
   return html`
   <div class="text-center">
     <h2 class="text-2xl font-medium mt-5">Remember These Forgotten Favorites?</h2>
-    <h3>Here are ${() => state.rewindReport.tracks?.[`forgottenFavortiteTracks`]?.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
+    <h3>Here are ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
     <h3><em>What changed?</em></h3>
 
     <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
-      ${() => state.rewindReport.tracks?.[`forgottenFavortiteTracks`]?.map((track, index) => html`
+      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.map((track, index) => html`
         <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
           <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
             <img id="${() => `forgotten-tracks-image-${index}`}" class="w-full h-full" />
@@ -1876,11 +1877,24 @@ function next() {
     // state.currentFeature = 0
     // closeFeatures()
   } else {
+    if (state.featureSideEffects[state.currentFeature + 1]?.skip) {
+      state.currentFeature += 2
+      return
+    }
     state.currentFeature++;
   }
 }
 function previous() {
-  state.currentFeature = state.currentFeature - 1 < 0 ? 0 : state.currentFeature - 1;
+  if (state.currentFeature === 0) return
+
+  if (state.featureSideEffects[state.currentFeature - 1]?.skip) {
+    if (state.currentFeature === 1) return
+
+    state.currentFeature -= 2
+    return
+  }
+
+  state.currentFeature--
 }
 
 function buildFeature(featureName, content, classes) {
@@ -2048,6 +2062,11 @@ function loadTopTracksMedia() {
 
 function loadForgottenFavoritesMedia() {
   const forgottenFavoriteTracks = state.rewindReport.tracks?.forgottenFavortiteTracks
+
+  if (!forgottenFavoriteTracks.length) {
+    state.featureSideEffects[11].skip = true
+    return
+  }
 
   forgottenFavoriteTracks.forEach((track, index) => {
     const trackPrimaryImage = document.querySelector(`#forgotten-tracks-image-${index}`)
