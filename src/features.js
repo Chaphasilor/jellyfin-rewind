@@ -990,7 +990,7 @@ state.features = [
       <div class="w-full flex flex-col items-center">
         <img class="h-20" src="${() => state.settings.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
       </div>
-      <span>Report</span>
+      <span>Report <span class="text-[#00A4DC] text-2xl font-semibold font-quicksand">${() => state.rewindReport?.year}</span></span>
     </h2>
 
     <div class="grid grid-cols-2 place-items-stretch gap-1 w-full mt-6 pb-20 text-gray-800 dark:text-gray-100">
