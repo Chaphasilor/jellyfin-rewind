@@ -64,7 +64,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
         },
         isFavorite: item.UserData?.IsFavorite,
-        lastPlay: playbackReportItem?.LastPlay || new Date(),
+        lastPlay: playbackReportItem?.LastPlay,
       })
 
       track.skips.score.jellyfin = (track.skips.total + 1) * 2 / track.playCount.jellyfin
@@ -438,21 +438,27 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
 }
 
 export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }) {
-  let topItems
-  if (!Array.isArray(itemInfo)) {
-    topItems = Object.values(itemInfo)
-  } else {
-    topItems = [...itemInfo]
-  }
+  const numberOfTracksToReturn = 10
+  const trackList = Array.isArray(itemInfo) ? [...itemInfo] : Object.values(itemInfo)
 
-  var today = new Date();
+  // Only look at songs that were played
+  let playedSongs = trackList.filter(x => x.playCount[dataSource] > 0)
+
+  const today = new Date()
+  const millisecondsPerDay = 86400000
+  const playCountWeight = 20
   
-  topItems.sort((a, b) => {
-    const result = (((today - b.lastPlay) / 86400000) + (b.playCount[dataSource] * 20)) - (((today - a.lastPlay) / 86400000) + (a.playCount[dataSource] * 20))
-    return result
+  // Weighted sort using days since last play and total number of plays
+  playedSongs.sort((a, b) => {
+    let daysSinceLastPlayA = (today - a.lastPlay) / millisecondsPerDay
+    let daysSinceLastPlayB = (today - b.lastPlay) / millisecondsPerDay
+    let weightedPlayCountA = a.playCount[dataSource] * playCountWeight
+    let weightedPlayCountB = b.playCount[dataSource] * playCountWeight
+
+    return (daysSinceLastPlayB + weightedPlayCountB) - (daysSinceLastPlayA + weightedPlayCountA)
   })
 
-  return topItems.slice(0, 5)
+  return playedSongs.slice(0, numberOfTracksToReturn)
 }
 
 export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limit = 25, dataSource = `average` }) {
