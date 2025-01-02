@@ -5,7 +5,7 @@
 ## Welcome to Jellyfin Rewind 2024!
 
 > [!IMPORTANT]  
-> Jellyfin Rewind 2025 **will launch on December 31st 2025** (2024-12-31)!
+> Jellyfin Rewind 2025 **will launch on December 31st 2025** (2025-12-31)!
 > If you want to be notified when it's time to review your listening habits of this year, **subscribe to release updates** by `watch`ing this repository.
 > See you then! - Chaphasilor
 
