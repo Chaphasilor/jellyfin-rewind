@@ -153,9 +153,14 @@ function indexPlaybackReport(playbackReportJSON) {
         Plays: [playInfo],
         FullSkips: playInfo.wasFullSkip ? 1 : 0,
         PartialSkips: playInfo.wasPartialSkip ? 1 : 0, 
+        LastPlay: playInfo.date
       }
 
     } else {
+      if (playInfo.date > items[item.ItemId].LastPlay) {
+        items[item.ItemId].LastPlay = playInfo.date
+      }
+
       items[item.ItemId].TotalDuration += !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
       items[item.ItemId].TotalPlayCount += 1
       if (playInfo.wasFullSkip) {
@@ -522,12 +527,14 @@ async function generateRewindReport({
     const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20, dataSource: dataSource })
     const topTracksByMostSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips.full`, limit: 20, dataSource: dataSource })
     // const topTracksByLastPlayed = aggregate.getTopItems(allTopTrackInfo, { by: `lastPlayed`, limit: 20, dataSource: dataSource })
+    const forgottenFavortiteTracks = aggregate.getForgottenFavortiteTracks(allTopTrackInfo, { dataSource: dataSource })
     
     jellyfinRewindReport.tracks[`duration`] = topTracksByDuration
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
     jellyfinRewindReport.tracks[`playCount`] = topTracksByPlayCount
     jellyfinRewindReport.tracks[`leastSkipped`] = topTracksByLeastSkipped
     jellyfinRewindReport.tracks[`mostSkipped`] = topTracksByMostSkipped
+    jellyfinRewindReport.tracks[`forgottenFavortiteTracks`] = forgottenFavortiteTracks
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${x.playCount.average} plays`).join(`\n`)
     // jellyfinRewindReport.tracks[`topTracksByLastPlayed`] = topTracksByLastPlayed
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)
