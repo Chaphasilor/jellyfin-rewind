@@ -438,6 +438,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
 }
 
 export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }) {
+  const minimumLastPlayAge = 180 // in days
   const numberOfTracksToReturn = 10
   const trackList = Array.isArray(itemInfo) ? [...itemInfo] : Object.values(itemInfo)
 
@@ -458,7 +459,19 @@ export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }
     return (daysSinceLastPlayB + weightedPlayCountB) - (daysSinceLastPlayA + weightedPlayCountA)
   })
 
-  return playedSongs.slice(0, numberOfTracksToReturn)
+  let forgottenFavortiteTracks = []
+
+  // Loop through sorted track list and get top tracks that are older than age threshold
+  for (let i = 0; i < playedSongs.length; i++) {
+    if ((today - playedSongs[i].lastPlay) / millisecondsPerDay > minimumLastPlayAge) {
+      forgottenFavortiteTracks.push(playedSongs[i])
+
+      // Exit once we hit the needed number of tracks
+      if (forgottenFavortiteTracks.length === numberOfTracksToReturn) break
+    }
+  }
+
+  return forgottenFavortiteTracks
 }
 
 export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limit = 25, dataSource = `average` }) {
