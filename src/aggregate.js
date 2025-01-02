@@ -13,11 +13,6 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
         missingPlaybackReportItems += 1
       }
 
-      // if (item.ArtistItems.find(artist => artist.Name === `ACRAZE`)) {
-      //   console.log(`item.ArtistItems:`, item.ArtistItems)
-      //   // TODO figure out how to consolidate artists with the same name but different IDs
-      // }
-      
       const track = new Track({
         name: item.Name || `Unknown Track`,
         id: item.Id,
