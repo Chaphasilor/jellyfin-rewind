@@ -1784,7 +1784,7 @@ export async function openFeatures() {
   state.featuresOpen = true
   // request fullscreen
   try {
-    // await document.querySelector(`body`).requestFullscreen()
+    await document.querySelector(`body`).requestFullscreen()
   } catch (err) {
     console.warn(`Fullscreen permission denied`, err)
   }
