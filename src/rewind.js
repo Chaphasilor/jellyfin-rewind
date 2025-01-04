@@ -13,7 +13,7 @@ const playbackReportQuery = (year) => {
   SELECT ROWID, *
   FROM PlaybackActivity
   WHERE ItemType="Audio"
-    AND datetime(DateCreated) >= datetime('${year}-01-01') AND datetime(DateCreated) <= datetime('${year}-12-31')
+    AND datetime(DateCreated) >= datetime('${year}-01-01') AND datetime(DateCreated) <= datetime('${year}-12-31 23:59:59.9999999')
     AND UserId="${auth.config.user.id}"
   ORDER BY DateCreated ASC
 `
