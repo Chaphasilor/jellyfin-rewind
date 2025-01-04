@@ -438,7 +438,7 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
 }
 
 export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }) {
-  const minimumLastPlayAge = 180 // in days
+  const minimumLastPlayAge = 120 // in days
   const numberOfTracksToReturn = 10
   const trackList = Array.isArray(itemInfo) ? [...itemInfo] : Object.values(itemInfo)
 
