@@ -1426,11 +1426,11 @@ function forgottenFavoritesPageContent() {
   return html`
   <div class="text-center">
     <h2 class="text-2xl font-medium mt-5">Remember These Forgotten Favorites?</h2>
-    <h3>Here are ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
-    <h3><em>What changed?</em></h3>
+    <h3 class="px-6">Here are ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
+    <h3 class="px-6"><em>What changed?</em></h3>
 
     <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
-      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.map((track, index) => html`
+      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.slice(0, 5).map((track, index) => html`
         <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
           <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
             <img id="${() => `forgotten-tracks-image-${index}`}" class="w-full h-full" />
@@ -1465,7 +1465,31 @@ function forgottenFavoritesPageContent() {
       `.key(track.id)
       )}
     </ol>
-  </div>`
+  </div>
+  <!-- continue as simple list -->
+  <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
+      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks?.slice(5, 10).map((track, index) => html`
+        <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
+          <div class="flex flex-col gap-1 w-full">
+            <div class="flex flex-col gap-0.25 items-start">
+              <div class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center">
+                <span class="font-semibold mr-2">${() => index + 6}.</span>
+                <span class="font-base leading-tight text-ellipsis overflow-hidden">${() => track.name}</span>
+              </div>
+              <div class="ml-6 max-h-[2rem] text-xs">by <span class="font-semibold text-ellipsis overflow-hidden">${() =>
+                state.settings.useAlbumArtists ?
+                  track.albumBaseInfo.albumArtistBaseInfo.name :
+                  track.artistsBaseInfo
+                    .reduce((acc, cur, index) => index > 0 ? `${acc} & ${cur.name}` : cur.name, ``)
+                }</span>
+              </div>
+            </div>
+          </div>
+        </li>
+      `.key((Math.random() * 100000).toString(16)) // assign a random key to force re-rendering of the list (and thus the indices)
+      )}
+    </ol>
+  `
 }
 
 function stopPropagation(f) {
