@@ -4,6 +4,8 @@
     "npm:@sveltejs/adapter-static@^3.0.6": "3.0.8_@sveltejs+kit@2.15.1__@sveltejs+vite-plugin-svelte@4.0.4___svelte@5.16.0____acorn@8.14.0___vite@5.4.11__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_@sveltejs+vite-plugin-svelte@4.0.4__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
     "npm:@sveltejs/kit@2": "2.15.1_@sveltejs+vite-plugin-svelte@4.0.4__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
     "npm:@sveltejs/vite-plugin-svelte@4": "4.0.4_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
+    "npm:prettier-plugin-svelte@^3.3.2": "3.3.2_prettier@3.4.2_svelte@5.16.0__acorn@8.14.0",
+    "npm:prettier@^3.4.2": "3.4.2",
     "npm:svelte-check@4": "4.1.1_svelte@5.16.0__acorn@8.14.0_typescript@5.7.2",
     "npm:svelte@5": "5.16.0_acorn@8.14.0",
     "npm:typescript@5": "5.7.2",
@@ -356,6 +358,16 @@
         "source-map-js"
       ]
     },
+    "prettier-plugin-svelte@3.3.2_prettier@3.4.2_svelte@5.16.0__acorn@8.14.0": {
+      "integrity": "sha512-kRPjH8wSj2iu+dO+XaUv4vD8qr5mdDmlak3IT/7AOgGIMRG86z/EHOLauFcClKEnOUf4A4nOA7sre5KrJD4Raw==",
+      "dependencies": [
+        "prettier",
+        "svelte"
+      ]
+    },
+    "prettier@3.4.2": {
+      "integrity": "sha512-e9MewbtFo+Fevyuxn/4rrcDAaq0IYxPGLvObpQjiZBMAzB9IGmzlnG9RZy3FFas+eBMu2vA0CszMeduow5dIuQ=="
+    },
     "readdirp@4.0.2": {
       "integrity": "sha512-yDMz9g+VaZkqBYS/ozoBJwaBhTbZo3UNYQHNRw1D3UFQB8oHB4uS/tAODO+ZLjGWmUbKnIlOWO+aaIiAxrUWHA=="
     },
@@ -474,6 +486,8 @@
         "npm:@sveltejs/adapter-static@^3.0.6",
         "npm:@sveltejs/kit@2",
         "npm:@sveltejs/vite-plugin-svelte@4",
+        "npm:prettier-plugin-svelte@^3.3.2",
+        "npm:prettier@^3.4.2",
         "npm:svelte-check@4",
         "npm:svelte@5",
         "npm:typescript@5",

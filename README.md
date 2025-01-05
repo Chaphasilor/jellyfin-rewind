@@ -21,7 +21,7 @@ currently
 
 ## Format
 
-You can also format the project using Deno! `deno fmt --indent-width 4`
+just run `deno task format`
 
 ## File System
 
@@ -29,17 +29,20 @@ You can also format the project using Deno! `deno fmt --indent-width 4`
 /src <------------------ Codebase
   /lib <---------------- Usually Server side code, this project doesn't allow server code so here are all important things for the Frontend
     /jellyfin
-      /queries <-------- Gathering the data to later do funny math with to make nice statistics 
+      /queries <-------- Gathering the data to later do funny math with to make nice statistics
         /api <---------- SQL Queries to the Playback Report plugin
-        /local <-------- Place to do local processing 
+        /local <-------- Place to do local processing
       index.ts <-------- The jellyfin interface/api thing
-    globals.ts <-------- Mostly Type definitions but also for (currently temporary) values which update the UI
-    simulator.ts <------ A Test Script to run automated tests because idk how real unit/browser tests work
-    utility.ts <-------- A collection of generally useful functions and classes
+    /utility <--------- A collection of generally useful functions and classes
+    globals.ts <-------- Globally used values
+    types.ts <---------- All existing types in one place
   /routes <------------- The place where the frontend exists
+    /welcome <---------- The landing page
+    /login
     +layout.svelte <---- The layout of the whole site, will be useful later
     +layout.ts <-------- This is required to disable SSR (Server Side Rendering) to prevent the server from receiving sensitive data
-    +page.svelte <------ The Homepage
+    +page.svelte <------ The Homepage (currently placeholder)
+    global.scss <------- The stylesheet
 /static <--------------- Place for assets like pngs or svgs, in other words the "public" folder
 .env <------------------ Login data for your jellyfin to make automated testing work
 ```
@@ -58,16 +61,13 @@ Here an example:
 function game(): Result<boolean> {
     const number = Math.random();
     if (number < 0.5) {
-        return logAndReturn(
-            "game",
-            { success: false, reason: "Number was too small" },
-        );
+        return logAndReturn('game', {
+            success: false,
+            reason: 'Number was too small',
+        });
     }
 
-    return logAndReturn(
-        "game",
-        { success: true, data: number },
-    ); // data is optional
+    return logAndReturn('game', { success: true, data: number }); // data is optional
 }
 ```
 
@@ -99,15 +99,12 @@ n stuff
 
 ## Tests
 
-As mentioned tests happen in the `simulator.ts` file. The test function only
-checks if the Result Object is successful or not.
-
 Here an example:
 
 ```ts
-let v = await game();
-if (!test("Random Game", v)) return;
-console.log("All tests completed");
+let v = await game() // returns Result object;
+if (!test('Random Game', v)) return;
+console.log('All tests completed');
 ```
 
 The output could be
@@ -164,35 +161,23 @@ And be Used like
 
 ```svelte
 <script lang="ts">
-    import Progress from "./ProgressBar.svelte"
-    let progress=0
+    import Progress from './ProgressBar.svelte';
+    let progress = 0;
 </script>
+
 <Progress {progress} />
-<br>
-<button on:click={()=>{progress += 0.1}} />
+<br />
+<button
+    on:click={() => {
+        progress += 0.1;
+    }}
+/>
 ```
 
 And you guessed it, clicking the button will lengthen the div!
 
 ## Current State
 
-Currently the simulator only logs into the server defined in the `.env` file and
-calculates `fullPlays`, `partialSkips`, `fullSkips` and `listenDuration` for all
-of the following:
+Currently the login flow works (welcome > login > rewind)
 
-0. everything (total skips etc.)
-1. Each album
-2. Each artist
-3. Each Track
-4. Each Genre
-5. Clients (Jellyfin Web / Finamp etc.)
-6. Devices (Chrome / Firefox etc.)
-7. per hour (8am yesterday contributes to the same value as 8am today does for
-   example)
-8. per month
-9. per day of month (1. January contributes to the same value as 1. August does
-   for example)
-10. per day of year
-
-and the count of favorite tracks as well as how many listens couldn't be
-evaluated because of missing metadata
+Though the rewind itself is highly temporary and currently only servers the purpose to debug the rewinding logic 

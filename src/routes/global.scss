@@ -1,0 +1,208 @@
+@use 'sass:color';
+// Realtime colors configuration
+@import url('https://fonts.googleapis.com/css?family=Mallanna:700|Blinker:400');
+body {
+    font-family: 'Blinker';
+    font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+    font-family: 'Mallanna';
+    font-weight: 700;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    font-size: 100%;
+} /* 16px */
+
+h1 {
+    font-size: 2.489rem; /* 39.84px */
+}
+
+h2 {
+    font-size: 2.074rem; /* 33.12px */
+}
+
+h3 {
+    font-size: 1.728rem; /* 27.68px */
+}
+
+h4 {
+    font-size: 1.44rem; /* 23.04px */
+}
+
+h5 {
+    font-size: 1.2rem; /* 19.2px */
+}
+
+small {
+    font-size: 0.833rem; /* 13.28px */
+}
+
+p {
+    margin: 0;
+    padding: 0;
+}
+
+$text: #d9e9f6;
+$background: #030b13;
+$primary: #85b5e3;
+$secondary: #4c3a71;
+$accent: #f1b539;
+
+/////
+
+body {
+    background-color: $background;
+    color: white;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    height: calc(100svh - 2rem * 2);
+    width: 100svw;
+    justify-content: center;
+    text-align: center;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    color: $text;
+}
+
+main {
+    max-width: 700px;
+    width: 100%;
+    height: calc(100% - 2rem);
+    background-color: color.adjust($background, $lightness: 8%);
+    padding: 1rem;
+    border-radius: 2rem;
+
+    display: flex;
+    flex-direction: column;
+}
+.content {
+    overflow-y: scroll;
+    margin-top: 2rem;
+}
+:not(:disabled) .warning {
+    background-color: rgba(255, 0, 0, 0.2);
+    padding: 1rem;
+    padding-bottom: 1.5rem;
+    border-radius: 1rem;
+    border-width: 1px;
+    border-color: rgba(255, 0, 0, 0.5);
+    border-style: solid;
+    color: white;
+    h3 {
+        padding-bottom: 0.2rem;
+    }
+}
+
+.info {
+    background-color: rgba(255, 255, 0, 0.2);
+    padding: 1rem;
+    padding-bottom: 1.5rem;
+    border-radius: 1rem;
+    border-width: 1px;
+    border-color: rgba(255, 255, 0, 0.5);
+    border-style: solid;
+    color: white;
+    h3 {
+        padding-bottom: 0.2rem;
+    }
+    .split {
+        button {
+            background-color: color.adjust($background, $lightness: 8%);
+            border-width: 1px;
+            border-style: solid;
+            border-color: rgba(255, 255, 0, 0.5);
+        }
+    }
+    code {
+        border-radius: 0.5rem;
+        border-width: 1px;
+        border-color: rgba(255, 255, 0, 0.5);
+        border-style: solid;
+    }
+}
+
+code {
+    background-color: color.adjust($background, $lightness: 8%);
+    padding: 0.5rem;
+}
+
+button {
+    padding: 1rem;
+    background-color: color.adjust($background, $lightness: 20%);
+    color: $text;
+    border: none;
+    outline: none;
+    border-radius: 1rem;
+
+    font-family: 'Blinker';
+    font-weight: 900;
+
+    transition: 100ms ease-out;
+
+    &:active:not(:disabled),
+    &:focus:not(:disabled) {
+        transform: scale(0.95);
+        background-color: color.adjust($background, $lightness: 5%);
+        box-shadow: 0 0 7px rgba(0, 0, 0, 0.3) inset;
+    }
+    &:hover {
+        transform: scale(1.05);
+        background-color: color.adjust($background, $lightness: 15%);
+    }
+    &:disabled {
+        filter: brightness(0.8);
+        opacity: 0.8;
+    }
+}
+
+input {
+    padding: 0.6rem;
+    background-color: color.adjust($background, $lightness: 20%);
+    color: $text;
+    border: none;
+    outline: none;
+    border-radius: 0.6rem;
+
+    font-family: 'Blinker';
+    font-weight: 900;
+
+    transition: 100ms ease-out;
+
+    &::placeholder {
+        font-family: 'Blinker';
+        font-weight: 900;
+    }
+    &:hover {
+        transform: scale(1.02);
+        background-color: color.adjust($background, $lightness: 15%);
+    }
+    &:active:not(:disabled),
+    &:focus:not(:disabled) {
+        transform: scale(0.98);
+        background-color: color.adjust($background, $lightness: 5%);
+        box-shadow: 0 0 7px rgba(0, 0, 0, 0.1) inset;
+    }
+    &:disabled {
+        filter: brightness(0.8);
+        opacity: 0.8;
+    }
+}
+
+.split {
+    display: grid;
+    padding-top: 1rem;
+    column-gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    width: fit-content;
+    margin: auto;
+}

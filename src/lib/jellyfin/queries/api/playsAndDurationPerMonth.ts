@@ -1,25 +1,29 @@
-import type { Result } from "$lib/globals";
-import jellyfin from "$lib/jellyfin";
-
+import jellyfin from '$lib/jellyfin';
+import type { Result } from '$lib/types';
 export default async () => {
-    const data = await jellyfin.queryPlaybackReporting(
+    const data = (await jellyfin.queryPlaybackReporting(
         [
             "COUNT(ItemId) AS 'plays'",
-            "strftime('%m', DateCreated) AS 'month'",
+            "strftime('%m',DateCreated) AS 'month'",
             "PlayDuration AS 'duration'",
         ],
         {
-            orderBy: "duration",
-            groupBy: "month",
+            orderBy: 'duration',
+            groupBy: 'month',
             limit: 13,
-            toInt: ["duration", "plays", "month"],
+            toInt: ['duration', 'plays', 'month'],
         },
-    ) as Result<{ plays: number; month: number; duration: number }[]>;
-    if (!data.success) return data;
-
+    )) as Result<{ plays: number; month: number; duration: number }[]>;
+    if (!data.success) {
+        return data;
+    }
     for (let month = 1; month < 12; month++) {
-        if (!data.data.find((entry) => entry.month == month)) {
-            data.data.push({ plays: 0, month, duration: 0 });
+        if (data.data.find((entry) => entry.month == month)) {
+            data.data.push({
+                plays: 0,
+                month,
+                duration: 0,
+            });
         }
     }
     return data;
