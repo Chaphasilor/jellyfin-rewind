@@ -1,4 +1,4 @@
-import Cache from '$lib/utility/cache';
+import Cache from "$lib/utility/cache";
 
 export type Result<T> = T extends undefined
     ? { success: true } | { success: false; reason: string }

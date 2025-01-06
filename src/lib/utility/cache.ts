@@ -46,7 +46,7 @@ export default class Cache<D, C extends { [key: string]: number }> {
 
     find(fn: (data: D) => boolean) {
         const key = Object.keys(this.data).find((key) =>
-            fn(this.data[key].data),
+            fn(this.data[key].data)
         );
 
         if (!key) return false;
@@ -60,7 +60,7 @@ export default class Cache<D, C extends { [key: string]: number }> {
     }
 
     sorted(counter: keyof C | (keyof C)[]) {
-        if (typeof counter == 'string') {
+        if (typeof counter == "string") {
             return this.entries.sort(
                 (a, b) => a[1].counters[counter] - b[1].counters[counter],
             );

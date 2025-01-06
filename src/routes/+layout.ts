@@ -10,4 +10,4 @@ export const ssr = false;
 // needs to be prerender to avoid errors while
 // building. This is because server code ($lib)
 // shouldnt exist in an static application
-export const prerender = true
+export const prerender = true;

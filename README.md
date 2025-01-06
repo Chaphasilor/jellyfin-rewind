@@ -61,13 +61,13 @@ Here an example:
 function game(): Result<boolean> {
     const number = Math.random();
     if (number < 0.5) {
-        return logAndReturn('game', {
+        return logAndReturn("game", {
             success: false,
-            reason: 'Number was too small',
+            reason: "Number was too small",
         });
     }
 
-    return logAndReturn('game', { success: true, data: number }); // data is optional
+    return logAndReturn("game", { success: true, data: number }); // data is optional
 }
 ```
 
@@ -102,9 +102,9 @@ n stuff
 Here an example:
 
 ```ts
-let v = await game() // returns Result object;
-if (!test('Random Game', v)) return;
-console.log('All tests completed');
+let v = await game(); // returns Result object;
+if (!test("Random Game", v)) return;
+console.log("All tests completed");
 ```
 
 The output could be
@@ -161,7 +161,7 @@ And be Used like
 
 ```svelte
 <script lang="ts">
-    import Progress from './ProgressBar.svelte';
+    import Progress from "./ProgressBar.svelte";
     let progress = 0;
 </script>
 
@@ -180,4 +180,5 @@ And you guessed it, clicking the button will lengthen the div!
 
 Currently the login flow works (welcome > login > rewind)
 
-Though the rewind itself is highly temporary and currently only servers the purpose to debug the rewinding logic 
+Though the rewind itself is highly temporary and currently only servers the
+purpose to debug the rewinding logic

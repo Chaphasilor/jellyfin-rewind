@@ -17,7 +17,7 @@ export function stringToUrl(url: string): Result<URL> {
     }
     return {
         success,
-        reason: 'The Given URL is invalid',
+        reason: "The Given URL is invalid",
     };
 }
 

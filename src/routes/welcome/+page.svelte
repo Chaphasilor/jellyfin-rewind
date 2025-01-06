@@ -1,5 +1,5 @@
 <script>
-    import { goto } from '$app/navigation';
+    import { goto } from "$app/navigation";
 </script>
 
 <h1>Welcome</h1>
@@ -8,8 +8,9 @@
     server, but dont worry all the communication stays between your server and
     your browser.<br />
     <br />
-    If you are paranoid (as you generally should be), feel free to monitor the network
-    traffic in the devtools or even checkout the code which is linked below!
+    If you are paranoid (as you generally should be), feel free to monitor the
+    network traffic in the devtools or even checkout the code which is linked
+    below!
 </p>
 
 <div class="warning">
@@ -29,7 +30,7 @@
     <p class="b">and set "Keep data for" to at least 1 year</p>
 </div>
 
-<button on:click={() => goto('/login')}> Proceed to Login </button>
+<button on:click={() => goto("/login")}>Proceed to Login</button>
 
 <style>
     .a {

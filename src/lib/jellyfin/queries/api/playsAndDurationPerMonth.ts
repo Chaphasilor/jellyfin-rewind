@@ -1,5 +1,5 @@
-import jellyfin from '$lib/jellyfin';
-import type { Result } from '$lib/types';
+import jellyfin from "$lib/jellyfin";
+import type { Result } from "$lib/types";
 export default async () => {
     const data = (await jellyfin.queryPlaybackReporting(
         [
@@ -8,10 +8,10 @@ export default async () => {
             "PlayDuration AS 'duration'",
         ],
         {
-            orderBy: 'duration',
-            groupBy: 'month',
+            orderBy: "duration",
+            groupBy: "month",
             limit: 13,
-            toInt: ['duration', 'plays', 'month'],
+            toInt: ["duration", "plays", "month"],
         },
     )) as Result<{ plays: number; month: number; duration: number }[]>;
     if (!data.success) {

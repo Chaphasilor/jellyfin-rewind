@@ -5,17 +5,17 @@ import {
     initTasksTodo,
     processTaskDone,
     processTaskTodo,
-} from '$lib/globals';
-import type { ProcessingResults, Result } from '$lib/types';
-import { logAndReturn } from '$lib/utility/logging';
-import allListens from '../../api/allListens';
+} from "$lib/globals";
+import type { ProcessingResults, Result } from "$lib/types";
+import { logAndReturn } from "$lib/utility/logging";
+import allListens from "../../api/allListens";
 import {
     compactTrack,
     getMusicLibrary,
     getTrackFromItem,
     reset,
     updateCounters,
-} from './functions';
+} from "./functions";
 import {
     albumsCache,
     artistCache,
@@ -32,7 +32,7 @@ import {
     playbackCache,
     skipped,
     tracksCache,
-} from './values';
+} from "./values";
 
 export default async (): Promise<Result<ProcessingResults>> => {
     reset();
@@ -42,20 +42,20 @@ export default async (): Promise<Result<ProcessingResults>> => {
     const listens = await allListens();
     fetchingTaskDone.set(1); // Queue Updates Ui
     if (!listens.success || listens.data.length == 0) {
-        return logAndReturn('processing', {
+        return logAndReturn("processing", {
             success: false,
             reason: !listens.success
                 ? listens.reason
-                : 'You didnt Listen to anything',
+                : "You didnt Listen to anything",
         });
     }
 
     const library = await getMusicLibrary();
     fetchingTaskDone.set(2); // Queue Updates Ui
     if (!library.success || library.data.Items.length == 0) {
-        return logAndReturn('processing', {
+        return logAndReturn("processing", {
             success: false,
-            reason: !library.success ? library.reason : 'Your Library is empty',
+            reason: !library.success ? library.reason : "Your Library is empty",
         });
     }
 
@@ -90,7 +90,7 @@ export default async (): Promise<Result<ProcessingResults>> => {
         if (Math.random() > 0.95) await new Promise((r) => setTimeout(r, 0)); // give Ui time to update
     }
 
-    return logAndReturn('processing', {
+    return logAndReturn("processing", {
         success: true,
         data: {
             generalCounter: generalCounter.v,

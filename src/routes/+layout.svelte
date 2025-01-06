@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { page } from '$app/state';
-    import JfRecap from '$lib/components/JFRecap.svelte';
-    import PageTransition from '$lib/components/PageTransition.svelte';
-    import './global.scss';
+    import { page } from "$app/state";
+    import JfRecap from "$lib/components/JFRecap.svelte";
+    import PageTransition from "$lib/components/PageTransition.svelte";
+    import "./global.scss";
 </script>
 
 <main>

@@ -1,5 +1,5 @@
-import { writable } from 'svelte/store';
-import { formatDateToSql } from './utility/format';
+import { writable } from "svelte/store";
+import { formatDateToSql } from "./utility/format";
 
 export const start = new Date(2024, 0, 1);
 export const end = new Date(2024, 11, 31);

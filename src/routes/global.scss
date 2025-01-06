@@ -1,8 +1,8 @@
-@use 'sass:color';
+@use "sass:color";
 // Realtime colors configuration
-@import url('https://fonts.googleapis.com/css?family=Mallanna:700|Blinker:400');
+@import url("https://fonts.googleapis.com/css?family=Mallanna:700|Blinker:400");
 body {
-    font-family: 'Blinker';
+    font-family: "Blinker";
     font-weight: 400;
 }
 
@@ -11,7 +11,7 @@ h2,
 h3,
 h4,
 h5 {
-    font-family: 'Mallanna';
+    font-family: "Mallanna";
     font-weight: 700;
     padding: 0;
     margin: 0;
@@ -143,7 +143,7 @@ button {
     outline: none;
     border-radius: 1rem;
 
-    font-family: 'Blinker';
+    font-family: "Blinker";
     font-weight: 900;
 
     transition: 100ms ease-out;
@@ -172,13 +172,13 @@ input {
     outline: none;
     border-radius: 0.6rem;
 
-    font-family: 'Blinker';
+    font-family: "Blinker";
     font-weight: 900;
 
     transition: 100ms ease-out;
 
     &::placeholder {
-        font-family: 'Blinker';
+        font-family: "Blinker";
         font-weight: 900;
     }
     &:hover {

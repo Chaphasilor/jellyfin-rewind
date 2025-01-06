@@ -4,7 +4,6 @@
 
 {#if error}
     <div class="warning">
-        <h3>An error occurred</h3>
-        {error}
+        <h3>An error occurred</h3> {error}
     </div>
 {/if}

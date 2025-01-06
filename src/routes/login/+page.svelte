@@ -1,22 +1,22 @@
 <script lang="ts">
-    import { dev } from '$app/environment';
-    import { goto } from '$app/navigation';
-    import Error from '$lib/components/Error.svelte';
-    import jellyfin from '$lib/jellyfin';
+    import { dev } from "$app/environment";
+    import { goto } from "$app/navigation";
+    import Error from "$lib/components/Error.svelte";
+    import jellyfin from "$lib/jellyfin";
 
-    let serverUrl: string = '';
-    let userName: string = '';
-    let userPassword: string = '';
+    let serverUrl: string = "";
+    let userName: string = "";
+    let userPassword: string = "";
 
     // only when devin' auto login
     if (dev) {
-        import('$env/static/public').then(async (i) => {
+        import("$env/static/public").then(async (i) => {
             serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
             userName = i.PUBLIC_JELLYFIN_USERNAME;
             userPassword = i.PUBLIC_JELLYFIN_PASSWORD;
             await pingServer();
             await authenticate();
-            goto('/');
+            goto("/");
         });
     }
 
@@ -24,7 +24,7 @@
     let serverValid: boolean = false;
     let loginValid: boolean = false;
     let loading = false;
-    let hasStored = localStorage.getItem('session') != null;
+    let hasStored = localStorage.getItem("session") != null;
 
     async function pingServer() {
         const ping = await jellyfin.connectToURL(serverUrl);
@@ -73,7 +73,7 @@
     once the Server URL is identified as an jellyfin server.
 </p>
 <div class="form">
-    <small>Server url {loading ? '...' : ''}</small>
+    <small>Server url {loading ? "..." : ""}</small>
     <input
         type="url"
         placeholder="https://demo.jellyfin.org"
@@ -81,14 +81,14 @@
         on:keyup={handleServerInput}
     />
 
-    <small>Username {loading ? '...' : ''}</small>
+    <small>Username {loading ? "..." : ""}</small>
     <input
         disabled={!serverValid || loading}
         bind:value={userName}
         on:keyup={handleLoginInput}
     />
 
-    <small>Password {loading ? '...' : ''}</small>
+    <small>Password {loading ? "..." : ""}</small>
     <input
         type="password"
         disabled={!serverValid || loading}
@@ -122,7 +122,7 @@
                     loginValid = auth.success;
                     if (auth.success) {
                         error = undefined;
-                        goto('/');
+                        goto("/");
                         return;
                     }
                     jellyfin.terminateSession();
@@ -138,7 +138,7 @@
 
 <button
     disabled={!serverValid || !loginValid || !userName || !userPassword}
-    on:click={() => goto('/')}
+    on:click={() => goto("/")}
 >
     Continue To Rewind
 </button>

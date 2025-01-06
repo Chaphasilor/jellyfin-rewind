@@ -1,12 +1,12 @@
-import jellyfin from '$lib/jellyfin';
+import jellyfin from "$lib/jellyfin";
 import {
     type Listen,
     type NormalCounters,
     normalCountersInit,
     type Result,
     type Track,
-} from '$lib/types';
-import { getDayOfYear } from '$lib/utility/other';
+} from "$lib/types";
+import { getDayOfYear } from "$lib/utility/other";
 import {
     albumsCache,
     artistCache,
@@ -23,14 +23,14 @@ import {
     playbackCache,
     skipped,
     tracksCache,
-} from './values';
+} from "./values";
 
 export function processArtists(track: any): string[] {
     if (track.ArtistItems == undefined) return [];
 
     const items = track.ArtistItems ?? [];
     return items.map((artist: any) =>
-        artistCache.setAndGetKey(artist.Id, () => artist.Name),
+        artistCache.setAndGetKey(artist.Id, () => artist.Name)
     );
 }
 
@@ -48,20 +48,17 @@ export function processAlbum(track: any): string | undefined {
 
 export function processGenres(track: any): string[] {
     track.Genres.forEach((genre: string) =>
-        genresCache.setAndGetKey(genre, () => null),
+        genresCache.setAndGetKey(genre, () => null)
     );
 
     return track.Genres ?? [];
 }
 
 export function trackToItemName(t: Track) {
-    const artist =
-        t.artists.length == 0
-            ? 'Not Known'
-            : t.artists
-                  .map((id) => artistCache.get(id))
-                  .filter((a) => a != undefined)
-                  .join(',');
+    const artist = t.artists.length == 0 ? "Not Known" : t.artists
+        .map((id) => artistCache.get(id))
+        .filter((a) => a != undefined)
+        .join(",");
 
     // the format of ItemName in Playback Reporting
     return `${artist} - ${t.name}`;
@@ -71,7 +68,7 @@ export function getTrackFromItem(item: any) {
     const idMatch = tracksCache.get(item.ItemId);
     if (idMatch != undefined) return idMatch;
     return tracksCache.find((track) =>
-        item.ItemName.startsWith(trackToItemName(track)),
+        item.ItemName.startsWith(trackToItemName(track))
     );
 }
 
@@ -99,11 +96,11 @@ export function increaseTimes(listen: any, fn: any) {
 }
 
 export async function getMusicLibrary() {
-    let query = '';
-    query += 'includeItemType=Audio';
-    query += '&recursive=true';
-    query += '&fields=Genres,ParentId';
-    query += '&enableImageTypes=Primary';
+    let query = "";
+    query += "includeItemType=Audio";
+    query += "&recursive=true";
+    query += "&fields=Genres,ParentId";
+    query += "&enableImageTypes=Primary";
     const route = `Users/${jellyfin.user?.id}/Items?${query}`;
     return (await jellyfin.getData(route)) as Result<{ Items: any[] }>;
 }
