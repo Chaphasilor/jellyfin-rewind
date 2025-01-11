@@ -1,3 +1,4 @@
+import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals";
 import jellyfin from "$lib/jellyfin";
 import {
     type Listen,
@@ -169,4 +170,8 @@ export function reset() {
     favorites.v = 0;
     generalCounter.v = { ...normalCountersInit };
     skipped.v = 0;
+
+    downloadingProgress.set({cur:0, max: 0, detail: ""})
+    processingProgress.set({cur:0, max: 0, detail: ""})
+    generatingProgress.set({cur:0, max: 0, detail: ""})
 }

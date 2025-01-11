@@ -1,13 +1,7 @@
-import {
-    fetchingTaskDone,
-    fetchingTaskTodo,
-    initTasksDone,
-    initTasksTodo,
-    processTaskDone,
-    processTaskTodo,
-} from "$lib/globals";
+import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals";
 import type { ProcessingResults, Result } from "$lib/types";
 import { logAndReturn } from "$lib/utility/logging";
+import { run } from "svelte/legacy";
 import allListens from "../../api/allListens";
 import {
     compactTrack,
@@ -34,24 +28,29 @@ import {
     tracksCache,
 } from "./values";
 
-export default async (): Promise<Result<ProcessingResults>> => {
+
+
+const execute = async (): Promise<Result<ProcessingResults>> => {
     reset();
 
-    fetchingTaskTodo.set(2); // Queue Updates Ui
 
+
+    downloadingProgress.set({cur: 0, max: 2, detail: "Getting playback reports"})
     const listens = await allListens();
-    fetchingTaskDone.set(1); // Queue Updates Ui
+    downloadingProgress.set({cur: 1, max: 2, detail: "Getting library tracks and metadata"})
     if (!listens.success || listens.data.length == 0) {
         return logAndReturn("processing", {
             success: false,
             reason: !listens.success
-                ? listens.reason
-                : "You didnt Listen to anything",
+            ? listens.reason
+            : "You didnt Listen to anything",
         });
     }
+    
+
 
     const library = await getMusicLibrary();
-    fetchingTaskDone.set(2); // Queue Updates Ui
+    downloadingProgress.set({cur: 2, max: 2, detail: ""})
     if (!library.success || library.data.Items.length == 0) {
         return logAndReturn("processing", {
             success: false,
@@ -59,36 +58,39 @@ export default async (): Promise<Result<ProcessingResults>> => {
         });
     }
 
-    initTasksTodo.set(library.data.Items.length);
-    processTaskTodo.set(listens.data.length);
 
-    let i = 0;
-    for (const track of library.data.Items) {
-        i++;
+
+    processingProgress.set({cur: 0, max: library.data.Items.length, detail: ""})
+    for (let i = 0; i < library.data.Items.length; i++) {
+        const track = library.data.Items[i]
+        processingProgress.update(state => ({...state, cur: i+1, detail: track.Name }))
+        
         if (track.UserData.IsFavorite) favorites.v++;
 
         tracksCache.setAndGetValue(track.Id, () => compactTrack(track));
 
-        initTasksDone.set(i); // Queue Updates Ui
-        if (Math.random() > 0.95) await new Promise((r) => setTimeout(r, 0)); // Give UI time to actually update
+        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
     }
 
-    i = 0;
-    for (const listen of listens.data) {
-        i++;
-        processTaskDone.set(i); // Queue Updates Ui
+
+
+    generatingProgress.set({cur: 0, max: listens.data.length, detail: ""})
+    for (let i = 0; i < listens.data.length; i++) {
+        const listen = listens.data[i]
+        generatingProgress.update(state => ({...state, cur: i+1, detail: listen.ItemId}))
 
         const track = getTrackFromItem(listen);
         if (!track) {
             skipped.v++;
-            console.log(listen);
             continue;
         }
-
+    
         updateCounters(listen, track);
-
-        if (Math.random() > 0.95) await new Promise((r) => setTimeout(r, 0)); // give Ui time to update
+    
+        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
     }
+
+
 
     return logAndReturn("processing", {
         success: true,
@@ -115,3 +117,13 @@ export default async (): Promise<Result<ProcessingResults>> => {
         },
     });
 };
+
+
+let running: Promise<Result<ProcessingResults>> | undefined= undefined
+function preventDoubleExecution() {
+    console.log("CallED!", running)
+    if (!running) running = execute()
+    return running
+}
+
+export default preventDoubleExecution

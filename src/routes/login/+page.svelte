@@ -2,13 +2,26 @@
     import { dev } from "$app/environment";
     import { goto } from "$app/navigation";
     import Error from "$lib/components/Error.svelte";
+    import { processingResult } from "$lib/globals";
     import jellyfin from "$lib/jellyfin";
+    import processing from "$lib/jellyfin/queries/local/processing";
 
     let serverUrl: string = "";
     let userName: string = "";
     let userPassword: string = "";
 
-    // only when devin' auto login
+    function proceedToLoading() {
+        processing()
+            .then((result) => {
+                if (result.success) {
+                    processingResult.set(result.data)
+                    goto("/")
+                }
+            })
+        goto("/loading")
+    }
+
+    // only when devin' attempt an auto login
     if (dev) {
         import("$env/static/public").then(async (i) => {
             serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
@@ -16,7 +29,7 @@
             userPassword = i.PUBLIC_JELLYFIN_PASSWORD;
             await pingServer();
             await authenticate();
-            goto("/");
+            proceedToLoading();
         });
     }
 
@@ -122,7 +135,7 @@
                     loginValid = auth.success;
                     if (auth.success) {
                         error = undefined;
-                        goto("/");
+                        proceedToLoading();
                         return;
                     }
                     jellyfin.terminateSession();
@@ -138,7 +151,7 @@
 
 <button
     disabled={!serverValid || !loginValid || !userName || !userPassword}
-    on:click={() => goto("/")}
+    on:click={() => proceedToLoading}
 >
     Continue To Rewind
 </button>
