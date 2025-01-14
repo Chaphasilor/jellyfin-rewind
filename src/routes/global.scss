@@ -1,6 +1,8 @@
 @use "sass:color";
 // Realtime colors configuration
 @import url("https://fonts.googleapis.com/css?family=Mallanna:700|Blinker:400");
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
 body {
     font-family: "Blinker";
     font-weight: 400;
@@ -50,13 +52,22 @@ p {
     padding: 0;
 }
 
-$text: #d9e9f6;
-$background: #030b13;
-$primary: #85b5e3;
-$secondary: #4c3a71;
-$accent: #f1b539;
+$text: rgb(217, 233, 246);
+$background: rgb(3, 11, 19);
+$primary: rgb(133, 181, 227);
+$secondary: rgb(76, 58, 113);
+$accent: rgb(241, 181, 57);
 
-/////
+////
+
+b {
+    background: linear-gradient(25deg, $accent, $secondary);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-style: italic;
+    font-family: "Quicksand", serif;
+    padding-right: 0.2rem; // prevent text overflow
+}
 
 body {
     background-color: $background;

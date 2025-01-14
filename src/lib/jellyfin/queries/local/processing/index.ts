@@ -69,7 +69,9 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
         tracksCache.setAndGetValue(track.Id, () => compactTrack(track));
 
-        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
+        if (Math.random() > 0.8) {
+            await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
+        }
     }
 
 
@@ -87,7 +89,9 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     
         updateCounters(listen, track);
     
-        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
+        if (Math.random() > 0.8) {
+            await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
+        }
     }
 
 

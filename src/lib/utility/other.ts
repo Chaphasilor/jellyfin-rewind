@@ -28,3 +28,19 @@ export function getDayOfYear(date: Date) {
     const day = Math.floor(diff / oneDay);
     return day;
 }
+
+
+export function indexOfMax(arr: any[]) {
+    return arr.indexOf(Math.max(...arr))
+}
+export function indexOfMin(arr: any[]) {
+    let min = Infinity
+    let index = 0
+    arr.forEach((v, i) => {
+        if (v != 0 && v < min) {
+            min = v
+            index = i
+        }
+    })
+    return index;
+}

@@ -11,6 +11,9 @@
 </script>
 
 
+{#if max != 0 && cur == max}
+    <h5>{title}</h5>
+{/if}
 {#if max != 0 && cur != max}
     <div class="progress">
         <h4>{title}</h4>
@@ -26,3 +29,10 @@
         </div>
     </div>
 {/if}
+
+<style>
+    h5 {
+        font-style: italic;
+        opacity: 0.8;
+    }
+</style>

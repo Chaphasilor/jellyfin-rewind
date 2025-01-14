@@ -15,7 +15,7 @@
             .then((result) => {
                 if (result.success) {
                     processingResult.set(result.data)
-                    goto("/")
+                    goto("/rewind")
                 }
             })
         goto("/loading")

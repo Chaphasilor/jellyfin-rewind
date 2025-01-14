@@ -4,6 +4,9 @@
     "npm:@sveltejs/adapter-static@^3.0.8": "3.0.8_@sveltejs+kit@2.15.1__@sveltejs+vite-plugin-svelte@4.0.4___svelte@5.16.0____acorn@8.14.0___vite@5.4.11__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_@sveltejs+vite-plugin-svelte@4.0.4__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
     "npm:@sveltejs/kit@2": "2.15.1_@sveltejs+vite-plugin-svelte@4.0.4__svelte@5.16.0___acorn@8.14.0__vite@5.4.11_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
     "npm:@sveltejs/vite-plugin-svelte@4": "4.0.4_svelte@5.16.0__acorn@8.14.0_vite@5.4.11",
+    "npm:@types/chart.js@^2.9.41": "2.9.41",
+    "npm:@types/chartjs@^0.0.31": "0.0.31",
+    "npm:chart.js@^4.4.7": "4.4.7",
     "npm:sass-embedded@^1.83.1": "1.83.1",
     "npm:svelte-check@4": "4.1.1_svelte@5.16.0__acorn@8.14.0_typescript@5.7.2",
     "npm:svelte@5": "5.16.0_acorn@8.14.0",
@@ -114,6 +117,9 @@
         "@jridgewell/sourcemap-codec"
       ]
     },
+    "@kurkle/color@0.3.4": {
+      "integrity": "sha512-M5UknZPHRu3DEDWoipU6sE8PdkZ6Z/S+v4dD+Ke8IaNlpdSQah50lz1KtcFBa2vsdOnwbbnxJwVM4wty6udA5w=="
+    },
     "@polka/url@1.0.0-next.28": {
       "integrity": "sha512-8LduaNlMZGwdZ6qWrKlfa+2M4gahzFkprZiAt2TF8uS0qQgBizKXpXURqvTJ4WtmupWxaLqjRb2UCTe72mu+Aw=="
     },
@@ -222,6 +228,15 @@
         "vitefu"
       ]
     },
+    "@types/chart.js@2.9.41": {
+      "integrity": "sha512-3dvkDvueckY83UyUXtJMalYoH6faOLkWQoaTlJgB4Djde3oORmNP0Jw85HtzTuXyliUHcdp704s0mZFQKio/KQ==",
+      "dependencies": [
+        "moment"
+      ]
+    },
+    "@types/chartjs@0.0.31": {
+      "integrity": "sha512-eF1AgrIO0qP9KJYwM2dTKL2pczTjiLa0hfmZdQfKiqFq5WIvFTKPn1gkgADitF5sT4byEyq4EFdMVvuPIk6zeQ=="
+    },
     "@types/cookie@0.6.0": {
       "integrity": "sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA=="
     },
@@ -245,6 +260,12 @@
     },
     "buffer-builder@0.2.0": {
       "integrity": "sha512-7VPMEPuYznPSoR21NE1zvd2Xna6c/CloiZCfcMXR1Jny6PjX0N4Nsa38zcBFo/FMK+BlA+FLKbJCQ0i2yxp+Xg=="
+    },
+    "chart.js@4.4.7": {
+      "integrity": "sha512-pwkcKfdzTMAU/+jNosKhNL2bHtJc/sSmYgVbuGTEDhzkrhmyihmP7vUc/5ZK9WopidMDHNe3Wm7jOd/WhuHWuw==",
+      "dependencies": [
+        "@kurkle/color"
+      ]
     },
     "chokidar@4.0.3": {
       "integrity": "sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==",
@@ -348,6 +369,9 @@
       "dependencies": [
         "@jridgewell/sourcemap-codec"
       ]
+    },
+    "moment@2.30.1": {
+      "integrity": "sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how=="
     },
     "mri@1.2.0": {
       "integrity": "sha512-tzzskb3bG8LvYGFF/mDTpq3jpI6Q9wc3LEmBaghu+DdCssd1FakN7Bc0hVNmEyGq1bq3RgfkCb3cmQLpNPOroA=="
@@ -610,6 +634,9 @@
         "npm:@sveltejs/adapter-static@^3.0.8",
         "npm:@sveltejs/kit@2",
         "npm:@sveltejs/vite-plugin-svelte@4",
+        "npm:@types/chart.js@^2.9.41",
+        "npm:@types/chartjs@^0.0.31",
+        "npm:chart.js@^4.4.7",
         "npm:sass-embedded@^1.83.1",
         "npm:svelte-check@4",
         "npm:svelte@5",
