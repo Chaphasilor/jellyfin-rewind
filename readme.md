@@ -22,7 +22,9 @@ If that doesn't work, or your server **is NOT** accessible over the internet, yo
 **Local Network / Self-Hosting**
 
 If your Jellyfin server is only accessible on your local network, you will need to self-host Jellyfin Rewind so that it's also accessible on your local network. Otherwise your browser will block the connection.  
-To do this, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the [provided Docker image here](https://hub.docker.com/r/chaphasilor/jellyfin-rewind/tags). The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.
+To do this, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the [provided Docker image here](https://hub.docker.com/r/chaphasilor/jellyfin-rewind/tags). The zip-archive will need to be extracted into a folder that is served by a web server, like Apache, Nginx or Caddy. Here's an example Docker command to run using Caddy and serve in port 2024: `docker run --rm -it -v $PWD:/srv/ -p 2024:2024 caddy caddy file-server --listen :2024`.
+
+The Docker image will need a to have port 80 exposed instead.
 
 **HTTP** (works for both http and https Jellyfin servers, as long as they are accessible over the internet):
 
