@@ -196,20 +196,20 @@ const viewPlaceholder = html`
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
 
     <p class="">Hi there!</p>
-    
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2025</span> will launch on <span class="text-white">December 31st, 2025</span> (if all goes well).</p>
+    <!-- TODO auto-close Rewind in march and show the placeholder instead, get rid of the [VITE_SHOW_PLACEHOLDER] variable -->
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-[#00A4DC] font-semibold dark:text-white">Jellyfin Rewind ${import.meta.env.VITE_TARGET_YEAR + 1}</span> will launch on <span class="text-[#00A4DC] font-semibold dark:text-white">December 31st, ${import.meta.env.VITE_TARGET_YEAR + 1}</span> (if all goes well).</p>
     <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
-    <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
+    <button class="self-center text-white font-semibold px-6 py-2 rounded-2xl bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
     
-    <p class="font-light text-base italic">If you want to review your stats from last year, you can now import your old report for viewing. The media itself probably won't load, but everything else should be there!</p>
+    <p class="mt-12 font-normal text-base italic">If you want to review your stats from last year, you can now import your old report for viewing. The media itself probably won't load, but everything else should be there!</p>
 
   </div>
 
   <button
-    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-4 flex flex-row gap-4 items-center mx-auto"
+    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-2 flex flex-row gap-4 items-center mx-auto"
     @click="${() => state.currentView = `importReportForViewing`}"
   >
-    <span>View An Old Report</span>
+    <span>Open An Old Report</span>
   </button>
 
 </div>
@@ -810,12 +810,21 @@ const viewImportReportForViewing = html`
         ${() => state.importingExistingReport ? html`
           <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
         ` : html`
+        ${() => JSON.parse(import.meta.env.VITE_SHOW_PLACEHOLDER) ? html`
           <button
-            class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
-            @click="${() => state.currentView = `start`}"
-          >
-            <span>Connect to a server instead</span>
-          </button>
+              class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+              @click="${() => state.currentView = `placeholder`}"
+            >
+              <span>Go Back</span>
+            </button>
+          ` : html`
+            <button
+              class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+              @click="${() => state.currentView = `start`}"
+            >
+              <span>Connect to a server instead</span>
+            </button>
+          `}
         `
       }
       `

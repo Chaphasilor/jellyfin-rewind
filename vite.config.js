@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import * as child from 'child_process';
+import * as child from 'node:child_process';
 
 const commitHash = child.execSync("git rev-parse --short HEAD").toString().trim()
 
