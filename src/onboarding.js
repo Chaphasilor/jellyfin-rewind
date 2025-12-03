@@ -197,7 +197,7 @@ const viewPlaceholder = html`
 
     <p class="">Hi there!</p>
     <!-- TODO auto-close Rewind in march and show the placeholder instead, get rid of the [VITE_SHOW_PLACEHOLDER] variable -->
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-[#00A4DC] font-semibold dark:text-white">Jellyfin Rewind ${import.meta.env.VITE_TARGET_YEAR + 1}</span> will launch on <span class="text-[#00A4DC] font-semibold dark:text-white">December 31st, ${import.meta.env.VITE_TARGET_YEAR + 1}</span> (if all goes well).</p>
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-[#00A4DC] font-semibold dark:text-white">Jellyfin Rewind ${Number(import.meta.env.VITE_TARGET_YEAR) + 1}</span> will launch on <span class="text-[#00A4DC] font-semibold dark:text-white">December 31st, ${Number(import.meta.env.VITE_TARGET_YEAR) + 1}</span> (if all goes well).</p>
     <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
     <button class="self-center text-white font-semibold px-6 py-2 rounded-2xl bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
     
