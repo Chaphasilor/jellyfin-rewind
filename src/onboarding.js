@@ -10,10 +10,10 @@ export const state = reactive({
   server: {
     url: ``,
     users: [
-      {name: `test`, id: `test`},
-      {name: `test`, id: `test`},
-      {name: `test`, id: `test`},
-      {name: `test`, id: `test`}
+      { name: `test`, id: `test` },
+      { name: `test`, id: `test` },
+      { name: `test`, id: `test` },
+      { name: `test`, id: `test` }
     ],
     loginType: `password`,
     selectedUser: null,
@@ -41,7 +41,7 @@ export const state = reactive({
 })
 
 export async function init(auth) {
-  
+
   state.views = reactive({
     start: viewStart,
     placeholder: viewPlaceholder,
@@ -60,14 +60,14 @@ export async function init(auth) {
 
   state.auth = auth
   state.server.url = state.auth?.config?.baseUrl
-  
+
   // MediaQueryList
   const darkModePreference = window.matchMedia("(prefers-color-scheme: dark)");
 
   // recommended method for newer browsers: specify event-type as first argument
   darkModePreference.addEventListener(`change`, e => {
     if (e.matches) {
-      state.darkMode = true 
+      state.darkMode = true
     } else {
       state.darkMode = false
     }
@@ -79,7 +79,7 @@ export async function init(auth) {
 
   try {
     let restored = await restoreAndPrepareRewind()
-  
+
     state.rewindReport = restored.rewindReportData
     state.staleReport = restored.staleReport
     console.log(`state.rewindReport:`, state.rewindReport)
@@ -111,9 +111,9 @@ function handleBackButton() {
     let url = new URL(location.href)
     url.hash = view
     history.pushState(null, null, url);
-  
+
   })
-  
+
   // handle back button by changing state.currentView
   // history.pushState(null, null, location.href);
   window.onpopstate = () => {
@@ -142,7 +142,7 @@ watch(() => [
 
 const header = html`
 <div class="mt-6 w-full flex flex-col items-center mb-16">
-  <img class="h-40" src="${() =>  state.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
+  <img class="h-40" src="${() => state.darkMode ? '/media/banner-dark.svg' : '/media/banner-light.svg'}" alt="Jellyfin Rewind Logo">
 </div>
 `
 
@@ -164,12 +164,12 @@ const viewStart = html`
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-16 flex flex-row gap-4 items-center mx-auto"
     @click="${() => {
-      if ((state.auth?.config?.baseUrl?.length ?? 0) > 0) {
-        connect(state.auth?.config?.baseUrl)
-      }
-      
-      state.currentView = `server`
-    }}"
+    if ((state.auth?.config?.baseUrl?.length ?? 0) > 0) {
+      connect(state.auth?.config?.baseUrl)
+    }
+
+    state.currentView = `server`
+  }}"
   >
     <span>Log In</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -197,7 +197,7 @@ const viewPlaceholder = html`
 
     <p class="">Hi there!</p>
     
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2024</span> will launch on <span class="text-white">December 31st, 2024</span> (if all goes well).</p>
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2025</span> will launch on <span class="text-white">December 31st, 2025</span> (if all goes well).</p>
     <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
     <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
     
@@ -271,12 +271,12 @@ const playbackReportingDialog = html`
             <button
               class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
               @click="${() => {
-                state.selectedAction = `openPluginsPage`
-                state.currentView = `server`
-                state.playbackReportingDialogOpen = false
-              }}">Open Plugins Page!</button>
+      state.selectedAction = `openPluginsPage`
+      state.currentView = `server`
+      state.playbackReportingDialogOpen = false
+    }}">Open Plugins Page!</button>
             `
-          }
+  }
           <p>By default, the Playback Reporting plugin only stores the last 3 months worth of playback data, so you definitely want to change that in the settings. I'd suggest keeping at least the last two years, just to be safe. The button below will take you directly to the settings page.</p>
           ${() => state.server.url !== `` ? html`
             <a class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Playback Reporting Settings!</a>
@@ -284,14 +284,14 @@ const playbackReportingDialog = html`
             <button
               class="px-3 py-2 my-1 rounded-md text-white font-semibold bg-[#00A4DC]"
               @click="${() => {
-                state.selectedAction = `openPlaybackReportingSettings`
-                state.currentView = `server`
-                state.playbackReportingDialogOpen = false
-              }}">Open Playback Reporting Settings!</button>
+      state.selectedAction = `openPlaybackReportingSettings`
+      state.currentView = `server`
+      state.playbackReportingDialogOpen = false
+    }}">Open Playback Reporting Settings!</button>
             `
-          }
+  }
           <p>For more information about the Playback Reporting plugin, you can visit <a class="text-[#00A4DC]" href="https://jellyfin.org/docs/general/server/plugins/#playback-reporting" target="_blank">its entry in the official Jellyfin Docs</a>.</p>
-          <p>I will try to again offer a way to import ${() => state.rewindReport?.year}'s Rewind data into Jellyfin Rewind ${() => state.rewindReport?.year+1}, so that more information can be used and the used data can be properly limited to the current year only.</p>
+          <p>I will try to again offer a way to import ${() => state.rewindReport?.year}'s Rewind data into Jellyfin Rewind ${() => state.rewindReport?.year + 1}, so that more information can be used and the used data can be properly limited to the current year only.</p>
         </div>
       </div>
     </div>
@@ -326,8 +326,8 @@ const finampOfflineExportDialog = html`
           <button
             class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
             @click="${() => {
-              state.finampOfflineExportDialogOpen = false
-            }}">Close help dialog</button>
+    state.finampOfflineExportDialogOpen = false
+  }}">Close help dialog</button>
           <p>I'll try to make this less complicated next year...</p>
         </div>
       </div>
@@ -429,10 +429,10 @@ const viewUser = html`
           <li
             class="flex flex-col gap-2 items-center bg-white shadow-sm rounded-xl p-2"
             @click="${() => {
-              state.server.selectedUser = user
-              state.server.loginType = `password`
-              state.currentView = `login`
-            }}"
+    state.server.selectedUser = user
+    state.server.loginType = `password`
+    state.currentView = `login`
+  }}"
           >
             <img
               class="w-10 h-10 rounded-md" src="${() => user.PrimaryImageTag ? `${state.auth.config.baseUrl}/Users/${user.Id}/Images/Primary?tag=${user.PrimaryImageTag}` : `/media/ArtistPlaceholder.png`}"
@@ -446,9 +446,9 @@ const viewUser = html`
         <li
           class="flex flex-row gap-4 items-center bg-white shadow-sm rounded-xl p-2"
           @click="${() => {
-            state.server.loginType = `full`
-            state.currentView = `login`
-          }}"
+    state.server.loginType = `full`
+    state.currentView = `login`
+  }}"
         >
           <span class="text-base text-center w-full font-regular text-gray-900">Manually enter username</span>
         </li>
@@ -456,9 +456,9 @@ const viewUser = html`
         <li
           class="flex flex-row gap-4 items-center bg-white shadow-sm rounded-xl p-2"
           @click="${() => {
-            state.server.loginType = `token`
-            state.currentView = `login`
-          }}"
+    state.server.loginType = `token`
+    state.currentView = `login`
+  }}"
         >
           <span class="text-base text-center w-full font-regular text-gray-900">Log in with a token</span>
         </li>
@@ -471,7 +471,7 @@ const viewUser = html`
 </div>
 `
 
-async function login()  {
+async function login() {
   const username = document.querySelector(`#onboarding-username`).value
   const password = document.querySelector(`#onboarding-password`).value
   try {
@@ -488,7 +488,7 @@ async function login()  {
   }
 }
 
-async function loginAuthToken()  {
+async function loginAuthToken() {
   const token = document.querySelector(`#onboarding-auth-token`).value
   try {
     let userInfo = await loginViaAuthToken(state.auth, token)
@@ -578,38 +578,38 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
         <button
           class="px-3 py-2 my-1 mx-auto rounded-lg text-white font-semibold bg-[#00A4DC] hover:bg-[#0085B2] "
           @click="${async () => {
-            try {
-              const newSettings = {
-                ...playbackReportingSetup.settings,
-                MaxDataAge: "-1",
-              }
-              await window.helper.updatePlaybackReportingSettings(newSettings)
-              checkPlaybackReportingSetup(nextScreen)
-            } catch (err) {
-              console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          try {
+            const newSettings = {
+              ...playbackReportingSetup.settings,
+              MaxDataAge: "-1",
             }
-          }}">Set retention interval to forever</button>
+            await window.helper.updatePlaybackReportingSettings(newSettings)
+            checkPlaybackReportingSetup(nextScreen)
+          } catch (err) {
+            console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          }
+        }}">Set retention interval to forever</button>
         <button
           class="px-2 py-1 mt-1 mx-auto rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
           @click="${async () => {
-            try {
-              const newSettings = {
-                ...playbackReportingSetup.settings,
-                MaxDataAge: 24,
-              }
-              await window.helper.updatePlaybackReportingSettings(newSettings)
-              checkPlaybackReportingSetup(nextScreen)
-            } catch (err) {
-              console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          try {
+            const newSettings = {
+              ...playbackReportingSetup.settings,
+              MaxDataAge: 24,
             }
-          }}">Set retention interval to 2 years</button>
+            await window.helper.updatePlaybackReportingSettings(newSettings)
+            checkPlaybackReportingSetup(nextScreen)
+          } catch (err) {
+            console.error(`Couldn't set up Playback Reporting Plugin!:`, err)
+          }
+        }}">Set retention interval to 2 years</button>
       `
     }
   } else if (playbackReportingSetup.ignoredUsers.some(user => user.id === state.auth?.config?.user?.id)) {
     inspection.valid = false
     inspection.issue = `The Playback Reporting plugin is installed and active, but your user account is ignored. Please remove your user from the list of ignored users so that listening activity is recorded for your account.`
     // if (window.helper && state.auth.config.user.isAdmin) {
-      inspection.action = html`
+    inspection.action = html`
       <a class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]" href="${() => `${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`}" target="_blank">Open Playback Reporting Settings!</a>
       <button class="px-2 py-1 rounded-lg text-sm font-semibold border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 hover:text-white" @click="${() => checkPlaybackReportingSetup(nextScreen)}">Check Again</button>
       `
@@ -617,11 +617,11 @@ function inspectPlaybackReportingSetup(playbackReportingSetup, nextScreen) {
   }
 
   return inspection
-  
-} 
+
+}
 
 async function checkPlaybackReportingSetup(nextScreen) {
-  
+
   // there's nothing we can do without the helper
   if (!window.helper) {
     state.currentView = nextScreen ?? `importLastYearsReport`
@@ -640,7 +640,7 @@ async function checkPlaybackReportingSetup(nextScreen) {
   }
 
   nextScreen = nextScreen ?? `importLastYearsReport`
-    
+
   try {
 
     const playbackReportingSetup = await window.helper.checkIfPlaybackReportingInstalled()
@@ -650,14 +650,14 @@ async function checkPlaybackReportingSetup(nextScreen) {
     console.log(`inspection:`, inspection)
 
     state.waitingForRestart = false
-    
+
     if (!inspection.valid) {
       state.currentView = `playbackReportingIssues`
       state.playbackReportingInspectionResult = inspection
     } else {
       state.currentView = nextScreen
     }
-    
+
   } catch (err) {
     console.error(`Failed to check the playback reporting setup, continuing without it:`, err)
     state.playbackReportingInspectionAttempts++
@@ -715,8 +715,8 @@ const viewLogin = html`
   </div>
 
   <form class="flex flex-col gap-4 mt-10 w-5/6 mx-auto" @submit="${(e) => e.preventDefault()}">
-    ${() => 
-      [`password`, `full`].includes(state.server.loginType) ? html`
+    ${() =>
+    [`password`, `full`].includes(state.server.loginType) ? html`
         <label class="flex flex-col gap-1">
           <span class="text-sm ml-1.5 font-medium">Username</span>
           <input
@@ -753,7 +753,7 @@ const viewLogin = html`
           >
         </label>
       `
-    }
+  }
   </form>
 
   <button
@@ -784,28 +784,28 @@ const viewImportReportForViewing = html`
 
   <div class="w-full flex flex-col items-center text-center mt-12">
     ${() =>
-      html`
+    html`
         <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingExistingReport ? `saturation-50` : ``}`}">Import Report</label>
         <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
-          console.info(`Importing file...`)
-          const input = e.target
-          try {
-            state.importingExistingReport = true
-            input.disabled = true
-            state.rewindReport = await importRewindReport(e.target.files[0])
-            state.auth.config.serverInfo = state.rewindReport.jellyfinRewindReport.server
-            console.log(`state.auth.serverInfo:`, state.auth.serverInfo)
-            console.log(`state.rewindReport:`, state.rewindReport)
-            state.currentView = `launchExistingReport`
-            // state.currentView = `load`
-            // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
-            // console.log(`featureDelta:`, featureDelta)
-          } catch (err) {
-            console.error(`Error while importing rewind report:`, err)
-          }
-          input.disabled = false
-          state.importingExistingReport = false
-        }}">
+        console.info(`Importing file...`)
+        const input = e.target
+        try {
+          state.importingExistingReport = true
+          input.disabled = true
+          state.rewindReport = await importRewindReport(e.target.files[0])
+          state.auth.config.serverInfo = state.rewindReport.jellyfinRewindReport.server
+          console.log(`state.auth.serverInfo:`, state.auth.serverInfo)
+          console.log(`state.rewindReport:`, state.rewindReport)
+          state.currentView = `launchExistingReport`
+          // state.currentView = `load`
+          // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
+          // console.log(`featureDelta:`, featureDelta)
+        } catch (err) {
+          console.error(`Error while importing rewind report:`, err)
+        }
+        input.disabled = false
+        state.importingExistingReport = false
+      }}">
 
         ${() => state.importingExistingReport ? html`
           <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
@@ -817,9 +817,9 @@ const viewImportReportForViewing = html`
             <span>Connect to a server instead</span>
           </button>
         `
-        }
+      }
       `
-    }
+  }
   </div>
 
 </div>
@@ -875,25 +875,25 @@ const viewImportOfflinePlayback = html`
   <div class="w-full flex flex-col items-center text-center mt-12">
     <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingOfflinePlayback ? `saturation-50` : ``}`}">Import Offline Playback History</label>
     <input type="file" id="import-file" class="hidden" accept=".txt,.json,.jsonl" @change="${async (e) => {
-      console.info(`Importing offline playback...`)
-      const input = e.target
-      try {
-        state.importingOfflinePlayback = true
-        input.disabled = true
-        state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
-        console.log(`state.offlinePlayback:`, state.offlinePlayback)
-        console.log(`missing playDurations:`, state.offlinePlayback.filter(x => !x.playDuration))
+    console.info(`Importing offline playback...`)
+    const input = e.target
+    try {
+      state.importingOfflinePlayback = true
+      input.disabled = true
+      state.offlinePlayback = await importOfflinePlayback(e.target.files[0])
+      console.log(`state.offlinePlayback:`, state.offlinePlayback)
+      console.log(`missing playDurations:`, state.offlinePlayback.filter(x => !x.playDuration))
 
-        // import plays to server
-        await uploadOfflinePlaybackBatched(state.offlinePlayback, state.auth)
-        
-        state.currentView = `importLastYearsReport`
-      } catch (err) {
-        console.error(`Error while importing offline playback data:`, err)
-      }
-      input.disabled = false
-      state.importingOfflinePlayback = false
-    }}">
+      // import plays to server
+      await uploadOfflinePlaybackBatched(state.offlinePlayback, state.auth)
+
+      state.currentView = `importLastYearsReport`
+    } catch (err) {
+      console.error(`Error while importing offline playback data:`, err)
+    }
+    input.disabled = false
+    state.importingOfflinePlayback = false
+  }}">
 
     ${() => state.importingOfflinePlayback ? html`
       <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
@@ -906,7 +906,7 @@ const viewImportOfflinePlayback = html`
         <span>Continue without importing</span>
       </button>
     `
-    }
+  }
   </div>
 
   ${() => buttonLogOut}
@@ -926,25 +926,25 @@ const viewImportLastYearsReport = html`
 
   <div class="w-full flex flex-col items-center text-center mt-12">
     ${() =>
-      !state.oldReport ? html`
+    !state.oldReport ? html`
         <label for="import-file" class="${() => `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${state.importingLastYearsReport ? `saturation-50` : ``}`}">Import Last Year's Report</label>
         <input type="file" id="import-file" class="hidden" accept=".json" @change="${async (e) => {
-          console.info(`Importing file...`)
-          const input = e.target
-          try {
-            state.importingLastYearsReport = true
-            input.disabled = true
-            state.oldReport = await importRewindReport(e.target.files[0])
-            console.log(`state.oldReport:`, state.oldReport)
-            state.currentView = `load`
-            // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
-            // console.log(`featureDelta:`, featureDelta)
-          } catch (err) {
-            console.error(`Error while importing rewind report:`, err)
-          }
-          input.disabled = false
-          state.importingLastYearsReport = false
-        }}">
+        console.info(`Importing file...`)
+        const input = e.target
+        try {
+          state.importingLastYearsReport = true
+          input.disabled = true
+          state.oldReport = await importRewindReport(e.target.files[0])
+          console.log(`state.oldReport:`, state.oldReport)
+          state.currentView = `load`
+          // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
+          // console.log(`featureDelta:`, featureDelta)
+        } catch (err) {
+          console.error(`Error while importing rewind report:`, err)
+        }
+        input.disabled = false
+        state.importingLastYearsReport = false
+      }}">
 
         ${() => state.importingLastYearsReport ? html`
           <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300">Importing, please wait a few seconds...</p>
@@ -966,7 +966,7 @@ const viewImportLastYearsReport = html`
         ` : null}
 
         `
-        }
+      }
       ` : html`
         <button
           class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
@@ -981,7 +981,7 @@ const viewImportLastYearsReport = html`
           </svg> -->
         </button>
       `
-    }
+  }
   </div>
 
   ${() => buttonLogOut}
@@ -1110,13 +1110,13 @@ const viewRevisit = html`
   <div class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center">
     <p class="">Welcome back, ${() => state.auth.config?.user?.name}!</p>
     <p class="">${() =>
-      !state.staleReport ? 
-        html`
+    !state.staleReport ?
+      html`
         <span>Your Rewind Report is still saved. You can view it any time you like.</span>
         ` : html`
         <span class="font-bold text-orange-500">The stored Rewind report is stale. Please re-generate it for the best experience.</span>
         `
-    }</p>
+  }</p>
   </div>
 
   <button
@@ -1136,8 +1136,8 @@ const viewRevisit = html`
   <button
     class="px-4 py-2 rounded-xl border-2 border-orange-400 hover:bg-orange-500 dark:border-orange-500 dark:hover:bg-orange-600 text-orange-500 font-medium mt-12 flex flex-row gap-3 items-center mx-auto hover:text-white"
     @click="${() => {
-      checkPlaybackReportingSetup() 
-    }}"
+    checkPlaybackReportingSetup()
+  }}"
   >
     <span>Regenerate Rewind</span>
     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-refresh" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -1166,8 +1166,8 @@ const viewRewindGenerationError = html`
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/40 text-white font-semibold mt-20 flex flex-row gap-4 items-center mx-auto"
     @click="${() => {
-      state.currentView = `load` 
-    }
+    state.currentView = `load`
+  }
   }"
   >
     <span>Try again</span>
