@@ -197,7 +197,7 @@ const viewPlaceholder = html`
 
     <p class="">Hi there!</p>
     
-    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2024</span> will launch on <span class="text-white">December 31st, 2024</span> (if all goes well).</p>
+    <p class="">If you're looking for this year's Jellyfin Rewind, you'll have to wait a little longer. <span class="text-white">Jellyfin Rewind 2025</span> will launch on <span class="text-white">December 31st, 2025</span> (if all goes well).</p>
     <p class="">In order to prepare for the launch, make sure your Playback Reporting plugin is installed and set up properly.</p>
     <button class="self-center text-[#00A4DC] font-semibold px-6 py-2 rounded-md bg-orange-500 dark:text-white" @click="${() => state.playbackReportingDialogOpen = true}">Click here<br>to configure it!</button></p>
     
