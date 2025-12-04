@@ -59,6 +59,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           average: !isNaN(Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2)) ? Math.ceil(((Number(item.UserData?.PlayCount) * (Number(item.RunTimeTicks) / (10000000 * 60))) + (Number(playbackReportItem?.TotalDuration) / 60 || 0))/2) : 0,
         },
         isFavorite: item.UserData?.IsFavorite,
+        lastPlay: playbackReportItem?.LastPlay,
       })
 
       track.skips.score.jellyfin = (track.skips.total + 1) * 2 / track.playCount.jellyfin
@@ -429,6 +430,43 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   delete totalStats.libraryStats.trackLength.lengths
   
   return totalStats
+}
+
+export function getForgottenFavortiteTracks(itemInfo, { dataSource = `average` }) {
+  const minimumLastPlayAge = 120 // in days
+  const numberOfTracksToReturn = 20
+  const trackList = Array.isArray(itemInfo) ? [...itemInfo] : Object.values(itemInfo)
+
+  // Only look at songs that were played
+  let playedSongs = trackList.filter(x => x.playCount[dataSource] > 0)
+
+  const today = new Date()
+  const millisecondsPerDay = 86400000
+  const playCountWeight = 20
+  
+  // Weighted sort using days since last play and total number of plays
+  playedSongs.sort((a, b) => {
+    let daysSinceLastPlayA = (today - a.lastPlay) / millisecondsPerDay
+    let daysSinceLastPlayB = (today - b.lastPlay) / millisecondsPerDay
+    let weightedPlayCountA = a.playCount[dataSource] * playCountWeight
+    let weightedPlayCountB = b.playCount[dataSource] * playCountWeight
+
+    return (daysSinceLastPlayB + weightedPlayCountB) - (daysSinceLastPlayA + weightedPlayCountA)
+  })
+
+  let forgottenFavortiteTracks = []
+
+  // Loop through sorted track list and get top tracks that are older than age threshold
+  for (let i = 0; i < playedSongs.length; i++) {
+    if ((today - playedSongs[i].lastPlay) / millisecondsPerDay > minimumLastPlayAge) {
+      forgottenFavortiteTracks.push(playedSongs[i])
+
+      // Exit once we hit the needed number of tracks
+      if (forgottenFavortiteTracks.length === numberOfTracksToReturn) break
+    }
+  }
+
+  return forgottenFavortiteTracks
 }
 
 export function getTopItems(itemInfo, { by = `duration`, lowToHigh = false, limit = 25, dataSource = `average` }) {
