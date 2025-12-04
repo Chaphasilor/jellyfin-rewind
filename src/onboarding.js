@@ -212,6 +212,19 @@ const viewPlaceholder = html`
     <span>Open An Old Report</span>
   </button>
 
+  <div class="flex flex-col gap-2 leading-5 text-gray-500 dark:text-gray-400 w-full mx-auto text-balance text-center mt-12 font-normal text-base italic">
+    <p>If you really can't wait though, Jellyfin Rewind ${Number(import.meta.env.VITE_TARGET_YEAR)} should still work just fine. It still has the same features as last year.
+    Just be aware that there's more to come, and you will probably have an even better experience and more accurate stats if you wait just a bit longer!</p>
+    <p>So why don't you add a reminder to your calendar right now? :D</p>
+  </div>
+
+  <button
+    class="px-3 py-2 rounded-lg text-[0.9rem] underline text-orange-600 font-semibold mt-2 flex flex-row gap-4 items-center mx-auto"
+    @click="${() => state.currentView = `start`}"
+  >
+    <span>I really, really want my Rewind Report now!</span>
+  </button>
+
 </div>
 `
 
