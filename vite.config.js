@@ -1,7 +1,29 @@
 import { defineConfig } from 'vite';
 import * as child from 'node:child_process';
 
-const commitHash = child.execSync("git rev-parse --short HEAD").toString().trim()
+function getCommitHash() {
+  if (process.env.GITHUB_SHA) {
+    return process.env.GITHUB_SHA
+  }
+  
+  if (process.env.CI_COMMIT_SHORT_SHA) {
+    return process.env.CI_COMMIT_SHORT_SHA
+  }
+  
+  if (process.env.VITE_COMMIT_HASH) {
+    return process.env.VITE_COMMIT_HASH
+  }
+
+  try {
+    return child.execSync('git rev-parse --short HEAD').toString().trim()
+  } catch (e) {
+    console.warn('Cannot retrieve git commit hash:', e.message)
+    return 'unknown'
+  }
+}
+
+
+const commitHash = getCommitHash().substring(0, 7)
 
 export default defineConfig({
   define: {
