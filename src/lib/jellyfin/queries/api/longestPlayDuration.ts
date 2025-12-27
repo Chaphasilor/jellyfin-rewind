@@ -1,4 +1,4 @@
-import jellyfin from "$lib/jellyfin";
+import jellyfin from "$lib/jellyfin/index.ts";
 export default async () =>
     await jellyfin.queryPlaybackReporting(
         ["ItemId", "DateCreated", "PlayDuration"],

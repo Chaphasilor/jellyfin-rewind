@@ -1,11 +1,12 @@
-import type { Result } from "$lib/types";
+// deno-lint-ignore-file no-explicit-any
+import type { Result } from "$lib/types.ts";
 
 export function log(id: string, data: any) {
     console.log(`%c[${id}]%c logged:`, "color:cyan", "color:pink", data);
 }
 
 export function logAndReturn<R>(id: string, result: R): R {
-    // @ts-ignore
+    // @ts-ignore: generics
     const isResult = typeof result.success == "boolean";
     if (!isResult) {
         console.log(
@@ -19,7 +20,7 @@ export function logAndReturn<R>(id: string, result: R): R {
             `%c[${id}]%c success:`,
             "color:gray",
             "color:green",
-            // @ts-ignore
+            // @ts-ignore: generics
             result.data,
         );
     } else {
@@ -27,7 +28,7 @@ export function logAndReturn<R>(id: string, result: R): R {
             `%c[${id}]%c failed:`,
             "color:gray",
             "color:red",
-            // @ts-ignore
+            // @ts-ignore: generics
             result.reason,
         );
     }

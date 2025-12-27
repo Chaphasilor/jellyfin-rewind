@@ -1,5 +1,5 @@
-import jellyfin from "$lib/jellyfin";
-import type { Result } from "$lib/types";
+import jellyfin from "$lib/jellyfin/index.ts";
+import type { Result } from "$lib/types.ts";
 export default async () => {
     const data = (await jellyfin.queryPlaybackReporting(
         [

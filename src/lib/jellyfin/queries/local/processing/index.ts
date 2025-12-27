@@ -1,15 +1,14 @@
-import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals";
-import type { ProcessingResults, Result } from "$lib/types";
-import { logAndReturn } from "$lib/utility/logging";
-import { run } from "svelte/legacy";
-import allListens from "../../api/allListens";
+import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals.ts";
+import type { ProcessingResults, Result } from "$lib/types.ts";
+import { logAndReturn } from "$lib/utility/logging.ts";
+import allListens from "$lib/jellyfin/queries/api/allListens.ts";
 import {
     compactTrack,
     getMusicLibrary,
     getTrackFromItem,
     reset,
     updateCounters,
-} from "./functions";
+} from "./functions.ts";
 import {
     albumsCache,
     artistCache,
@@ -26,7 +25,7 @@ import {
     playbackCache,
     skipped,
     tracksCache,
-} from "./values";
+} from "./values.ts";
 
 
 

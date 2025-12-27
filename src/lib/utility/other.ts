@@ -1,4 +1,4 @@
-import type { Result } from "$lib/types";
+import type { Result } from "$lib/types.ts";
 
 export function stringToUrl(url: string): Result<URL> {
     let success = true;

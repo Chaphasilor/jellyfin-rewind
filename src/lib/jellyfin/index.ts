@@ -1,7 +1,7 @@
-import { startSql, endSql } from "$lib/globals";
-import type { User, Result, JellyfinResponse_SystemInfoPublic, JellyfinResponse_UsersAuthenticateByName, JellyfinResponse_UsersMe } from "$lib/types";
-import { logAndReturn } from "$lib/utility/logging";
-import { stringToUrl } from "$lib/utility/other";
+import { startSql, endSql } from "$lib/globals.ts";
+import type { User, Result, JellyfinResponse_SystemInfoPublic, JellyfinResponse_UsersAuthenticateByName, JellyfinResponse_UsersMe } from "$lib/types.ts";
+import { logAndReturn } from "$lib/utility/logging.ts";
+import { stringToUrl } from "$lib/utility/other.ts";
 
 class Jellyfin {
     private token?: string;

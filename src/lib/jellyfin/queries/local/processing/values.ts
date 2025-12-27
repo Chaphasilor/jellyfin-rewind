@@ -3,9 +3,9 @@ import {
     type NormalCounters,
     normalCountersInit,
     type Track,
-} from "$lib/types";
-import Cache from "$lib/utility/cache";
-import Value from "$lib/utility/value";
+} from "$lib/types.ts";
+import Cache from "$lib/utility/cache.ts";
+import Value from "$lib/utility/value.ts";
 
 export const tracksCache = new Cache<Track, NormalCounters>(normalCountersInit);
 export const albumsCache = new Cache<Album, NormalCounters>(normalCountersInit);

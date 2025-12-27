@@ -1,1 +1,4 @@
-{ "unstable": ["fmt-component"] }
+{
+  "unstable": ["fmt-component"],
+  "allowScripts": ["npm:@sveltejs/kit@2.15.1", "npm:esbuild@0.21.5"]
+}

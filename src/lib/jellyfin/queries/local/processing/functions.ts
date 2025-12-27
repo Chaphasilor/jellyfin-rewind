@@ -1,13 +1,13 @@
-import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals";
-import jellyfin from "$lib/jellyfin";
+import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals.ts";
+import jellyfin from "$lib/jellyfin/index.ts";
 import {
     type Listen,
     type NormalCounters,
     normalCountersInit,
     type Result,
     type Track,
-} from "$lib/types";
-import { getDayOfYear } from "$lib/utility/other";
+} from "$lib/types.ts";
+import { getDayOfYear } from "$lib/utility/other.ts";
 import {
     albumsCache,
     artistCache,
@@ -24,7 +24,7 @@ import {
     playbackCache,
     skipped,
     tracksCache,
-} from "./values";
+} from "./values.ts";
 
 export function processArtists(track: any): string[] {
     if (track.ArtistItems == undefined) return [];
