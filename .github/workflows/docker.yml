@@ -46,5 +46,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           push: true
           build-args: |
+            VITE_COMMIT_HASH=${{ github.sha }}
             VITE_SHOW_PLACEHOLDER=true
             VITE_TARGET_YEAR=2024
