@@ -46,7 +46,7 @@ async function parseOfflinePlaybackData(fileContent) {
   }
   
   if (!!content) {
-    console.warning(`Regular JSON detected, unsupported`)
+    console.warn(`Regular JSON detected, unsupported`)
   }
   
   console.log(`fileContent.split(/\r\n|\r|\n/):`, fileContent.split(/\r\n|\r|\n/))

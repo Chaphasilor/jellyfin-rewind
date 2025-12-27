@@ -32,7 +32,7 @@ To do this, check out the [GitHub releases page](https://github.com/Chaphasilor/
 
 **HTTPS** (**only use this if your Jellyfin server has an https connection and is accessible over the internet**, this is the best experience):
 
-<https://jellyfin-rewind.chaphasilor.xyz>
+<https://jellyfin-rewind.netlify.app>
 
 ### Download your Rewind report!
 
