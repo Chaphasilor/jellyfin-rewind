@@ -21,7 +21,9 @@ export const listensCache = new Cache<Listen>(normalCountersInit);
 
 export const deviceCache = new Cache<null>(normalCountersInit);
 export const clientCache = new Cache<null>(normalCountersInit);
-export const combinedDeviceClientCache = new Cache<CombinedDeviceClientInfo>(normalCountersInit);
+export const combinedDeviceClientCache = new Cache<CombinedDeviceClientInfo>(
+  normalCountersInit,
+);
 export const playbackCache = new Cache<null>(
   normalCountersInit,
 );

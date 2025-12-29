@@ -7,8 +7,8 @@ export const end = new Date(2025, 11, 31);
 export const startSql = formatDateToSql(start);
 export const endSql = formatDateToSql(end);
 
-export const downloadingProgress = writable({cur: 0, max: 0, detail: ""})
-export const processingProgress = writable({cur: 0, max: 0, detail: ""})
-export const generatingProgress = writable({cur: 0, max: 0, detail: ""})
+export const downloadingProgress = writable({ cur: 0, max: 0, detail: "" });
+export const processingProgress = writable({ cur: 0, max: 0, detail: "" });
+export const generatingProgress = writable({ cur: 0, max: 0, detail: "" });
 
 export const processingResult = writable<ProcessingResults>();

@@ -59,15 +59,15 @@ Here an example:
 
 ```ts
 function game(): Result<boolean> {
-    const number = Math.random();
-    if (number < 0.5) {
-        return logAndReturn("game", {
-            success: false,
-            reason: "Number was too small",
-        });
-    }
+  const number = Math.random();
+  if (number < 0.5) {
+    return logAndReturn("game", {
+      success: false,
+      reason: "Number was too small",
+    });
+  }
 
-    return logAndReturn("game", { success: true, data: number }); // data is optional
+  return logAndReturn("game", { success: true, data: number }); // data is optional
 }
 ```
 
@@ -161,16 +161,16 @@ And be Used like
 
 ```svelte
 <script lang="ts">
-    import Progress from "./ProgressBar.svelte";
-    let progress = 0;
+  import Progress from "./ProgressBar.svelte";
+  let progress = 0;
 </script>
 
 <Progress {progress} />
 <br />
 <button
-    on:click={() => {
-        progress += 0.1;
-    }}
+  on:click={() => {
+    progress += 0.1;
+  }}
 />
 ```
 
