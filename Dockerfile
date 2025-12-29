@@ -1,4 +1,19 @@
-FROM httpd:2.4-alpine
+FROM node:alpine AS build
+# this image is used just to build the static files
+WORKDIR /build
+COPY package*.json ./
+RUN npm install
+
+# configure variables and their default values
+ARG VITE_COMMIT_HASH=unknown VITE_TARGET_YEAR=2025 VITE_SHOW_PLACEHOLDER=false
+# allow overwriting them at build time
+ENV VITE_COMMIT_HASH=$VITE_COMMIT_HASH VITE_TARGET_YEAR=$VITE_TARGET_YEAR VITE_SHOW_PLACEHOLDER=$VITE_SHOW_PLACEHOLDER
+
+COPY . ./
+RUN npm run build
 
 
-COPY ./dist-self-host /usr/local/apache2/htdocs/
+FROM nginx:alpine
+# this image is used to serve the static files, without any nodejs dependency
+COPY --from=build /build/dist /usr/share/nginx/html
+# nginx defaults to port 80
