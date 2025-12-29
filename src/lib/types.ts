@@ -37,6 +37,38 @@ export type JellyfinResponse_UsersMe = {
     IsAdministrator: boolean;
   };
 };
+export type JellyfinTrack = any;
+export type JellyfinAlbum = any;
+export type JellyfinArtist = any;
+export type JellyfinGenre = any;
+
+export type LibraryData = Array<
+  {
+    id: string;
+    name: string;
+    // tracks: Array<{
+    //   id: string;
+    //   name: string;
+    //   albumId: string | undefined;
+    // }>;
+    // albums: Array<{
+    //   id: string;
+    //   name: string;
+    // }>;
+    // artists: Array<{
+    //   id: string;
+    //   name: string;
+    // }>;
+    // genres: Array<{
+    //   id: string;
+    //   name: string;
+    // }>;
+    tracks: Array<JellyfinTrack>;
+    albums: Array<JellyfinAlbum>;
+    artists: Array<JellyfinArtist>;
+    genres: Array<JellyfinGenre>;
+  }
+>;
 
 export type User = {
   id: string;
@@ -55,10 +87,12 @@ export type Track = {
   id: string;
   albumId: string | undefined;
   artists: string[];
+  albumArtists: string[];
   name: string;
   year: number | null;
   duration: number;
   favorite: boolean;
+  lastPlayed: Date | null;
   genres: string[];
   imageTag: string | undefined;
   imageBlur: string | undefined;
@@ -67,9 +101,22 @@ export type Track = {
 export type Album = {
   id: string;
   name: string;
+  year: number | null;
   imageTag: string;
+  imageBlur: string | undefined;
+  lastPlayed: Date | null;
   artists: string[];
-  artist: string;
+  albumArtists: string[];
+};
+
+export type Artist = {
+  id: string;
+  name: string;
+  imageTag: string;
+  imageBlur: string | undefined;
+  backdropTag: string | undefined;
+  backdropBlur: string | undefined;
+  lastPlayed: Date | null;
 };
 
 export type Genre = {
@@ -89,12 +136,14 @@ export class PlaybackCounter {
       listenDuration: number;
       partialSkips: number;
       fullSkips: number;
+      listens: Set<string>; // references listen IDs
     };
     jellyfin: {
       fullPlays: number;
       listenDuration: number;
       partialSkips: number;
       fullSkips: number;
+      listens: Set<string>; // references listen IDs, not used since Jellyfin doesn't track individual listens with timestamps
     };
   };
 
@@ -119,6 +168,11 @@ export class PlaybackCounter {
       this.counters[source].partialSkips += delta.partialSkips;
     }
     if (delta.fullSkips) this.counters[source].fullSkips += delta.fullSkips;
+    if (delta.listens) {
+      this.counters[source].listens = this.counters[source].listens.union(
+        delta.listens,
+      );
+    }
   }
   // use getters for less verbose access, while keeping proper typing
   get playbackReporting() {
@@ -129,20 +183,23 @@ export class PlaybackCounter {
   }
   get average(): PlaybackCounter["counters"][CounterSources] {
     return {
-      fullPlays: Math.round(
+      fullPlays: Math.floor(
         (this.counters.playbackReporting.fullPlays +
           this.counters.jellyfin.fullPlays) / 2,
       ),
-      listenDuration: (this.counters.playbackReporting.listenDuration +
-        this.counters.jellyfin.listenDuration) / 2,
-      partialSkips: Math.round(
+      listenDuration: Math.ceil(
+        (this.counters.playbackReporting.listenDuration +
+          this.counters.jellyfin.listenDuration) / 2,
+      ),
+      partialSkips: Math.floor(
         (this.counters.playbackReporting.partialSkips +
           this.counters.jellyfin.partialSkips) / 2,
       ),
-      fullSkips: Math.round(
+      fullSkips: Math.floor(
         (this.counters.playbackReporting.fullSkips +
           this.counters.jellyfin.fullSkips) / 2,
       ),
+      listens: new Set(), // not used
     };
   }
 }
@@ -151,9 +208,14 @@ export const normalCountersInit = {
   listenDuration: 0,
   partialSkips: 0,
   fullSkips: 0,
+  listens: new Set<string>(),
 } as PlaybackCounter["counters"][CounterSources];
 export type PlaybackCounterDelta = Partial<
   PlaybackCounter["counters"][CounterSources]
+>;
+export type NumericPlaybackCounterKeys = keyof Omit<
+  PlaybackCounter["counters"][CounterSources],
+  "listens"
 >;
 
 export type ProcessingResults = {
@@ -168,7 +230,7 @@ export type ProcessingResults = {
   favorites: number;
   skipped: number;
 
-  artistCache: Cache<string>;
+  artistCache: Cache<Artist>;
   tracksCache: Cache<Track>;
   albumsCache: Cache<Album>;
   genresCache: Cache<Genre>;
@@ -560,7 +622,7 @@ interface OldPlayCount {
 }
 
 interface OldPlay {
-  date: string;
+  date: string | Date;
   duration: number;
   wasFullSkip: boolean;
   wasPartialSkip: boolean;
@@ -593,10 +655,10 @@ export interface OldTrack {
   playCount: OldPlayCount;
   plays: OldPlay[];
   mostSuccessivePlays: OldMostSuccessivePlays;
-  lastPlayed: string;
+  lastPlayed: string | Date | null;
   totalPlayDuration: OldTotalPlayDuration;
   isFavorite: boolean;
-  lastPlay?: string;
+  lastPlay: string | Date | null;
 }
 
 export interface OldAlbum {
@@ -609,14 +671,15 @@ export interface OldAlbum {
   image: OldImage;
   playCount: OldPlayCount;
   plays: OldPlay[];
-  lastPlayed: string;
+  lastPlayed: string | Date | null;
   totalPlayDuration: OldTotalPlayDuration;
+  lastPlay: string | Date | null;
 }
 
 export interface OldArtist {
   name: string;
   id: string;
-  tracks: OldTrack[];
+  tracks: number;
   images: {
     primary: OldImage;
     backdrop: {
@@ -625,14 +688,14 @@ export interface OldArtist {
     };
   };
   playCount: OldPlayCount;
-  uniqueTracks: OldBaseInfo[];
+  uniqueTracks: number;
   uniquePlayedTracks: {
-    jellyfin: OldBaseInfo[];
-    playbackReport: OldBaseInfo[];
-    average: OldBaseInfo[];
+    jellyfin: number;
+    playbackReport: number;
+    average: number;
   };
   plays: OldPlay[];
-  lastPlayed: string;
+  lastPlayed: Date | string | null;
   totalPlayDuration: OldTotalPlayDuration;
 }
 
@@ -641,11 +704,11 @@ export interface OldGenre {
   id: string;
   tracks: OldTrack[];
   playCount: OldPlayCount;
-  uniqueTracks: OldBaseInfo[];
+  uniqueTracks: number;
   uniquePlayedTracks: {
-    jellyfin: OldBaseInfo[];
-    playbackReport: OldBaseInfo[];
-    average: OldBaseInfo[];
+    jellyfin: number;
+    playbackReport: number;
+    average: number;
   };
   plays: OldPlay[];
   lastPlayed: string;

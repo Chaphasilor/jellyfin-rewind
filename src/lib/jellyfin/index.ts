@@ -349,7 +349,7 @@ class Jellyfin {
         const value = modifiers.toInt.includes(column)
           ? Number(cell)
           : modifiers.toDate.includes(column)
-          ? new Date(cell)
+          ? new Date(cell.replace(" ", "T") + "Z") //!!! the plugin doesn't return proper ISO strings, so JavaScript assumes local time when parsing
           : cell;
         // @ts-ignore
         item[column] = value;

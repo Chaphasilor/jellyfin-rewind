@@ -1,4 +1,8 @@
-import { CounterSources, PlaybackCounter } from "../types.ts";
+import {
+  CounterSources,
+  type NumericPlaybackCounterKeys,
+  PlaybackCounter,
+} from "../types.ts";
 
 export default class Cache<D> {
   private data: Record<
@@ -63,11 +67,17 @@ export default class Cache<D> {
     return undefined;
   }
 
+  getCounters(key: string | undefined) {
+    if (!key) return undefined;
+    if (this.hasKey(key)) return this.data[key].counters;
+    return undefined;
+  }
+
   sorted(
     source: CounterSources,
     counter:
-      | keyof PlaybackCounter["counters"][CounterSources]
-      | (keyof PlaybackCounter["counters"][CounterSources])[],
+      | NumericPlaybackCounterKeys
+      | (NumericPlaybackCounterKeys)[],
     sortDirection: "ASC" | "DESC" = "ASC",
   ) {
     const ascending = sortDirection === "ASC";
@@ -82,7 +92,7 @@ export default class Cache<D> {
     return this.entries.sort((a, b) => {
       let aCount = 0;
       let bCount = 0;
-      (counter as (keyof PlaybackCounter["counters"][typeof source])[]).forEach(
+      (counter as (NumericPlaybackCounterKeys)[]).forEach(
         (c) => {
           aCount += a[1].counters.counters[source][c];
           bCount += b[1].counters.counters[source][c];

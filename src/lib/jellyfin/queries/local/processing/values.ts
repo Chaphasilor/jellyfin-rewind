@@ -1,5 +1,6 @@
 import {
   type Album,
+  type Artist,
   type CombinedDeviceClientInfo,
   type Genre,
   type Listen,
@@ -12,7 +13,7 @@ import Value from "$lib/utility/value.ts";
 
 export const tracksCache = new Cache<Track>(normalCountersInit);
 export const albumsCache = new Cache<Album>(normalCountersInit);
-export const artistCache = new Cache<string>(
+export const artistCache = new Cache<Artist>(
   normalCountersInit,
 );
 export const genresCache = new Cache<Genre>(normalCountersInit);
