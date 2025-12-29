@@ -25,7 +25,7 @@
             <div class="percent">
                 {Math.round(cur/max*100)}%
             </div>
-            <div class="barfg" style="width: {cur/max*100}%"></div>
+            <div class="barfg" style="width: {cur/max*100}%; transition: width 0.3s ease;"></div>
         </div>
     </div>
 {/if}

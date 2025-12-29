@@ -1,30 +1,32 @@
-export default class Cache<D, C extends { [key: string]: number }> {
+import { CounterSources, PlaybackCounter } from "../types.ts";
+
+export default class Cache<D> {
     private data: Record<
         string,
         {
             data: D;
-            counters: C;
+            counters: PlaybackCounter;
         }
     > = {};
     private keys: Set<string> = new Set();
-    private defaultCounters: C;
+    private defaultCounters: PlaybackCounter["counters"][CounterSources];
 
-    constructor(defaultCounters: C) {
+    constructor(defaultCounters: PlaybackCounter["counters"][CounterSources]) {
         // copy because else multiple Caches share the same counters
         this.defaultCounters = { ...defaultCounters };
     }
 
     setAndGetValue(key: string, value: () => D) {
-        if (this.hasKey(key)) return this.data[key];
+        if (this.hasKey(key)) return this.data[key].data;
 
         const data = value();
         this.data[key] = {
             data,
-            counters: { ...this.defaultCounters }, // stop counter sharing
+            counters: new PlaybackCounter(this.defaultCounters), // stop counter sharing
         };
         this.keys.add(key);
 
-        return data;
+        return this.data[key].data;
     }
 
     setAndGetKey(key: string, value: () => D) {
@@ -32,16 +34,16 @@ export default class Cache<D, C extends { [key: string]: number }> {
 
         this.data[key] = {
             data: value(),
-            counters: { ...this.defaultCounters }, // stop counter sharing
+            counters: new PlaybackCounter(this.defaultCounters), // stop counter sharing
         };
         this.keys.add(key);
 
         return key;
     }
 
-    count(key: string, fn: (counters: C) => C) {
+    count(key: string, source: CounterSources, delta: Partial<PlaybackCounter["counters"][CounterSources]>) {
         if (!this.hasKey(key)) return;
-        this.data[key].counters = fn(this.data[key].counters);
+        this.data[key].counters.applyDelta(source, delta);
     }
 
     find(fn: (data: D) => boolean) {
@@ -59,20 +61,21 @@ export default class Cache<D, C extends { [key: string]: number }> {
         return undefined;
     }
 
-    sorted(counter: keyof C | (keyof C)[]) {
+    sorted(source: CounterSources, counter: keyof PlaybackCounter["counters"][CounterSources] | (keyof PlaybackCounter["counters"][CounterSources])[], sortDirection: "ASC" | "DESC" = "ASC") {
+        const ascending = sortDirection === "ASC";
         if (typeof counter == "string") {
             return this.entries.sort(
-                (a, b) => a[1].counters[counter] - b[1].counters[counter],
+                (a, b) => (ascending ? 1 : -1) * (a[1].counters.counters[source][counter] - b[1].counters.counters[source][counter]),
             );
         }
         return this.entries.sort((a, b) => {
             let aCount = 0;
             let bCount = 0;
-            (counter as (keyof C)[]).forEach((c) => {
-                aCount += a[1].counters[c];
-                bCount += b[1].counters[c];
+            (counter as (keyof PlaybackCounter["counters"][typeof source])[]).forEach((c) => {
+                aCount += a[1].counters.counters[source][c];
+                bCount += b[1].counters.counters[source][c];
             });
-            return aCount - bCount;
+            return (ascending ? 1 : -1) * (aCount - bCount);
         });
     }
 
@@ -82,7 +85,7 @@ export default class Cache<D, C extends { [key: string]: number }> {
     }
     hasKey = (key: string) => this.keys.has(key);
 
-    get entries(): [string, { data: D; counters: C }][] {
+    get entries(): [string, { data: D; counters: PlaybackCounter }][] {
         return [...this.keys].map((key) => [key, this.data[key]]);
     }
 

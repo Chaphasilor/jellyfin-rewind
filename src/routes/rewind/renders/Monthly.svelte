@@ -3,8 +3,13 @@
     import { processingResult } from "$lib/globals";
     import { onMount } from "svelte";
     import { indexOfMax, indexOfMin } from "$lib/utility/other";
+    import { CounterSources } from "$lib/types";
 
     let canvas: HTMLCanvasElement
+
+    let informationSource: CounterSources = $state(
+        CounterSources.PLAYBACK_REPORTING,
+    );
     
     const months = [
         "January",
@@ -24,19 +29,19 @@
     let plays = Array.from({length: 12}).fill(0) as number[]
     let skips = Array.from({length: 12}).fill(0) as number[]
     
-    let monthWithMostSkips = ""
-    let mostSkips = 0;
-    let monthWithMostDuration = "";
-    let mostDuration = 0;
-    let monthWithMostPlays = "";
-    let mostPlays = 0;
+    let monthWithMostSkips = $state("");
+    let mostSkips = $state(0);
+    let monthWithMostDuration = $state("");
+    let mostDuration = $state(0);
+    let monthWithMostPlays = $state("");
+    let mostPlays = $state(0);
 
-    let monthWithLeastSkips = "";
-    let leastSkips = 0;
-    let monthWithLeastDuration = "";
-    let leastDuration = 0;
-    let monthWithLeastPlays = "";
-    let leastPlays = 0;
+    let monthWithLeastSkips = $state("");
+    let leastSkips = $state(0);
+    let monthWithLeastDuration = $state("");
+    let leastDuration = $state(0);
+    let monthWithLeastPlays = $state("");
+    let leastPlays = $state(0);
 
     onMount(() => {
         const rawData = $processingResult.monthOfYear.entries;
@@ -44,9 +49,9 @@
         
         rawData.forEach(([month, d]) => {
             const i = parseInt(month);
-            duration[i] = Math.round(d.counters.listenDuration / 60)
-            plays[i] = d.counters.fullPlays + d.counters.partialSkips;
-            skips[i] = d.counters.fullSkips + d.counters.partialSkips;
+            duration[i] = Math.round(d.counters[informationSource].listenDuration / 60)
+            plays[i] = d.counters[informationSource].fullPlays + d.counters[informationSource].partialSkips;
+            skips[i] = d.counters[informationSource].fullSkips + d.counters[informationSource].partialSkips;
         })
 
         mostDuration = indexOfMax(duration)

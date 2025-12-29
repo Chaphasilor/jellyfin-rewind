@@ -1,5 +1,5 @@
 import { downloadingProgress, generatingProgress, processingProgress } from "$lib/globals.ts";
-import type { ProcessingResults, Result } from "$lib/types.ts";
+import { CounterSources, Listen, type ProcessingResults, type Result } from "$lib/types.ts";
 import { logAndReturn } from "$lib/utility/logging.ts";
 import allListens from "$lib/jellyfin/queries/api/allListens.ts";
 import {
@@ -13,15 +13,17 @@ import {
     albumsCache,
     artistCache,
     clientCache,
-    dayOfMonth,
-    dayOfWeek,
-    dayOfYear,
+    combinedDeviceClientCache,
+    dayOfMonthCache,
+    dayOfWeekCache,
+    dayOfYearCache,
     deviceCache,
     favorites,
     generalCounter,
     genresCache,
-    hourOfDay,
-    monthOfYear,
+    hourOfDayCache,
+    listensCache,
+    monthOfYearCache,
     playbackCache,
     skipped,
     tracksCache,
@@ -33,10 +35,19 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     reset();
 
 
-
-    downloadingProgress.set({cur: 0, max: 2, detail: "Getting playback reports"})
+    downloadingProgress.set({cur: 0, max: 2, detail: ""})
+    setTimeout(() => downloadingProgress.set({cur: 1, max: 2, detail: "Getting library tracks and metadata"}), 100);
+    
+    const library = await getMusicLibrary();
+    if (!library.success || library.data.Items.length == 0) {
+        return logAndReturn("processing", {
+            success: false,
+            reason: !library.success ? library.reason : "Your Library is empty",
+        });
+    }
+    
+    downloadingProgress.set({cur: 2, max: 2, detail: "Getting playback reports"})
     const listens = await allListens();
-    downloadingProgress.set({cur: 1, max: 2, detail: "Getting library tracks and metadata"})
     if (!listens.success || listens.data.length == 0) {
         return logAndReturn("processing", {
             success: false,
@@ -45,19 +56,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
             : "You didnt Listen to anything",
         });
     }
-    
-
-
-    const library = await getMusicLibrary();
     downloadingProgress.set({cur: 2, max: 2, detail: ""})
-    if (!library.success || library.data.Items.length == 0) {
-        return logAndReturn("processing", {
-            success: false,
-            reason: !library.success ? library.reason : "Your Library is empty",
-        });
-    }
-
-
 
     processingProgress.set({cur: 0, max: library.data.Items.length, detail: ""})
     for (let i = 0; i < library.data.Items.length; i++) {
@@ -77,16 +76,21 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     generatingProgress.set({cur: 0, max: listens.data.length, detail: ""})
     for (let i = 0; i < listens.data.length; i++) {
-        const listen = listens.data[i]
-        generatingProgress.update(state => ({...state, cur: i+1, detail: listen.ItemId}))
+        const rawListen = listens.data[i]
+        generatingProgress.update(state => ({...state, cur: i+1, detail: rawListen.ItemId}))
 
-        const track = getTrackFromItem(listen);
+        const listen = listensCache.setAndGetValue(rawListen.rowid, () => {
+            return new Listen(rawListen, tracksCache.get(rawListen.ItemId))
+        });
+        
+        const track = getTrackFromItem(rawListen);
         if (!track) {
+            console.warn(`Track not found for listen:`, rawListen);
             skipped.v++;
             continue;
         }
     
-        updateCounters(listen, track);
+        updateCounters(CounterSources.PLAYBACK_REPORTING, listen, track);
     
         if (Math.random() > 0.8) {
             await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
@@ -100,11 +104,11 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
         data: {
             generalCounter: generalCounter.v,
 
-            dayOfMonth,
-            monthOfYear,
-            dayOfWeek,
-            hourOfDay,
-            dayOfYear,
+            dayOfMonth: dayOfMonthCache,
+            monthOfYear: monthOfYearCache,
+            dayOfWeek: dayOfWeekCache,
+            hourOfDay: hourOfDayCache,
+            dayOfYear: dayOfYearCache,
 
             favorites: favorites.v,
             skipped: skipped.v,
@@ -114,8 +118,11 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
             albumsCache,
             genresCache,
 
+            listensCache,
+
             deviceCache,
             clientCache,
+            combinedDeviceClientCache,
             playbackCache,
         },
     });
@@ -124,7 +131,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
 let running: Promise<Result<ProcessingResults>> | undefined= undefined
 function preventDoubleExecution() {
-    console.log("CallED!", running)
+    console.log("Called!", running)
     if (!running) running = execute()
     return running
 }

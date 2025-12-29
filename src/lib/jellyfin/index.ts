@@ -5,7 +5,7 @@ import { stringToUrl } from "$lib/utility/other.ts";
 
 class Jellyfin {
     private token?: string;
-    private baseurl?: string;
+    baseurl?: string;
     user?: User;
     private header?: string;
 
@@ -257,7 +257,6 @@ class Jellyfin {
     }
 
     async queryPlaybackReporting<
-        C extends string[],
         O extends {
             conditions: string[];
             groupBy: string | false;
@@ -267,7 +266,19 @@ class Jellyfin {
             toInt: string[];
             toDate: string[];
         },
-    >(headers: C, options?: Partial<O>): Promise<Result<object[]>> {
+    >(options?: Partial<O>): Promise<Result<object[]>> {
+
+        const headers = [
+            "rowid",
+            "ItemId",
+            "ItemName",
+            "DateCreated",
+            "PlayDuration",
+            "DeviceName",
+            "ClientName",
+            "PlaybackMethod",
+        ]
+        
         // have default values and overwrite them
         const modifiers = Object.assign(
             {
@@ -288,7 +299,7 @@ class Jellyfin {
             `DateCreated <= '${endSql}'`,
             `UserId = '${this.user?.id}'`,
             `ItemType='Audio'`,
-            `PlayDuration > 0`,
+            // `PlayDuration > 0`, actually, we want to be able to tell how many tracks were completely skipped, including within one second
         );
 
         // make sql query
@@ -306,7 +317,7 @@ class Jellyfin {
         const path = `user_usage_stats/submit_custom_query?stamp=${Date.now()}`;
         const body = { CustomQueryString: query };
         const resultData = (await this.fetchData(path, body)) as Result<{
-            colums: string[];
+            colums: string[]; //!!! the plugin returns the data with a typo
             results: string[];
             message: "";
         }>;
@@ -324,21 +335,21 @@ class Jellyfin {
             });
         }
 
-        const { colums, results } = data;
+        const { colums : columns, results } = data;
 
         const mapped = results.map((row) => {
             const item = {};
-            for (let i = 0; i < colums.length; i++) {
-                const colum = colums[i];
+            for (let i = 0; i < columns.length; i++) {
+                const column = columns[i];
 
                 const cell = row[i];
-                const value = modifiers.toInt.includes(colum)
+                const value = modifiers.toInt.includes(column)
                     ? Number(cell)
-                    : modifiers.toDate.includes(colum)
+                    : modifiers.toDate.includes(column)
                     ? new Date(cell)
                     : cell;
                 // @ts-ignore
-                item[colum] = value;
+                item[column] = value;
             }
             return item;
         });

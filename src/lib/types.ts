@@ -13,6 +13,7 @@ export type JellyfinResponse_SystemInfoPublic = {
     OperatingSystem: string;
     Id: string;
     StartupWizardCompleted: boolean;
+    PublicAddress: string;
 };
 export type JellyfinResponse_UsersAuthenticateByName = {
     AccessToken: string;
@@ -55,6 +56,7 @@ export type Track = {
     albumId: string | undefined;
     artists: string[];
     name: string;
+    year: number | null;
     duration: number;
     favorite: boolean;
     genres: string[];
@@ -70,42 +72,148 @@ export type Album = {
     artist: string;
 };
 
-export type NormalCounters = {
-    fullPlays: number;
-    listenDuration: number;
-    partialSkips: number;
-    fullSkips: number;
+export type Genre = {
+    id: string;
+    name: string;
+};
+
+export enum CounterSources {
+    PLAYBACK_REPORTING = "playbackReporting",
+    JELLYFIN = "jellyfin",
+}
+
+export class PlaybackCounter {
+    counters: {
+        playbackReporting: {
+            fullPlays: number;
+            listenDuration: number;
+            partialSkips: number;
+            fullSkips: number;
+        },
+        jellyfin: {
+            fullPlays: number;
+            listenDuration: number;
+            partialSkips: number;
+            fullSkips: number;
+        }
+    }
+
+    constructor(init: PlaybackCounter["counters"][CounterSources] = normalCountersInit) {
+        this.counters = {
+            [CounterSources.PLAYBACK_REPORTING]: { ...init },
+            [CounterSources.JELLYFIN]: { ...init },
+        };
+    }
+
+    applyDelta(source: CounterSources, delta: Partial<PlaybackCounter["counters"][CounterSources]>) {
+        if (delta.fullPlays) this.counters[source].fullPlays += delta.fullPlays;
+        if (delta.listenDuration) this.counters[source].listenDuration += delta.listenDuration;
+        if (delta.partialSkips) this.counters[source].partialSkips += delta.partialSkips;
+        if (delta.fullSkips) this.counters[source].fullSkips += delta.fullSkips;
+    }
+    // use getters for less verbose access, while keeping proper typing
+    get playbackReporting() { return this.counters.playbackReporting; }
+    get jellyfin() { return this.counters.jellyfin; }
+    get average(): PlaybackCounter["counters"][CounterSources] {
+        return {
+            fullPlays: Math.round((this.counters.playbackReporting.fullPlays + this.counters.jellyfin.fullPlays) / 2),
+            listenDuration: (this.counters.playbackReporting.listenDuration + this.counters.jellyfin.listenDuration) / 2,
+            partialSkips: Math.round((this.counters.playbackReporting.partialSkips + this.counters.jellyfin.partialSkips) / 2),
+            fullSkips: Math.round((this.counters.playbackReporting.fullSkips + this.counters.jellyfin.fullSkips) / 2),
+        }
+    }
 };
 export const normalCountersInit = {
     fullPlays: 0,
     listenDuration: 0,
     partialSkips: 0,
     fullSkips: 0,
-} as NormalCounters;
+} as PlaybackCounter["counters"][CounterSources];
+export type PlaybackCounterDelta = Partial<PlaybackCounter["counters"][CounterSources]>;
 
 export type ProcessingResults = {
-    generalCounter: NormalCounters;
+    generalCounter: PlaybackCounter;
 
-    dayOfMonth: Cache<null, NormalCounters>;
-    monthOfYear: Cache<null, NormalCounters>;
-    dayOfWeek: Cache<null, NormalCounters>;
-    hourOfDay: Cache<null, NormalCounters>;
-    dayOfYear: Cache<null, NormalCounters>;
+    dayOfMonth: Cache<null>;
+    monthOfYear: Cache<null>;
+    dayOfWeek: Cache<null>;
+    hourOfDay: Cache<null>;
+    dayOfYear: Cache<null>;
 
     favorites: number;
     skipped: number;
 
-    artistCache: Cache<string, NormalCounters>;
-    tracksCache: Cache<Track, NormalCounters>;
-    albumsCache: Cache<Album, NormalCounters>;
-    genresCache: Cache<null, NormalCounters>;
+    artistCache: Cache<string>;
+    tracksCache: Cache<Track>;
+    albumsCache: Cache<Album>;
+    genresCache: Cache<Genre>;
 
-    deviceCache: Cache<null, NormalCounters>;
-    clientCache: Cache<null, NormalCounters>;
-    playbackCache: Cache<null, NormalCounters>;
+    listensCache: Cache<Listen>;
+
+    deviceCache: Cache<null>;
+    clientCache: Cache<null>;
+    combinedDeviceClientCache: Cache<CombinedDeviceClientInfo>;
+    playbackCache: Cache<null>;
 };
 
-export type Listen = {
+export class Listen {
+    rowId: string;
+    itemId: string;
+    itemName: string;
+    dateCreated: Date;
+    rawPlayDuration: number
+    playDuration: number
+    deviceName: string;
+    clientName: string;
+    playbackMethod: string;
+
+    skipType: SkipType;
+
+    constructor(data: ListenQueryRow, track: Track | undefined) {
+        if (!track) {
+            console.warn("Creating Listen without Track info:", data);
+        }
+
+        this.rowId = data.rowid;
+        this.itemId = data.ItemId;
+        this.itemName = data.ItemName;
+        this.dateCreated = new Date(data.DateCreated);
+        this.rawPlayDuration = data.PlayDuration;
+        this.playDuration = Math.min(track?.duration ?? data.PlayDuration, data.PlayDuration);
+        this.deviceName = data.DeviceName;
+        this.clientName = data.ClientName;
+        this.playbackMethod = data.PlaybackMethod;
+        
+        const playPercent = (track?.duration ?? 0) === 0 ? 0 : this.playDuration / track!.duration;
+        if (playPercent >= 0.7) {
+            this.skipType = SkipType.FULL_PLAY;
+        } else if (playPercent >= 0.3) {
+            this.skipType = SkipType.PARTIAL_SKIP;
+        } else {
+            this.skipType = SkipType.SKIP;
+        }
+    }
+
+    get isFullPlay() {
+        return this.skipType === SkipType.FULL_PLAY;
+    }
+    get isPartialSkip() {
+        return this.skipType === SkipType.PARTIAL_SKIP;
+    }
+    get isSkip() {
+        return this.skipType === SkipType.SKIP;
+    }
+
+}
+
+export enum SkipType {
+    FULL_PLAY,
+    PARTIAL_SKIP,
+    SKIP,
+}
+
+export type ListenQueryRow = {
+    rowid: string;
     ItemId: string;
     ItemName: string;
     DateCreated: Date;
@@ -113,6 +221,11 @@ export type Listen = {
     DeviceName: string;
     ClientName: string;
     PlaybackMethod: string;
+};
+
+export type CombinedDeviceClientInfo = {
+    device: string;
+    client: string;
 };
 
 // old Rewind report format
@@ -249,7 +362,7 @@ export type FullRewindReport = {
             },
             totalRuntime: number;
         },
-        playbackReportComplete: false,
+        playbackReportComplete: boolean;
     },
     rawData: any;
 }
@@ -276,18 +389,7 @@ export type LightRewindReport = {
     playbackReportDataMissing: boolean;
     generalStats: {
         totalPlaybackDurationByMonth: {
-            0: number;
-            1: number;
-            2: number;
-            3: number;
-            4: number;
-            5: number;
-            6: number;
-            7: number;
-            8: number;
-            9: number;
-            10: number;
-            11: number;
+            [key: number]: number; // in minutes
         },
         totalPlays: {
             playbackReport: number;
@@ -384,7 +486,7 @@ export type LightRewindReport = {
         },
         totalRuntime: number;
     },
-    playbackReportComplete: false,
+    playbackReportComplete: boolean;
 }
 
 interface OldBaseInfo {
@@ -449,7 +551,7 @@ interface OldTotalPlayDuration {
   average: number;
 }
 
-interface OldTrack {
+export interface OldTrack {
   name: string;
   id: string;
   artistsBaseInfo: OldBaseInfo[];
@@ -468,7 +570,7 @@ interface OldTrack {
   lastPlay?: string;
 }
 
-interface OldAlbum {
+export interface OldAlbum {
   name: string;
   id: string;
   artists: OldBaseInfo[]; // not deduped
@@ -482,7 +584,7 @@ interface OldAlbum {
   totalPlayDuration: OldTotalPlayDuration;
 }
 
-interface OldArtist {
+export interface OldArtist {
   name: string;
   id: string;
   tracks: OldTrack[];
@@ -505,7 +607,7 @@ interface OldArtist {
   totalPlayDuration: OldTotalPlayDuration;
 }
 
-interface OldGenre {
+export interface OldGenre {
   name: string;
   id: string;
   tracks: OldTrack[];
