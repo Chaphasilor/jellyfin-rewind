@@ -1,11 +1,11 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { lightRewindReport, isAccuracyDisclaimerOpen } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import Unavailable from "$lib/components/Unavailable.svelte";
+  import Unavailable from "$lib/components/Unavailable.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
@@ -114,7 +114,7 @@
     }<span
       class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
       on:click|stopPropagation={() => {
-        //TODO showOverlayDataAccuracy
+        isAccuracyDisclaimerOpen.set(true)
       }}
     >
       <svg

@@ -136,6 +136,7 @@
   const DEBOUNCE_DELAY = 0;
 
   function handleWheel(event: WheelEvent) {
+    event.preventDefault()
     const now = Date.now();
     if (now - lastScrollTime < DEBOUNCE_DELAY) return;
     lastScrollTime = now;
@@ -364,10 +365,10 @@
   }
 </script>
 
-<svelte:document on:wheel={handleWheel} />
+<svelte:document on:wheel={handleWheel} on:scroll|preventDefault={()=>{}} />
 
 {#snippet renderFeature(index, Feature: Component<FeatureProps>)}
-  <div class="h-screen" id="feature-{index}">
+  <div class="h-screen pt-10" id="feature-{index}">
     <Feature
       {informationSource}
       {rankingMetric}
@@ -385,11 +386,13 @@
   </div>
 {/snippet}
 
-{#each features() as feat, index}
-  {#if !feat.skip}
-    {@render renderFeature(index, feat.component)}
-  {/if}
-{/each}
+<div class="noScrollBar">
+    {#each features() as feat, index}
+        {#if !feat.skip}
+            {@render renderFeature(index, feat.component)}
+        {/if}
+    {/each}
+</div>
 
 <audio id="audio-player-1" loop></audio>
 <audio id="audio-player-2" loop></audio>

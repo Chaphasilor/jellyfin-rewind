@@ -18,3 +18,5 @@ export const generatingProgress = writable({ cur: 0, max: 0, detail: "" });
 export const processingResult = writable<ProcessingResults>();
 export const lightRewindReport = writable<LightRewindReport>();
 export const oldReport = writable<FullRewindReport>();
+
+export const isAccuracyDisclaimerOpen = writable(false)

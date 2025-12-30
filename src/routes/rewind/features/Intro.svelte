@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { lightRewindReport, isAccuracyDisclaimerOpen } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -63,7 +63,7 @@
     <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-600 dark:text-gray-300 mt-4 flex flex-row gap-4 items-center mx-auto"
-      on:click|stopPropagation={() => showOverlayDataAccuracy()}
+      on:click|stopPropagation={() => isAccuracyDisclaimerOpen.set(true)}
     >
       Accuracy Disclaimer
     </button>

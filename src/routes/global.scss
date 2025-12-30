@@ -249,3 +249,36 @@ input {
     }
   }
 }
+
+
+.noScrollBar {
+    overflow-y: scroll;
+    max-height: 100%;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    >div {
+        height: fit-content;
+        width: fit-content;
+        padding: 3rem;
+        background-color: $background;
+        border-radius: 1rem;
+    }
+}

@@ -1,3 +1,8 @@
+<script>
+    import { writable } from "svelte/store";
+    import Modal from "./Modal.svelte";
+    let modalOpen = writable(false)
+</script>
 <div class="relative">
     <div class="absolute top-0 left-0 w-full h-1rem pt-10 pb-10 flex flex-col items-center justify-center gap-12 bg-[#121212AB]">
         <span class="text-4xl text-[#00A4DC] tracking-wider font-semibold -rotate-15">
@@ -5,7 +10,7 @@
         </span>
         <button
             on:click|stopPropagation={() => {
-                //TODO showOverlayFeatureUnavailableMissingPlaybackReporting
+                $modalOpen = true
             }}
             class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900"
         >
@@ -30,3 +35,8 @@
         </button>
     </div>
 </div>
+
+
+<Modal open={modalOpen}>
+    Hello
+</Modal>
