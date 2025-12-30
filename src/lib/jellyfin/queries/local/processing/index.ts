@@ -50,19 +50,29 @@ import {
   tracksCache,
 } from "./values.ts";
 
+async function waitForUi() {
+    // 20% chance -> 80% speedup
+    if (Math.random() > 0.8) {
+        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
+    }
+}
+async function nextProcessing(detail: string) {
+    processingProgress.update((state) => ({
+        ...state,
+        cur: state.cur + 1,
+        detail,
+      }));
+    await waitForUi()
+}
+
+
 const execute = async (): Promise<Result<ProcessingResults>> => {
   reset();
-
-  downloadingProgress.set({ cur: 0, max: 1, detail: "" });
-  setTimeout(
-    () =>
-      downloadingProgress.set({
-        cur: 1,
-        max: 1,
-        detail: "Getting library metadata",
-      }),
-    100,
-  );
+  downloadingProgress.set({
+    cur: 1,
+    max: 1,
+    detail: "Getting library metadata",
+   })
 
   const libraryResult = await getMusicLibrary();
   if (!libraryResult.success || !libraryResult.data) {
@@ -143,13 +153,6 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   }
   logAndReturn("libraryData", libraryData);
 
-  const totalItemCount = libraryData.reduce(
-    (sum, lib) =>
-      sum + lib.tracks.length + lib.albums.length + lib.artists.length +
-      lib.genres.length,
-    0,
-  );
-
   //TODO update downloadingProgress in getMusicLibrary
   downloadingProgress.set({
     cur: 2,
@@ -169,30 +172,20 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
   processingProgress.set({
     cur: 0,
-    max: totalItemCount,
-    detail: "",
+    max: libraryData.reduce((sum, lib) => sum + lib.tracks.length + lib.albums.length + lib.artists.length + lib.genres.length, 0),
+    detail: "Preparing...",
   });
 
   for (const lib of libraryData) {
     // Process Tracks
     for (let i = 0; i < lib.tracks.length; i++) {
       const track = lib.tracks[i];
-      processingProgress.update((state) => ({
-        ...state,
-        cur: i + 1,
-        detail: track.Name,
-      }));
-
+      await nextProcessing(track.Name)
       if (track.UserData.IsFavorite) favorites.v++;
-
       const processedTrack = tracksCache.setAndGetValue(
         track.Id,
         () => compactTrack(track),
       );
-
-      if (Math.random() > 0.8) {
-        await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
-      }
 
       updateCountersForJellyfinTrack(track);
     }
@@ -200,11 +193,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Albums
     for (let i = 0; i < lib.albums.length; i++) {
       const album = lib.albums[i];
-      processingProgress.update((state) => ({
-        ...state,
-        cur: lib.tracks.length + i + 1,
-        detail: album.Name,
-      }));
+      await nextProcessing(album.Name)
       const processedAlbum = processAlbum(album);
       updateCountersForAlbum(CounterSources.JELLYFIN, album);
     }
@@ -213,11 +202,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     //TODO handle album artists and dedupe
     for (let i = 0; i < lib.artists.length; i++) {
       const artist = lib.artists[i];
-      processingProgress.update((state) => ({
-        ...state,
-        cur: lib.tracks.length + lib.albums.length + i + 1,
-        detail: artist.Name,
-      }));
+      await nextProcessing(artist.Name)
       const processedArtist = processArtist(artist);
       updateCountersForArtist(CounterSources.JELLYFIN, artist);
     }
@@ -226,12 +211,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Genres
     for (let i = 0; i < lib.genres.length; i++) {
       const genre = lib.genres[i];
-      processingProgress.update((state) => ({
-        ...state,
-        cur: lib.tracks.length + lib.albums.length + lib.artists.length + i +
-          1,
-        detail: genre.Name,
-      }));
+      await nextProcessing(genre.Name)
       const processedGenre = processGenre(genre);
       if (genre.Name === `Dance`) {
         console.log(
@@ -267,9 +247,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     updateCountersForPlaybackReportingTrack(listen, track);
 
-    if (Math.random() > 0.8) {
-      await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
-    }
+    await waitForUi()
   }
 
   return logAndReturn("processing", {

@@ -25,7 +25,7 @@
       </div>
       <div
         class="barfg"
-        style={`${cur / max * 100}%; transition: width 0.3s ease;`}
+        style={`width: ${cur / max * 100}%; transition: width 0.3s ease;`}
       >
       </div>
     </div>
