@@ -266,9 +266,12 @@ export class Listen {
     this.itemName = data.ItemName;
     this.dateCreated = new Date(data.DateCreated);
     this.rawPlayDuration = data.PlayDuration;
-    this.playDuration = Math.min(
-      track?.duration ?? data.PlayDuration,
-      data.PlayDuration,
+    this.playDuration = Math.max(
+        Math.min(
+            track?.duration ?? data.PlayDuration,
+            data.PlayDuration,
+        ),
+        0 // for the rare case when Jellyfin reports negative numbers
     );
     this.deviceName = data.DeviceName;
     this.clientName = data.ClientName;
