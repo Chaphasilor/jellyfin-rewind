@@ -122,8 +122,8 @@ state.featureSideEffects = {
     load: loadForgottenFavoritesMedia,
     enter: () => {
       playTopForgotten()
-      let forgottenFavortiteTracks = document.querySelectorAll(`#top-forgotten-main-feature li`)
-      animate(forgottenFavortiteTracks, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
+      let forgottenFavoriteTracks = document.querySelectorAll(`#top-forgotten-main-feature li`)
+      animate(forgottenFavoriteTracks, { opacity: [0, 1], x: [500, 0] }, { duration: 0.35, ease: `easeOut`, delay: stagger(0.1) });
     },
   },
   12: {
@@ -1426,11 +1426,11 @@ function forgottenFavoritesPageContent() {
   return html`
   <div class="text-center">
     <h2 class="text-2xl font-medium mt-5">Remember These Forgotten Favorites?</h2>
-    <h3 class="px-6">Here are ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
+    <h3 class="px-6">Here are ${() => state.rewindReport.tracks?.forgottenFavoriteTracks.length} tracks you loved earlier this year, but it's been a while since you last played them.</h3>
     <h3 class="px-6"><em>What changed?</em></h3>
 
     <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
-      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks.slice(0, 5).map((track, index) => html`
+      ${() => state.rewindReport.tracks?.forgottenFavoriteTracks.slice(0, 5).map((track, index) => html`
         <li class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl">
           <div class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"> 
             <img id="${() => `forgotten-tracks-image-${index}`}" class="w-full h-full" />
@@ -1468,7 +1468,7 @@ function forgottenFavoritesPageContent() {
   </div>
   <!-- continue as simple list -->
   <ol class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40">
-      ${() => state.rewindReport.tracks?.forgottenFavortiteTracks?.slice(5, 10).map((track, index) => html`
+      ${() => state.rewindReport.tracks?.forgottenFavoriteTracks?.slice(5, 10).map((track, index) => html`
         <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
           <div class="flex flex-col gap-1 w-full">
             <div class="flex flex-col gap-0.25 items-start">
@@ -2085,7 +2085,7 @@ function loadTopTracksMedia() {
 }
 
 function loadForgottenFavoritesMedia() {
-  const forgottenFavoriteTracks = state.rewindReport.tracks?.forgottenFavortiteTracks
+  const forgottenFavoriteTracks = state.rewindReport.tracks?.forgottenFavoriteTracks
 
   if (!forgottenFavoriteTracks.length) {
     state.featureSideEffects[11].skip = true
@@ -2338,11 +2338,11 @@ function playLeastSkippedTracks() {
 
 // plays a random track from the 5 forgotten favorites
 function playTopForgotten() {
-  const forgottenFavortiteTracks = state.rewindReport.tracks?.[`forgottenFavortiteTracks`]
-  const randomTrackId = Math.floor(Math.random() * forgottenFavortiteTracks.length)
-  const randomTrack = forgottenFavortiteTracks[randomTrackId]
+  const forgottenFavoriteTracks = state.rewindReport.tracks?.[`forgottenFavoriteTracks`]
+  const randomTrackId = Math.floor(Math.random() * forgottenFavoriteTracks.length)
+  const randomTrack = forgottenFavoriteTracks[randomTrackId]
 
-  showPlaying(`#forgotten-tracks-visualizer`, randomTrackId, forgottenFavortiteTracks.length)
+  showPlaying(`#forgotten-tracks-visualizer`, randomTrackId, forgottenFavoriteTracks.length)
   fadeToNextTrack(randomTrack)
 }
 

@@ -18,8 +18,8 @@ const playbackReportQuery = (year) => {
   ORDER BY DateCreated ASC
 `
 }
-  // GROUP BY ItemId -- don't group so that we can filter out wrong durations
-  // LIMIT 200
+// GROUP BY ItemId -- don't group so that we can filter out wrong durations
+// LIMIT 200
 
 async function loadPlaybackReport(year) {
 
@@ -86,7 +86,7 @@ function adjustPlaybackReportJSON(playbackReportJSON, indexedItemInfo) {
       playbackReportDuration = 0
     }
     const jellyfinItemDuration = Math.ceil(itemInfo.RunTimeTicks / 10000000) // get duration in seconds
-    
+
     playbackReportJSON.items[index].PlayDuration = playbackReportDuration
     if (playbackReportJSON.items[index].PlayDuration > jellyfinItemDuration + 1) {
       console.debug(`Wrong duration for ${item.ItemId} (${item.ItemName}), adjusting from ${playbackReportJSON.items[index].PlayDuration} to ${jellyfinItemDuration}`)
@@ -121,13 +121,13 @@ function indexPlaybackReport(playbackReportJSON) {
         return playbackMethod
     }
   }
-  
+
   let currentSuccessivePlays = {
     count: 0,
     totalDuration: 0,
     itemId: null,
   }
-  
+
   const items = {}
   for (const item of playbackReportJSON.items) {
     const isoDate = item.DateCreated.replace(` `, `T`) + `Z` // Safari doesn't seem to support parsing the raw dates from playback reporting (RFC 3339)
@@ -152,7 +152,7 @@ function indexPlaybackReport(playbackReportJSON) {
         TotalPlayCount: 1,
         Plays: [playInfo],
         FullSkips: playInfo.wasFullSkip ? 1 : 0,
-        PartialSkips: playInfo.wasPartialSkip ? 1 : 0, 
+        PartialSkips: playInfo.wasPartialSkip ? 1 : 0,
         LastPlay: playInfo.date
       }
 
@@ -187,7 +187,7 @@ function indexPlaybackReport(playbackReportJSON) {
       currentSuccessivePlays.count += 1
       currentSuccessivePlays.totalDuration += !isNaN(Number(item.PlayDuration)) ? Number(item.PlayDuration) : 0
     }
-      
+
   }
 
   return items
@@ -203,7 +203,7 @@ function indexArtists(artistInfoJSON) {
 
     } else {
     }
-      
+
   }
   return items
 }
@@ -218,7 +218,7 @@ function indexAlbums(albumInfoJSON) {
 
     } else {
     }
-      
+
   }
   return items
 }
@@ -257,7 +257,7 @@ export async function loadItemInfoBatched(items) {
   let response
   for (let batchIndex = 0; batchIndex < Math.ceil(items.length / batchSize); batchIndex++) {
     console.info(`Fetching item batch info`)
-    response = await loadItemInfo(items.slice(batchSize*batchIndex, batchSize*(batchIndex+1)), auth)
+    response = await loadItemInfo(items.slice(batchSize * batchIndex, batchSize * (batchIndex + 1)), auth)
     if (!combinedResponse) {
       combinedResponse = response
     } else {
@@ -349,7 +349,7 @@ function indexItemInfo(itemInfo) {
 function adjustItemInfo(itemInfo, oldReport) {
 
   console.log(`itemInfo:`, itemInfo)
-  
+
   if (!oldReport) {
     return itemInfo
   }
@@ -363,7 +363,7 @@ function adjustItemInfo(itemInfo, oldReport) {
     if (oldItemInfo) {
       let adjustedPlayCount
       if (itemInfo[itemId].UserData.PlayCount >= oldItemInfo.UserData.PlayCount) {
-        adjustedPlayCount = itemInfo[itemId].UserData.PlayCount - oldItemInfo.UserData.PlayCount 
+        adjustedPlayCount = itemInfo[itemId].UserData.PlayCount - oldItemInfo.UserData.PlayCount
       } else {
         adjustedPlayCount = itemInfo[itemId].UserData.PlayCount
       }
@@ -398,7 +398,7 @@ async function generateRewindReport({
 
   try {
 
-    progressCallback = progressCallback || (() => {})
+    progressCallback = progressCallback || (() => { })
 
     console.info(`Generating Rewind Report for ${year}...`)
     progressCallback(0)
@@ -426,7 +426,7 @@ async function generateRewindReport({
 
     // const allItemInfo = []
 
-    
+
     // for (const items of chunkedArray(Object.values(playbackReportJSON.items), 200)) {
     //   const itemInfo = await loadItemInfo(items)
     //   allItemInfo.push(...itemInfo.Items)
@@ -434,9 +434,9 @@ async function generateRewindReport({
 
     const allItemInfo = (await loadItemInfo()).Items;
     progressCallback(0.3)
-    
+
     console.log(`allItemInfo:`, allItemInfo)
-    
+
     const allItemInfoIndexed = indexItemInfo(allItemInfo)
     progressCallback(0.4)
 
@@ -527,14 +527,14 @@ async function generateRewindReport({
     const topTracksByLeastSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips`, lowToHigh: true, limit: 20, dataSource: dataSource })
     const topTracksByMostSkipped = aggregate.getTopItems(allTopTrackInfo, { by: `skips.full`, limit: 20, dataSource: dataSource })
     // const topTracksByLastPlayed = aggregate.getTopItems(allTopTrackInfo, { by: `lastPlayed`, limit: 20, dataSource: dataSource })
-    const forgottenFavortiteTracks = aggregate.getForgottenFavortiteTracks(allTopTrackInfo, { dataSource: dataSource })
-    
+    const forgottenFavoriteTracks = aggregate.getforgottenFavoriteTracks(allTopTrackInfo, { dataSource: dataSource })
+
     jellyfinRewindReport.tracks[`duration`] = topTracksByDuration
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${Number((x.totalPlayDuration / 60).toFixed(1))} minutes`).join(`\n`)
     jellyfinRewindReport.tracks[`playCount`] = topTracksByPlayCount
     jellyfinRewindReport.tracks[`leastSkipped`] = topTracksByLeastSkipped
     jellyfinRewindReport.tracks[`mostSkipped`] = topTracksByMostSkipped
-    jellyfinRewindReport.tracks[`forgottenFavortiteTracks`] = forgottenFavortiteTracks
+    jellyfinRewindReport.tracks[`forgottenFavoriteTracks`] = forgottenFavoriteTracks
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: ${x.playCount.average} plays`).join(`\n`)
     // jellyfinRewindReport.tracks[`topTracksByLastPlayed`] = topTracksByLastPlayed
     // .map(x => `${x.name} by ${x.artistsBaseInfo[0].name}: last played on ${x.lastPlayed}`).join(`\n`)
@@ -576,19 +576,19 @@ async function generateRewindReport({
     // .map(x => `${x.name}: last played on ${x.lastPlayed}`).join(`\n`)
 
     jellyfinRewindReport.playbackReportComplete = playbackReportComplete
-    
+
     if (oldReport) {
       const featureDelta = await getFeatureDelta(oldReport, { jellyfinRewindReport })
-  
+
       jellyfinRewindReport.featureDelta = featureDelta
     }
-    
+
     console.log(`jellyfinRewindReport:`, jellyfinRewindReport)
 
     progressCallback(1)
-    
+
     rewindReport = jellyfinRewindReport
-    
+
     return {
       jellyfinRewindReport,
       rawData: {
@@ -601,7 +601,7 @@ async function generateRewindReport({
         topGenreInfo,
       },
     }
-    
+
   } catch (err) {
     console.error(`Error while generating the Rewind report:`, err)
     throw err
@@ -659,7 +659,7 @@ function restoreRewindReport() {
   if (rewindReport.year !== new Date().getFullYear()) {
     console.warn(`Rewind report was generated for a different year (${rewindReport.year})!`)
   }
-  
+
   return rewindReport
 }
 
