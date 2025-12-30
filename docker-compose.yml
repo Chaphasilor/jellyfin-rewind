@@ -1,0 +1,9 @@
+services:
+  jellyfin-rewind:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jellyfin-rewind-2025
+    ports:
+      - 80:80
+    restart: unless-stopped
