@@ -45,16 +45,15 @@ export function indexOfMin(arr: any[]) {
 }
 
 export function showPlaying(itemQuery: any, itemId: any, idRange: number) {
-
   for (let i = 0; i < idRange; i++) {
-    const itemOverlay = document.querySelector(`${itemQuery}-${i}`)
+    const itemOverlay = document.querySelector(`${itemQuery}-${i}`);
     if (itemOverlay) {
-      itemOverlay.innerHTML = ``
-      itemOverlay.classList.add(`hidden`)
+      itemOverlay.innerHTML = ``;
+      itemOverlay.classList.add(`hidden`);
     }
   }
 
-  const playingItemOverlay = document.querySelector(`${itemQuery}-${itemId}`)
+  const playingItemOverlay = document.querySelector(`${itemQuery}-${itemId}`);
 
   // animated bars
   if (playingItemOverlay) {
@@ -74,8 +73,7 @@ export function showPlaying(itemQuery: any, itemId: any, idRange: number) {
           <animate attributeName="y2" values="0;16;0" begin="0.4s" dur="0.7s" repeatCount="indefinite" />
         </line>
       </svg>
-    `
-    playingItemOverlay.classList.remove(`hidden`)
+    `;
+    playingItemOverlay.classList.remove(`hidden`);
   }
-
 }

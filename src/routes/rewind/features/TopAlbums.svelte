@@ -2,23 +2,62 @@
   import Chart from "chart.js/auto";
   import { lightRewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
+  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import { loadImage } from "$lib/utility/jellyfin-helper";
+  import {
+    loadImage,
+    loadTracksForGroup,
+  } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
+
+  // plays a random track from the top 5 albums (excluding the top album)
+  async function playTopAlbums() {
+    const topAlbums = $lightRewindReport.jellyfinRewindReport.albums
+      ?.[rankingMetric]?.slice(1, 5); // first album excluded
+    const randomAlbumId = Math.floor(Math.random() * topAlbums.length);
+    const randomAlbum = topAlbums[randomAlbumId];
+    console.log(`randomAlbum:`, randomAlbum);
+    showPlaying(`#top-albums-visualizer`, randomAlbumId + 1, 5);
+
+    let albumsTracks = await loadTracksForGroup(randomAlbum.id, `album`);
+    let randomTrackId = Math.floor(Math.random() * albumsTracks.length);
+    let randomTrack = albumsTracks[randomTrackId];
+    console.log(`randomTrack:`, randomTrack);
+
+    fadeToNextTrack({ id: randomTrack.Id });
+  }
+
+  export function onEnter() {
+    playTopAlbums();
+  }
+  export function onExit() {
+  }
 
   onMount(() => {
-    const topAlbums = $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]?.slice(0, 5)
+    const topAlbums = $lightRewindReport.jellyfinRewindReport.albums
+      ?.[rankingMetric]?.slice(0, 5);
 
     topAlbums.forEach((album, index) => {
-      const albumPrimaryImage = document.querySelector(`#top-albums-image-${index}`);
-      const albumBackgroundImage = document.querySelector(`#top-albums-background-image-${index}`);
-      console.log(`img:`, albumPrimaryImage)
-      loadImage([albumPrimaryImage, albumBackgroundImage], album.image, `album`)
-    })
+      const albumPrimaryImage = document.querySelector(
+        `#top-albums-image-${index}`,
+      );
+      const albumBackgroundImage = document.querySelector(
+        `#top-albums-background-image-${index}`,
+      );
+      console.log(`img:`, albumPrimaryImage);
+      loadImage(
+        [albumPrimaryImage, albumBackgroundImage],
+        album.image,
+        `album`,
+      );
+    });
   });
 </script>
 

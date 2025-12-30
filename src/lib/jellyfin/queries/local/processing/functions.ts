@@ -458,7 +458,6 @@ export function updateCountersForArtist(
   artist: JellyfinArtist,
 ) {
   const delta = generateCountsDelta(null, artist);
-  console.log(`delta:`, delta);
   // generalCounter.v.applyDelta(source, delta); //!!! don't double count album plays, generalCounter is only for tracks
   artistCache.count(artist.id, source, delta);
 }

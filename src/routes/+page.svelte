@@ -1,4 +1,4 @@
 <script lang="ts">
-    import { goto } from "$app/navigation";
-    goto("/welcome")
+  import { goto } from "$app/navigation";
+  goto("/welcome");
 </script>

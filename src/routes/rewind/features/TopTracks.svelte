@@ -7,8 +7,12 @@
   import { showAsNumber } from "$lib/utility/format";
   import { loadImage } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures, fadeToNextTrack }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
 
   // plays a random track from the top 5 tracks (excluding the top track)
   function playTopTracks() {
@@ -21,6 +25,12 @@
 
     console.log(`randomTrack:`, randomTrack);
     fadeToNextTrack(randomTrack);
+  }
+
+  export function onEnter() {
+    playTopTracks();
+  }
+  export function onExit() {
   }
 
   onMount(() => {
@@ -44,15 +54,18 @@
         `track`,
       );
     });
-
-    playTopTracks();
   });
 </script>
 
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Tracks<br />of the year</h2>
   <ol id="top-tracks-main-feature" class="flex flex-col gap-2 p-6">
-    {#each $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.slice(0, 5) as track, index (track.id)}
+    {#each       $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]
+        ?.slice(0, 5) as
+      track,
+      index
+      (track.id)
+    }
       <li
         class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl"
       >
@@ -63,7 +76,8 @@
           <div
             id={`top-tracks-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
-          ></div>
+          >
+          </div>
         </div>
         <div
           class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md"
@@ -75,25 +89,25 @@
               <span class="font-semibold text-base mr-2">{index + 1}.</span>
               <span
                 class="font-semibold text-base leading-tight text-ellipsis overflow-hidden"
-                >{track.name}</span
-              >
+              >{track.name}</span>
             </div>
             <span
               class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
-              >by {track.artistsBaseInfo.reduce(
-                (acc, cur, index) =>
-                  index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                ``,
-              )}</span
-            >
+            >by {
+                track.artistsBaseInfo.reduce(
+                  (acc, cur, index) =>
+                    index > 0 ? `${acc} & ${cur.name}` : cur.name,
+                  ``,
+                )
+              }</span>
           </div>
           <div
             class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
           >
             <div>
-              <span class="font-semibold text-black dark:text-white"
-                >{showAsNumber(track.playCount[informationSource])}</span
-              >
+              <span class="font-semibold text-black dark:text-white">{
+                showAsNumber(track.playCount[informationSource])
+              }</span>
               streams
             </div>
             <svg
@@ -109,11 +123,12 @@
               <circle cx="12" cy="12" r="4"></circle>
             </svg>
             <div>
-              <span class="font-semibold text-black dark:text-white"
-                >{showAsNumber(
-                  track.totalPlayDuration[informationSource].toFixed(0),
-                )}</span
-              >
+              <span class="font-semibold text-black dark:text-white">{
+                showAsNumber(
+                  track.totalPlayDuration[informationSource]
+                    .toFixed(0),
+                )
+              }</span>
               minutes
             </div>
           </div>
@@ -134,7 +149,14 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.slice(5, 20) as track, index (track.id)}
+  {#each     $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.slice(
+      5,
+      20,
+    ) as
+    track,
+    index
+    (track.id)
+  }
     <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
       <div class="flex flex-col gap-1 w-full">
         <div class="flex flex-col gap-0.25 items-start">
@@ -142,19 +164,19 @@
             class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center"
           >
             <span class="font-semibold mr-2">{index + 1 + 5}.</span>
-            <span class="font-base leading-tight text-ellipsis overflow-hidden"
-              >{track.name}</span
-            >
+            <span
+              class="font-base leading-tight text-ellipsis overflow-hidden"
+            >{track.name}</span>
           </div>
           <div class="ml-6 max-h-[2rem] text-xs">
             by
-            <span class="font-semibold text-ellipsis overflow-hidden"
-              >{track.artistsBaseInfo.reduce(
+            <span class="font-semibold text-ellipsis overflow-hidden">{
+              track.artistsBaseInfo.reduce(
                 (acc, cur, index) =>
                   index > 0 ? `${acc} & ${cur.name}` : cur.name,
                 ``,
-              )}</span
-            >
+              )
+            }</span>
           </div>
         </div>
       </div>

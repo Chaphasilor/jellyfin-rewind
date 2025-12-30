@@ -1,5 +1,7 @@
 import { decode as decodeBlurhash } from "blurhash";
 import jellyfin from "../jellyfin/index.ts";
+import { checkIfOfflinePlaybackImportAvailable } from "./offlineImport.ts";
+import { PlaybackReportingIssueAction } from "../types.ts";
 
 export function loadImage(
   elements: any[],
@@ -401,4 +403,102 @@ export function blurhashToDataURI(blurhash: string) {
   imageData.data.set(pixels);
   ctx.putImageData(imageData, 0, 0);
   return ctx.canvas.toDataURL();
+}
+
+function inspectPlaybackReportingSetup(
+  playbackReportingSetup: {
+    installed: boolean;
+    version?: string;
+    id?: string;
+    restartRequired: boolean;
+    disabled: boolean;
+    settings?: { raw: any; retentionInterval: number };
+    ignoredUsers?: { id: string }[];
+  },
+): PlaybackReportingIssueAction {
+  if (!playbackReportingSetup.installed) {
+    return PlaybackReportingIssueAction.INSTALL_PLUGIN;
+  } else if (playbackReportingSetup.restartRequired) {
+    return PlaybackReportingIssueAction.RESTART_SERVER;
+  } else if (playbackReportingSetup.disabled) {
+    return PlaybackReportingIssueAction.ENABLE_PLUGIN;
+  } else if (
+    playbackReportingSetup.version &&
+    parseInt(playbackReportingSetup.version) < 16
+  ) {
+    return PlaybackReportingIssueAction.UPDATE_PLUGIN;
+  } else if (
+    Number(playbackReportingSetup.settings?.retentionInterval) !== -1 &&
+    Number(playbackReportingSetup.settings?.retentionInterval) < 24
+  ) {
+    return PlaybackReportingIssueAction.SET_RETENTION_FOREVER;
+  } else if (
+    playbackReportingSetup.ignoredUsers?.some((user: { id: string }) =>
+      user.id === jellyfin.user?.id
+    )
+  ) {
+    return PlaybackReportingIssueAction.USER_IGNORED;
+  }
+
+  return PlaybackReportingIssueAction.CONFIGURED_CORRECTLY;
+
+  // return inspection;
+}
+
+type PlaybackReportingSetupCheckResult = {
+  checked: boolean;
+  issue: PlaybackReportingIssueAction;
+  offlineImportAvailable?: boolean;
+  checkAttempts: number;
+};
+
+export async function checkPlaybackReportingSetup(
+  previousResult?: PlaybackReportingSetupCheckResult,
+) {
+  const result: PlaybackReportingSetupCheckResult = {
+    checked: false,
+    issue: PlaybackReportingIssueAction.CONFIGURED_CORRECTLY,
+    checkAttempts: previousResult?.checkAttempts ?? 0,
+  };
+  if (jellyfin.user?.isAdmin) {
+    // check if eligible for offline playback import
+    // not strictly related to playback reporting, but whatever
+    if (
+      await checkIfOfflinePlaybackImportAvailable()
+    ) {
+      result.offlineImportAvailable = true;
+    } else {
+      result.offlineImportAvailable = false;
+    }
+
+    try {
+      const playbackReportingSetup = await checkIfPlaybackReportingInstalled();
+      console.log(`playbackReportingSetup:`, playbackReportingSetup);
+
+      const playbackReportingIssue = inspectPlaybackReportingSetup(
+        playbackReportingSetup,
+        // nextScreen,
+      );
+      console.log(`inspection:`, playbackReportingIssue);
+
+      // state.waitingForRestart = false;
+
+      result.issue = playbackReportingIssue;
+    } catch (err) {
+      console.error(
+        `Failed to check the playback reporting setup, continuing without it: ${err?.toString()}`,
+      );
+      result.checkAttempts++;
+      if (result.checkAttempts > 3) {
+        return result;
+      } else {
+        setTimeout(() => {
+          checkPlaybackReportingSetup(result);
+        }, 5000);
+      }
+    }
+  } else {
+    result.issue = PlaybackReportingIssueAction.CONFIGURED_CORRECTLY;
+  }
+  return result;
 }

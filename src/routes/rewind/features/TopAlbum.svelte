@@ -5,18 +5,46 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import { loadImage } from "$lib/utility/jellyfin-helper";
+  import {
+    loadImage,
+    loadTracksForGroup,
+  } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
+
+  async function playTopAlbum() {
+    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport
+      .albums?.[rankingMetric]?.[0];
+    console.log(`topAlbumByDuration:`, topAlbumByDuration);
+
+    let albumsTracks = await loadTracksForGroup(
+      topAlbumByDuration.id,
+      `album`,
+    );
+    let randomTrackId = Math.floor(Math.random() * albumsTracks.length);
+    let randomTrack = albumsTracks[randomTrackId];
+    console.log(`randomTrack:`, randomTrack);
+
+    fadeToNextTrack({ id: randomTrack.Id });
+  }
+
+  export function onEnter() {
+    playTopAlbum();
+  }
+  export function onExit() {}
 
   onMount(() => {
     const topAlbumPrimaryImage = document.querySelector(`#top-album-image`);
-    const topAlbumBackgroundImage = document.querySelector(`#top-album-background-image`);
-    console.log(`img:`, topAlbumPrimaryImage)
-    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]?.[0]
-    console.log(`topAlbumByDuration:`, topAlbumByDuration)
-    loadImage([topAlbumPrimaryImage, topAlbumBackgroundImage], topAlbumByDuration.image, `album`)
+    console.log(`img:`, topAlbumPrimaryImage);
+    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport
+      .albums?.[rankingMetric]?.[0];
+    console.log(`topAlbumByDuration:`, topAlbumByDuration);
+    loadImage([topAlbumPrimaryImage], topAlbumByDuration.image, `album`);
   });
 </script>
 
@@ -34,54 +62,44 @@
         <div class="-ml-4">
           {
             $lightRewindReport.jellyfinRewindReport.albums
-              ?.[rankingMetric]?.[0].name
+              ?.[rankingMetric]?.[0]
+              .name
           }
         </div>
         <div class="ml-4 mt-8 max-h-[3.5em]">
           by {
-            $lightRewindReport.jellyfinRewindReport.albums
-              ?.[rankingMetric]?.[0]
-              ?.artists.reduce(
-                (acc, cur, index) =>
-                  index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                ``,
-              )
+            $lightRewindReport.jellyfinRewindReport.albums?.[
+              rankingMetric
+            ]?.[0]?.artists.reduce(
+              (acc, cur, index) =>
+                index > 0 ? `${acc} & ${cur.name}` : cur.name,
+              ``,
+            )
           }
         </div>
       </div>
     </div>
   </div>
-  <div class="relative">
-    <div
-        class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
-    >
-        <div>
-        Streamed <span class="font-semibold">{
-            showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.albums
-                ?.[rankingMetric]?.[0]?.playCount[
-                informationSource
-                ],
-            )
-        }</span> times.
-        </div>
-        <div>
-        Listened for <span class="font-semibold">{
-            showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.albums
-                ?.[rankingMetric]?.[0]
-                ?.totalPlayDuration[
-                informationSource
-                ]?.toFixed(0),
-            )
-        }</span> minutes.
-        </div>
+  <div
+    class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
+  >
+    <div>
+      Streamed <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.albums
+            ?.[rankingMetric]?.[0]
+            ?.playCount[informationSource],
+        )
+      }</span> times.
+    </div>
+    <div>
+      Listened for <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.albums?.[
+            rankingMetric
+          ]?.[0]?.totalPlayDuration[informationSource]?.toFixed(0),
+        )
+      }</span> minutes.
     </div>
   </div>
-
-</div>
-<div
-  class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]"
->
-  <img id="top-album-background-image" class="w-full h-full" />
 </div>

@@ -12,6 +12,11 @@
 
   let rewindReportDownloaded = $state(false);
 
+  export function onEnter() {
+  }
+  export function onExit() {
+  }
+
   onMount(() => {});
 </script>
 

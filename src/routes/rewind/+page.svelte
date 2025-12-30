@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { lightRewindReport, processingResult } from "$lib/globals";
-  import type { FeatureProps } from "$lib/types";
+  import type { FeatureEvents, FeatureProps } from "$lib/types";
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import { logAndReturn } from "$lib/utility/logging";
   import type { Component } from "svelte";
@@ -26,13 +26,16 @@
   import FeatureDelta from "./features/FeatureDelta.svelte";
   import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
   import { loadAudio } from "$lib/utility/jellyfin-helper";
+  import type { Features } from "tailwindcss";
+  import type { Point } from "chart.js";
 
   if (!$lightRewindReport?.jellyfinRewindReport) {
     goto("/login");
   }
 
-  let informationSource: FeatureProps["informationSource"] =
-    $state("playbackReport");
+  let informationSource: FeatureProps["informationSource"] = $state(
+    "playbackReport",
+  );
 
   let rankingMetric: FeatureProps["rankingMetric"] = $state("playCount");
 
@@ -63,11 +66,11 @@
       totalMusicDays:
         $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
         !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
-      mostSuccessivePlays:
-        !!$lightRewindReport.jellyfinRewindReport.generalStats
-          .mostSuccessivePlays,
-      listeningActivityDifference:
-        !!$lightRewindReport.jellyfinRewindReport.featureDelta,
+      mostSuccessivePlays: !!$lightRewindReport.jellyfinRewindReport
+        .generalStats
+        .mostSuccessivePlays,
+      listeningActivityDifference: !!$lightRewindReport.jellyfinRewindReport
+        .featureDelta,
     };
   });
 
@@ -135,8 +138,15 @@
   let lastScrollTime = 0;
   const DEBOUNCE_DELAY = 0;
 
+  function handleClick(event: MouseEvent) {
+    if (event.clientY < window.innerHeight / 3) {
+      prevFeature();
+    } else {
+      nextFeature();
+    }
+  }
+
   function handleWheel(event: WheelEvent) {
-    event.preventDefault()
     const now = Date.now();
     if (now - lastScrollTime < DEBOUNCE_DELAY) return;
     lastScrollTime = now;
@@ -147,6 +157,9 @@
       prevFeature();
     }
   }
+
+  let featureInstances: Record<number, FeatureEvents> = {};
+
   function scrollToActive() {
     const element = document.getElementById(`feature-${page}`);
     element?.scrollIntoView({
@@ -157,6 +170,7 @@
   }
 
   function nextFeature() {
+    const oldPage = page;
     if (page < features().length - 1) {
       if (features()[page + 1].skip) {
         if (page + 2 < features().length) {
@@ -168,9 +182,12 @@
         page += 1;
       }
     }
+    featureInstances[page]?.onEnter?.();
+    featureInstances[oldPage]?.onExit?.();
     scrollToActive();
   }
   function prevFeature() {
+    const oldPage = page;
     if (page > 0) {
       if (features()[page - 1].skip) {
         if (page - 2 >= 0) {
@@ -182,15 +199,19 @@
         page -= 1;
       }
     }
+    featureInstances[page]?.onEnter?.();
+    featureInstances[oldPage]?.onExit?.();
     scrollToActive();
   }
 
   // fade between two tracks over 1000ms
   async function fadeToNextTrack(trackInfo: { id: any }) {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -261,10 +282,12 @@
 
   // fade both tracks out over 1000ms
   function pausePlayback() {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -303,7 +326,10 @@
           player2.pause();
           //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
         } else {
-          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+          setTimeout(
+            doFade(stepIndex + 1),
+            fadeDuration / fadeSteps.length,
+          );
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -320,10 +346,12 @@
 
   // uses the tag data to determine the previously active player and resumes playback by fading it in
   function resumePlayback() {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -352,7 +380,10 @@
         activePlayer.volume = fadeSteps[stepIndex];
 
         if (stepIndex !== fadeSteps.length - 1) {
-          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+          setTimeout(
+            doFade(stepIndex + 1),
+            fadeDuration / fadeSteps.length,
+          );
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -365,11 +396,19 @@
   }
 </script>
 
-<svelte:document on:wheel={handleWheel} on:scroll|preventDefault={()=>{}} />
+<svelte:document
+  on:click={handleClick}
+  on:wheel={handleWheel}
+  on:scroll|preventDefault={() => {}}
+/>
 
-{#snippet renderFeature(index, Feature: Component<FeatureProps>)}
-  <div class="h-screen pt-10" id="feature-{index}">
+{#snippet renderFeature(
+  index: number,
+  Feature: Component<FeatureProps, FeatureEvents>,
+)}
+  <div class="relative h-screen pt-10" id="feature-{index}">
     <Feature
+      bind:this={featureInstances[index]}
       {informationSource}
       {rankingMetric}
       {extraFeatures}
@@ -387,11 +426,11 @@
 {/snippet}
 
 <div class="noScrollBar">
-    {#each features() as feat, index}
-        {#if !feat.skip}
-            {@render renderFeature(index, feat.component)}
-        {/if}
-    {/each}
+  {#each features() as feat, index}
+    {#if !feat.skip}
+      {@render renderFeature(index, feat.component)}
+    {/if}
+  {/each}
 </div>
 
 <audio id="audio-player-1" loop></audio>

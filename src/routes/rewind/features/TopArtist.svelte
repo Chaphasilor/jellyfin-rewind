@@ -5,22 +5,50 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-  import { loadImage } from "$lib/utility/jellyfin-helper";
+  import {
+    loadImage,
+    loadTracksForGroup,
+  } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
+
+  async function playTopArtist() {
+    const topArtistByDuration = $lightRewindReport.jellyfinRewindReport
+      .artists?.[rankingMetric]?.[0];
+    console.log(`topArtistByDuration:`, topArtistByDuration);
+
+    let artistsTracks = await loadTracksForGroup(
+      topArtistByDuration.id,
+      `artist`,
+    );
+    let randomTrackId = Math.floor(Math.random() * artistsTracks.length);
+    let randomTrack = artistsTracks[randomTrackId];
+    console.log(`randomTrack:`, randomTrack);
+
+    fadeToNextTrack({ id: randomTrack.Id });
+  }
+
+  export function onEnter() {
+    playTopArtist();
+  }
+  export function onExit() {
+  }
 
   onMount(() => {
-    const topArtistPrimaryImage = document.querySelector(`#top-artist-image`);
-    const topArtistBackgroundImage = document.querySelector(
-      `#top-artist-background-image`,
+    const topArtistPrimaryImage = document.querySelector(
+      `#top-artist-image`,
     );
     console.log(`img:`, topArtistPrimaryImage);
-    const topTrackByDuration =
-      $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]?.[0];
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
+      .artists?.[rankingMetric]?.[0];
     console.log(`topTrackByDuration:`, topTrackByDuration);
     loadImage(
-      [topArtistPrimaryImage, topArtistBackgroundImage],
+      [topArtistPrimaryImage],
       topTrackByDuration.images.primary,
       `artist`,
     );
@@ -39,47 +67,43 @@
     <div class="px-4 py-4 overflow-hidden whitespace-wrap">
       <div class="-rotate-6 mt-16 text-5xl font-semibold">
         <div class="">
-          {$lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]?.[0]
-            ?.name}
+          {
+            $lightRewindReport.jellyfinRewindReport.artists
+              ?.[rankingMetric]?.[0]
+              ?.name
+          }
         </div>
       </div>
     </div>
   </div>
-  <div class="relative">
-    <div
-      class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
-    >
-      <div>
-        Streamed <span class="font-semibold"
-          >{showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.artists?.[
-              rankingMetric
-            ]?.[0]?.playCount?.[informationSource],
-          )}</span
-        > times.
-      </div>
-      <div>
-        Listened to <span class="font-semibold"
-          >{showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.artists?.[
-              rankingMetric
-            ]?.[0]?.uniquePlayedTracks?.[informationSource],
-          )}</span
-        >
-        unique tracks <br />for
-        <span class="font-semibold"
-          >{showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.artists?.[
-              rankingMetric
-            ]?.[0]?.totalPlayDuration[informationSource].toFixed(0),
-          )}</span
-        > minutes.
-      </div>
+  <div
+    class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
+  >
+    <div>
+      Streamed <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.artists?.[
+            rankingMetric
+          ]?.[0]?.playCount?.[informationSource],
+        )
+      }</span> times.
+    </div>
+    <div>
+      Listened to <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.artists?.[
+            rankingMetric
+          ]?.[0]?.uniquePlayedTracks?.[informationSource],
+        )
+      }</span>
+      unique tracks <br />for
+      <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.artists?.[
+            rankingMetric
+          ]?.[0]?.totalPlayDuration[informationSource].toFixed(0),
+        )
+      }</span> minutes.
     </div>
   </div>
-</div>
-<div
-  class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]"
->
-  <img id="top-artist-background-image" class="w-full h-full" />
 </div>

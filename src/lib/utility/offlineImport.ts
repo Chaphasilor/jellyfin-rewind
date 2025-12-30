@@ -131,8 +131,9 @@ export async function checkIfOfflinePlaybackImportAvailable() {
         const [, major, minor, patch] = versionString.match(versionRegex) || [];
         return Number(major) > 0 || Number(minor) >= 9;
       }
+      return false;
     });
-    return finampBetaMatch;
+    return !!finampBetaMatch;
   } catch (err) {
     console.error(
       `Error while checking if offline playback import is available:`,

@@ -46,6 +46,11 @@
   let monthWithLeastPlays = $state("");
   let leastPlays = $state(0);
 
+  export function onEnter() {
+  }
+  export function onExit() {
+  }
+
   onMount(() => {
     const rawData = $processingResult.monthOfYear.entries;
 

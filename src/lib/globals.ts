@@ -19,4 +19,4 @@ export const processingResult = writable<ProcessingResults>();
 export const lightRewindReport = writable<LightRewindReport>();
 export const oldReport = writable<FullRewindReport>();
 
-export const isAccuracyDisclaimerOpen = writable(false)
+export const isAccuracyDisclaimerOpen = writable(false);

@@ -5,27 +5,37 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import { loadImage } from "$lib/utility/jellyfin-helper";
+  import { loadImage } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures, fadeToNextTrack, pausePlayback, resumePlayback }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+    pausePlayback,
+    resumePlayback,
+  }: FeatureProps = $props();
 
   let topTrackPrimaryImage: HTMLImageElement;
-  let topTrackBackgroundImage: HTMLImageElement;
 
   function playTopTrack() {
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0]
-    console.log(`topTrackByDuration:`, topTrackByDuration)
-    fadeToNextTrack(topTrackByDuration)
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric]?.[0];
+    console.log(`topTrackByDuration:`, topTrackByDuration);
+    fadeToNextTrack(topTrackByDuration);
   }
-    
-  onMount(() => {
-    console.log(`img:`, topTrackPrimaryImage)
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0]
-    console.log(`topTrackByDuration:`, topTrackByDuration)
-    loadImage([topTrackPrimaryImage, topTrackBackgroundImage], topTrackByDuration.image, `track`)
 
+  export function onEnter() {
     playTopTrack();
+  }
+  export function onExit() {}
+
+  onMount(() => {
+    console.log(`img:`, topTrackPrimaryImage);
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric]?.[0];
+    console.log(`topTrackByDuration:`, topTrackByDuration);
+    loadImage([topTrackPrimaryImage], topTrackByDuration.image, `track`);
   });
 </script>
 
@@ -55,43 +65,33 @@
         <div class="mt-8 ml-10">
           {
             $lightRewindReport.jellyfinRewindReport.tracks
-              ?.[rankingMetric]?.[0]?.name
+              ?.[rankingMetric]?.[0]
+              ?.name
           }
         </div>
       </div>
     </div>
   </div>
-  <div class="relative">
-    <div
-        class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
-    >
-        <div>
-        Streamed <span class="font-semibold">{
-            showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.tracks
-                ?.[rankingMetric]?.[0]?.playCount[
-                informationSource
-                ],
-            )
-        }</span> times.
-        </div>
-        <div>
-        Listened for <span class="font-semibold">{
-            showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.tracks
-                ?.[rankingMetric]?.[0]
-                ?.totalPlayDuration[
-                informationSource
-                ]?.toFixed(0),
-            )
-        }</span> minutes.
-        </div>
+  <div
+    class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
+  >
+    <div>
+      Streamed <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.tracks
+            ?.[rankingMetric]?.[0]
+            ?.playCount[informationSource],
+        )
+      }</span> times.
+    </div>
+    <div>
+      Listened for <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.tracks?.[
+            rankingMetric
+          ]?.[0]?.totalPlayDuration[informationSource]?.toFixed(0),
+        )
+      }</span> minutes.
     </div>
   </div>
-
-</div>
-<div
-  class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]"
->
-  <img bind:this={topTrackBackgroundImage} id="top-track-background-image" class="w-full h-full" />
 </div>

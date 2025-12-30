@@ -65,8 +65,8 @@
           importingOfflinePlayback = true;
           //@ts-ignore
           input.disabled = true;
-          //@ts-ignore
           offlinePlayback = await importOfflinePlayback(
+            //@ts-ignore
             e.target.files[0],
           );
           if (!offlinePlayback) {

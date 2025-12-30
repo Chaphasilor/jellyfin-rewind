@@ -11,6 +11,11 @@
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
+  export function onEnter() {
+  }
+  export function onExit() {
+  }
+
   onMount(() => {
     console.log(`summary`);
 
@@ -19,8 +24,8 @@
       `#summary-top-track-image`,
     );
     console.log(`img:`, topTrackPrimaryImage);
-    const topTrack =
-      $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0];
+    const topTrack = $lightRewindReport.jellyfinRewindReport.tracks
+      ?.[rankingMetric]?.[0];
     console.log(`topTrack:`, topTrack);
 
     // top artist
@@ -28,8 +33,8 @@
       `#summary-top-artist-image`,
     );
     console.log(`img:`, topArtistPrimaryImage);
-    const topArtist =
-      $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]?.[0];
+    const topArtist = $lightRewindReport.jellyfinRewindReport.artists
+      ?.[rankingMetric]?.[0];
     console.log(`topArtist:`, topArtist);
 
     // most successive plays
@@ -37,9 +42,9 @@
       `#summary-most-successive-streams-track-image`,
     );
     console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage);
-    const mostSuccessivePlaysTrack =
-      $lightRewindReport.jellyfinRewindReport.generalStats?.mostSuccessivePlays
-        ?.track;
+    const mostSuccessivePlaysTrack = $lightRewindReport.jellyfinRewindReport
+      .generalStats?.mostSuccessivePlays
+      ?.track;
     console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack);
 
     // load images
@@ -63,11 +68,9 @@
     <div class="w-full flex flex-col items-center">
       <JellyfinRewindLogo />
     </div>
-    <span
-      >Report <span class="text-[#00A4DC] text-2xl font-semibold font-quicksand"
-        >{$lightRewindReport.jellyfinRewindReport?.year}</span
-      ></span
-    >
+    <span>Report <span
+        class="text-[#00A4DC] text-2xl font-semibold font-quicksand"
+      >{$lightRewindReport.jellyfinRewindReport?.year}</span></span>
   </h2>
 
   <div
@@ -78,13 +81,14 @@
     >
       <!-- duration -->
       <div class="text-lg">
-        <span class="text-[#00A4DC] text-2xl font-semibold font-quicksand"
-          >{showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes[
-              informationSource
-            ].toFixed(0),
-          )}</span
-        > minutes listened
+        <span class="text-[#00A4DC] text-2xl font-semibold font-quicksand">{
+          showAsNumber(
+            $lightRewindReport.jellyfinRewindReport.generalStats
+              .totalPlaybackDurationMinutes[
+                informationSource
+              ].toFixed(0),
+          )
+        }</span> minutes listened
       </div>
     </div>
     <div
@@ -97,19 +101,20 @@
         class="w-auto h-[5rem] my-1.5 rounded-md"
       />
       <div class="text-balance">
-        <span class="text-[#00A4DC] font-semibold font-quicksand"
-          >{$lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0]
-            ?.name}</span
-        >
-        <span class=""
-          >by {$lightRewindReport.jellyfinRewindReport.tracks?.[
-            rankingMetric
-          ]?.[0]?.artistsBaseInfo?.reduce(
-            (acc, cur, index) =>
-              index > 0 ? `${acc} & ${cur.name}` : cur.name,
-            ``,
-          )}</span
-        >
+        <span class="text-[#00A4DC] font-semibold font-quicksand">{
+          $lightRewindReport.jellyfinRewindReport.tracks
+            ?.[rankingMetric]?.[0]
+            ?.name
+        }</span>
+        <span class="">by {
+            $lightRewindReport.jellyfinRewindReport.tracks?.[
+              rankingMetric
+            ]?.[0]?.artistsBaseInfo?.reduce(
+              (acc, cur, index) =>
+                index > 0 ? `${acc} & ${cur.name}` : cur.name,
+              ``,
+            )
+          }</span>
       </div>
     </div>
     <div
@@ -122,11 +127,11 @@
         class="w-auto h-[5rem] my-1.5 rounded-md"
       />
       <div class="text-balance">
-        <span class="text-[#00A4DC] font-semibold font-quicksand"
-          >{$lightRewindReport.jellyfinRewindReport.artists?.[
+        <span class="text-[#00A4DC] font-semibold font-quicksand">{
+          $lightRewindReport.jellyfinRewindReport.artists?.[
             rankingMetric
-          ]?.[0]?.name}</span
-        >
+          ]?.[0]?.name
+        }</span>
       </div>
     </div>
     {#if extraFeatures().totalMusicDays}
@@ -136,12 +141,12 @@
         <!-- days listened to music -->
         <div class="text-xl text-balance">
           Listened on
-          <span class="font-semibold text-[#00A4DC] text-3xl font-quicksand"
-            >{showAsNumber(
+          <span class="font-semibold text-[#00A4DC] text-3xl font-quicksand">{
+            showAsNumber(
               $lightRewindReport.jellyfinRewindReport.generalStats
                 .totalMusicDays,
-            )}</span
-          >
+            )
+          }</span>
           days
         </div>
       </div>
@@ -151,28 +156,28 @@
     >
       <!-- stats 1 - unique items -->
       <div>
-        <span class="font-semibold text-[#00A4DC] font-quicksand"
-          >{showAsNumber(
+        <span class="font-semibold text-[#00A4DC] font-quicksand">{
+          showAsNumber(
             $lightRewindReport.jellyfinRewindReport.generalStats
               .uniqueTracksPlayed,
-          )}</span
-        > unique tracks
+          )
+        }</span> unique tracks
       </div>
       <div>
-        <span class="font-semibold text-[#00A4DC] font-quicksand"
-          >{showAsNumber(
+        <span class="font-semibold text-[#00A4DC] font-quicksand">{
+          showAsNumber(
             $lightRewindReport.jellyfinRewindReport.generalStats
               .uniqueArtistsPlayed,
-          )}</span
-        > unique artists
+          )
+        }</span> unique artists
       </div>
       <div>
-        <span class="font-semibold text-[#00A4DC] font-quicksand"
-          >{showAsNumber(
+        <span class="font-semibold text-[#00A4DC] font-quicksand">{
+          showAsNumber(
             $lightRewindReport.jellyfinRewindReport.generalStats
               .uniqueAlbumsPlayed,
-          )}</span
-        > unique albums
+          )
+        }</span> unique albums
       </div>
     </div>
     {#if extraFeatures().mostSuccessivePlays}
@@ -186,17 +191,18 @@
           class="w-auto h-[5rem] my-1.5 rounded-md"
         />
         <div class="text-balance">
-          <span class="text-[#00A4DC] font-semibold font-quicksand"
-            >{$lightRewindReport.jellyfinRewindReport.generalStats
-              .mostSuccessivePlays?.name}</span
-          >
-          <span class=""
-            >by {$lightRewindReport.jellyfinRewindReport.generalStats.mostSuccessivePlays?.artists?.reduce(
-              (acc, cur, index) =>
-                index > 0 ? `${acc} & ${cur.name}` : cur.name,
-              ``,
-            )}</span
-          >
+          <span class="text-[#00A4DC] font-semibold font-quicksand">{
+            $lightRewindReport.jellyfinRewindReport.generalStats
+              .mostSuccessivePlays?.name
+          }</span>
+          <span class="">by {
+              $lightRewindReport.jellyfinRewindReport.generalStats
+                .mostSuccessivePlays?.artists?.reduce(
+                  (acc, cur, index) =>
+                    index > 0 ? `${acc} & ${cur.name}` : cur.name,
+                  ``,
+                )
+            }</span>
         </div>
       </div>
     {/if}
@@ -207,7 +213,8 @@
       <div class="text-balance">
         Library Duration: <span
           class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-          >{showAsNumber(
+        >{
+          showAsNumber(
             (
               $lightRewindReport.jellyfinRewindReport?.libraryStats
                 ?.totalRuntime /
@@ -215,18 +222,20 @@
               60.0 /
               24.0
             ).toFixed(1),
-          )}</span
-        > days
+          )
+        }</span> days
       </div>
       <div class="text-balance">
         Average track length: <span
           class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-          >{showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats?.trackLength?.mean.toFixed(
-              0,
-            ),
-          )}</span
-        > seconds
+        >{
+          showAsNumber(
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.trackLength?.mean.toFixed(
+                0,
+              ),
+          )
+        }</span> seconds
       </div>
     </div>
     {#if extraFeatures().listeningActivityDifference}
@@ -234,56 +243,76 @@
         class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md col-span-2"
       >
         <!-- stats 2 - listening activity difference (if positive) -->
-        {#if ($lightRewindReport.jellyfinRewindReport?.featureDelta?.listeningActivityDifference?.totalPlays[informationSource] ?? 0) > 0}
+        {#if         ($lightRewindReport.jellyfinRewindReport?.featureDelta
+          ?.listeningActivityDifference
+          ?.totalPlays[informationSource] ?? 0) > 0}
           <div class="text-center mb-2">
-            <span class="font-semibold font-quicksand text-[#00A4DC] text-lg"
-              >{showAsNumber(
+            <span class="font-semibold font-quicksand text-[#00A4DC] text-lg">{
+              showAsNumber(
                 Math.abs(
                   $lightRewindReport.jellyfinRewindReport?.featureDelta
                     ?.listeningActivityDifference?.totalPlays[
-                    informationSource
-                  ] ?? 0,
+                      informationSource
+                    ] ?? 0,
                 ).toFixed(0),
-              )}</span
-            >
+              )
+            }</span>
             more streams than last year
           </div>
         {/if}
         <div class="flex flex-row flex-wrap justify-around gap-4">
-          {#if ($lightRewindReport.jellyfinRewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.tracks ?? 0) >= 0}
+          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+            ?.listeningActivityDifference?.uniquePlays.tracks ?? 0) >=
+            0}
             <div class="text-center">
-              <span class="text-lg text-[#00A4DC] font-semibold font-quicksand"
-                >{showAsNumber(
+              <span
+                class="text-lg text-[#00A4DC] font-semibold font-quicksand"
+              >{
+                showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport?.featureDelta
-                      ?.listeningActivityDifference?.uniquePlays.tracks ?? 0,
+                    $lightRewindReport.jellyfinRewindReport
+                      ?.featureDelta
+                      ?.listeningActivityDifference?.uniquePlays
+                      .tracks ?? 0,
                   ),
-                )}</span
-              ><br />more tracks
+                )
+              }</span><br />more tracks
             </div>
           {/if}
-          {#if ($lightRewindReport.jellyfinRewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.artists ?? 0) >= 0}
+          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+            ?.listeningActivityDifference?.uniquePlays.artists ??
+            0) >= 0}
             <div class="text-center">
-              <span class="text-lg text-[#00A4DC] font-semibold font-quicksand"
-                >{showAsNumber(
+              <span
+                class="text-lg text-[#00A4DC] font-semibold font-quicksand"
+              >{
+                showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport?.featureDelta
-                      ?.listeningActivityDifference?.uniquePlays.artists ?? 0,
+                    $lightRewindReport.jellyfinRewindReport
+                      ?.featureDelta
+                      ?.listeningActivityDifference?.uniquePlays
+                      .artists ?? 0,
                   ),
-                )}</span
-              ><br />more artists
+                )
+              }</span><br />more artists
             </div>
           {/if}
-          {#if ($lightRewindReport.jellyfinRewindReport?.featureDelta?.listeningActivityDifference?.uniquePlays.albums ?? 0) >= 0}
+          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+            ?.listeningActivityDifference?.uniquePlays.albums ?? 0) >=
+            0}
             <div class="text-center">
-              <span class="text-lg text-[#00A4DC] font-semibold font-quicksand"
-                >{showAsNumber(
+              <span
+                class="text-lg text-[#00A4DC] font-semibold font-quicksand"
+              >{
+                showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport?.featureDelta
-                      ?.listeningActivityDifference?.uniquePlays.albums ?? 0,
+                    $lightRewindReport.jellyfinRewindReport
+                      ?.featureDelta
+                      ?.listeningActivityDifference?.uniquePlays
+                      .albums ?? 0,
                   ),
-                )}</span
-              ><br />more albums
+                )
+              }</span><br />more albums
             </div>
           {/if}
         </div>

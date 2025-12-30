@@ -1,6 +1,9 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport, isAccuracyDisclaimerOpen } from "$lib/globals";
+  import {
+    isAccuracyDisclaimerOpen,
+    lightRewindReport,
+  } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -13,6 +16,11 @@
     extraFeatures,
     onNextFeature,
   }: FeatureProps = $props();
+
+  export function onEnter() {
+  }
+  export function onExit() {
+  }
 
   onMount(() => {});
 </script>
@@ -72,7 +80,10 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-8 flex flex-row gap-4 items-center mx-auto"
-    on:click|stopPropagation={() => onNextFeature()}
+    on:click|stopPropagation={() => {
+      console.info("button");
+      onNextFeature();
+    }}
   >
     <span>Let's Go!</span>
     <svg

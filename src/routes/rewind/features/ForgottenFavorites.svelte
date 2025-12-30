@@ -2,36 +2,79 @@
   import Chart from "chart.js/auto";
   import { lightRewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
+  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import { loadImage } from "$lib/utility/jellyfin-helper";
+  import { loadImage } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
+
+  // plays a random track from the 5 forgotten favorites
+  function playTopForgotten() {
+    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport
+      .tracks?.forgottenFavoriteTracks[informationSource];
+    const randomTrackId = Math.floor(
+      Math.random() * forgottenFavoriteTracks.length,
+    );
+    const randomTrack = forgottenFavoriteTracks[randomTrackId];
+
+    showPlaying(
+      `#forgotten-tracks-visualizer`,
+      randomTrackId,
+      forgottenFavoriteTracks.length,
+    );
+    fadeToNextTrack(randomTrack);
+  }
+
+  export function onEnter() {
+    playTopForgotten();
+  }
+  export function onExit() {
+  }
 
   onMount(() => {
-    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource]
+    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport
+      .tracks?.forgottenFavoriteTracks[informationSource];
 
     forgottenFavoriteTracks.forEach((track, index) => {
-      const trackPrimaryImage = document.querySelector(`#forgotten-tracks-image-${index}`)
-      const trackBackgroundImage = document.querySelector(`#forgotten-tracks-background-image-${index}`)
-      loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`)
-    })
+      const trackPrimaryImage = document.querySelector(
+        `#forgotten-tracks-image-${index}`,
+      );
+      const trackBackgroundImage = document.querySelector(
+        `#forgotten-tracks-background-image-${index}`,
+      );
+      loadImage(
+        [trackPrimaryImage, trackBackgroundImage],
+        track.image,
+        `track`,
+      );
+    });
   });
 </script>
 
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Remember These Forgotten Favorites?</h2>
   <h3 class="px-6">
-    Here are {$lightRewindReport.jellyfinRewindReport.tracks
-      ?.forgottenFavoriteTracks[informationSource].length} tracks you loved earlier
-    this year, but it's been a while since you last played them.
+    Here are {
+      $lightRewindReport.jellyfinRewindReport.tracks
+        ?.forgottenFavoriteTracks[informationSource].length
+    } tracks you loved earlier this year, but it's been a while since you last
+    played them.
   </h3>
   <h3 class="px-6"><em>What changed?</em></h3>
 
   <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
-    {#each $lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource].slice(0, 5) as track, index (track.id)}
+    {#each       $lightRewindReport.jellyfinRewindReport.tracks
+        ?.forgottenFavoriteTracks[informationSource].slice(0, 5) as
+      track,
+      index
+      (track.id)
+    }
       <li
         class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl"
       >
@@ -42,7 +85,8 @@
           <div
             id={`forgotten-tracks-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
-          ></div>
+          >
+          </div>
         </div>
         <div
           class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md"
@@ -54,25 +98,25 @@
               <span class="font-semibold text-base mr-2">{index + 1}.</span>
               <span
                 class="font-semibold text-base leading-tight text-ellipsis overflow-hidden"
-                >{track.name}</span
-              >
+              >{track.name}</span>
             </div>
             <span
               class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
-              >by {track.artistsBaseInfo.reduce(
-                (acc, cur, index) =>
-                  index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                ``,
-              )}</span
-            >
+            >by {
+                track.artistsBaseInfo.reduce(
+                  (acc, cur, index) =>
+                    index > 0 ? `${acc} & ${cur.name}` : cur.name,
+                  ``,
+                )
+              }</span>
           </div>
           <div
             class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
           >
             <div>
-              <span class="font-semibold text-black dark:text-white"
-                >{showAsNumber(track.playCount[informationSource])}</span
-              >
+              <span class="font-semibold text-black dark:text-white">{
+                showAsNumber(track.playCount[informationSource])
+              }</span>
               streams
             </div>
             <svg
@@ -88,11 +132,12 @@
               <circle cx="12" cy="12" r="4"></circle>
             </svg>
             <div>
-              <span class="font-semibold text-black dark:text-white"
-                >Last Played {new Date(
-                  track.lastPlayed ?? 0,
-                ).toLocaleDateString()}</span
-              >
+              <span class="font-semibold text-black dark:text-white">Last Played
+                {
+                  new Date(
+                    track.lastPlayed ?? 0,
+                  ).toLocaleDateString()
+                }</span>
             </div>
           </div>
         </div>
@@ -112,7 +157,12 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each $lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource].slice(5, 10) as track, index (track.id)}
+  {#each     $lightRewindReport.jellyfinRewindReport.tracks
+      ?.forgottenFavoriteTracks[informationSource].slice(5, 10) as
+    track,
+    index
+    (track.id)
+  }
     <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
       <div class="flex flex-col gap-1 w-full">
         <div class="flex flex-col gap-0.25 items-start">
@@ -120,19 +170,19 @@
             class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center"
           >
             <span class="font-semibold mr-2">{index + 6}.</span>
-            <span class="font-base leading-tight text-ellipsis overflow-hidden"
-              >{track.name}</span
-            >
+            <span
+              class="font-base leading-tight text-ellipsis overflow-hidden"
+            >{track.name}</span>
           </div>
           <div class="ml-6 max-h-[2rem] text-xs">
             by
-            <span class="font-semibold text-ellipsis overflow-hidden"
-              >{track.artistsBaseInfo.reduce(
+            <span class="font-semibold text-ellipsis overflow-hidden">{
+              track.artistsBaseInfo.reduce(
                 (acc, cur, index) =>
                   index > 0 ? `${acc} & ${cur.name}` : cur.name,
                 ``,
-              )}</span
-            >
+              )
+            }</span>
           </div>
         </div>
       </div>

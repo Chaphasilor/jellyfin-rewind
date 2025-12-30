@@ -5,10 +5,19 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-    import Unavailable from "$lib/components/Unavailable.svelte";
+  import Unavailable from "$lib/components/Unavailable.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
+
+  // svelte-ignore non_reactive_update
+  let unavailableOverlay: Unavailable;
+
+  export function onEnter() {
+  }
+  export function onExit() {
+    unavailableOverlay?.closeModal();
+  }
 
   onMount(() => {});
 </script>
@@ -157,6 +166,6 @@
   {/if}
 
   {#if !extraFeatures().listeningActivityDifference}
-    <Unavailable />
+    <Unavailable bind:this={unavailableOverlay} />
   {/if}
 </div>

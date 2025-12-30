@@ -6,28 +6,44 @@
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { Spring } from "svelte/motion";
-    import Unavailable from "$lib/components/Unavailable.svelte";
+  import Unavailable from "$lib/components/Unavailable.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
   const musicDays = new Spring(0, {
-    stiffness: 0.03,
-    damping: 0.06,
+    stiffness: 0.025,
+    damping: 0.05,
     precision: 0.075,
   });
 
-  onMount(() => {
-    if (extraFeatures().totalMusicDays) {
-      musicDays.set(0, {
-        instant: true,
-      });
+  export function onEnter() {
+    musicDays.set(0, {
+      instant: true,
+    });
+    setTimeout(() => {
       musicDays.set(
         $lightRewindReport.jellyfinRewindReport.generalStats.totalMusicDays,
         {
           instant: false,
         },
       );
+    }, 1000);
+  }
+  export function onExit() {
+    setTimeout(() => {
+      musicDays.set(0, {
+        instant: true,
+      });
+    }, 500);
+  }
+
+  onMount(() => {
+    if (extraFeatures().totalMusicDays) {
+      musicDays.set(0, {
+        instant: true,
+      });
+      onEnter();
     }
   });
 </script>
@@ -81,8 +97,9 @@
           <span class="text-3xl text-sky-500 font-quicksand">{
             showAsNumber(
               $lightRewindReport.jellyfinRewindReport?.generalStats
-                ?.minutesPerDay?.mean
-                .toFixed(0),
+                ?.minutesPerDay?.mean.toFixed(
+                  0,
+                ),
             )
           }</span> minutes per day on average.</span>
       </div>
@@ -92,8 +109,7 @@
             showAsNumber(
               (
                 $lightRewindReport.jellyfinRewindReport?.generalStats
-                  ?.minutesPerDay?.mean /
-                60.0
+                  ?.minutesPerDay?.mean / 60.0
               ).toFixed(2),
             )
           }</span>
@@ -102,8 +118,8 @@
               showAsNumber(
                 (
                   ($lightRewindReport.jellyfinRewindReport
-                    ?.generalStats?.minutesPerDay
-                    ?.mean /
+                    ?.generalStats
+                    ?.minutesPerDay?.mean /
                     60.0 /
                     24.0) *
                   100.0
@@ -115,8 +131,9 @@
         (Median value is <span class="text-sky-500 font-quicksand">{
           showAsNumber(
             $lightRewindReport.jellyfinRewindReport?.generalStats
-              ?.minutesPerDay?.median
-              .toFixed(1),
+              ?.minutesPerDay?.median.toFixed(
+                1,
+              ),
           )
         }</span> minutes, for those who care)
       </div>

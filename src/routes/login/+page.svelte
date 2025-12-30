@@ -6,12 +6,14 @@
   import jellyfin from "$lib/jellyfin";
   import processing from "$lib/jellyfin/queries/local/processing";
   import { processingResultToRewindReport } from "$lib/utility/convert";
+  import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
 
   let serverUrl: string = "";
   let userName: string = "";
   let userPassword: string = "";
 
-  function proceed() {
+  async function proceed() {
+    await checkPlaybackReportingSetup();
     goto("/importLastYearsReport");
   }
 

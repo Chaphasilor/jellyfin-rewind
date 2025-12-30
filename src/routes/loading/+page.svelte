@@ -21,7 +21,7 @@
         lightRewindReport.set(conversionResult.data);
         console.log(`$lightRewindReport:`, $lightRewindReport);
       }
-      goto("/rewind");
+      goto("/launch");
     }
   });
 </script>

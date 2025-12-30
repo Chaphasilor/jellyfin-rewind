@@ -267,11 +267,11 @@ export class Listen {
     this.dateCreated = new Date(data.DateCreated);
     this.rawPlayDuration = data.PlayDuration;
     this.playDuration = Math.max(
-        Math.min(
-            track?.duration ?? data.PlayDuration,
-            data.PlayDuration,
-        ),
-        0 // for the rare case when Jellyfin reports negative numbers
+      Math.min(
+        track?.duration ?? data.PlayDuration,
+        data.PlayDuration,
+      ),
+      0, // for the rare case when Jellyfin reports negative numbers
     );
     this.deviceName = data.DeviceName;
     this.clientName = data.ClientName;
@@ -341,6 +341,22 @@ export type FeatureProps = {
   pausePlayback: () => void;
   resumePlayback: () => void;
 };
+
+export type FeatureEvents = {
+  onEnter: () => void;
+  onExit: () => void;
+};
+
+export enum PlaybackReportingIssueAction {
+  CONFIGURED_CORRECTLY,
+  INSTALL_PLUGIN,
+  ENABLE_PLUGIN,
+  RESTART_SERVER,
+  UPDATE_PLUGIN,
+  SET_RETENTION_FOREVER,
+  SET_RETENTION_TWO_YEARS,
+  USER_IGNORED,
+}
 
 // old Rewind report format
 

@@ -2,24 +2,47 @@
   import Chart from "chart.js/auto";
   import { lightRewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
+  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
+  import { loadTracksForGroup } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
 
   function stringToColor(string: string) {
     var hash = 0;
     for (var i = 0; i < string.length; i++) {
       hash = string.charCodeAt(i) + ((hash << 5) - hash);
     }
-    // var color = `#`;
-    // for (var i = 0; i < 3; i++) {
-    //     var value = (hash >> (i * 8)) & 0xFF;
-    //     color += ('00' + value.toString(16)).substring(-2);
-    // }
     return `hsl(${Number(hash) % 256}, 100%, 80%)`;
+  }
+
+  // plays a random track from the top 5 genres
+  async function playTopGenres() {
+    const topGenres = $lightRewindReport.jellyfinRewindReport.genres
+      ?.[rankingMetric]?.slice(0, 5); // first genre excluded
+    const randomGenreId = Math.floor(Math.random() * topGenres.length);
+    const randomGenre = topGenres[randomGenreId];
+    console.log(`randomGenre:`, randomGenre);
+    showPlaying(`#top-genres-visualizer`, randomGenreId, 5);
+
+    let genresTracks = await loadTracksForGroup(randomGenre.id, `genre`);
+    let randomTrackId = Math.floor(Math.random() * genresTracks.length);
+    let randomTrack = genresTracks[randomTrackId];
+    console.log(`randomTrack:`, randomTrack);
+
+    fadeToNextTrack({ id: randomTrack.Id });
+  }
+
+  export function onEnter() {
+    playTopGenres();
+  }
+  export function onExit() {
   }
 
   onMount(() => {});

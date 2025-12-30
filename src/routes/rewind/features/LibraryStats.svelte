@@ -9,6 +9,11 @@
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
+  export function onEnter() {
+  }
+  export function onExit() {
+  }
+
   onMount(() => {});
 </script>
 
