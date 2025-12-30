@@ -5,11 +5,19 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
+    import { loadImage } from "$lib/utility/jellyfin-helper";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
-  onMount(() => {});
+  onMount(() => {
+    const topAlbumPrimaryImage = document.querySelector(`#top-album-image`);
+    const topAlbumBackgroundImage = document.querySelector(`#top-album-background-image`);
+    console.log(`img:`, topAlbumPrimaryImage)
+    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]?.[0]
+    console.log(`topAlbumByDuration:`, topAlbumByDuration)
+    loadImage([topAlbumPrimaryImage, topAlbumBackgroundImage], topAlbumByDuration.image, `album`)
+  });
 </script>
 
 <div class="text-center text-white">

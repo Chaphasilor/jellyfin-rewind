@@ -24,15 +24,15 @@
   import Outro from "./features/Outro.svelte";
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
-    import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
+  import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
+  import { loadAudio } from "$lib/utility/jellyfin-helper";
 
   if (!$lightRewindReport?.jellyfinRewindReport) {
     goto("/login");
   }
 
-  let informationSource: FeatureProps["informationSource"] = $state(
-    "playbackReport",
-  );
+  let informationSource: FeatureProps["informationSource"] =
+    $state("playbackReport");
 
   let rankingMetric: FeatureProps["rankingMetric"] = $state("playCount");
 
@@ -63,11 +63,11 @@
       totalMusicDays:
         $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
         !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
-      mostSuccessivePlays: !!$lightRewindReport.jellyfinRewindReport
-        .generalStats
-        .mostSuccessivePlays,
-      listeningActivityDifference: !!$lightRewindReport.jellyfinRewindReport
-        .featureDelta,
+      mostSuccessivePlays:
+        !!$lightRewindReport.jellyfinRewindReport.generalStats
+          .mostSuccessivePlays,
+      listeningActivityDifference:
+        !!$lightRewindReport.jellyfinRewindReport.featureDelta,
     };
   });
 
@@ -107,7 +107,8 @@
       component: FeatureDelta,
     },
     {
-      skip: !$lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource]?.length,
+      skip: !$lightRewindReport.jellyfinRewindReport.tracks
+        ?.forgottenFavoriteTracks[informationSource]?.length,
       component: ForgottenFavorites,
     },
     {
@@ -146,12 +147,12 @@
     }
   }
   function scrollToActive() {
-    const element = document.getElementById(`feature-${page}`)
+    const element = document.getElementById(`feature-${page}`);
     element?.scrollIntoView({
-        behavior: "smooth",
-        inline: "center",
-        block: "start"
-    })
+      behavior: "smooth",
+      inline: "center",
+      block: "start",
+    });
   }
 
   function nextFeature() {
@@ -166,7 +167,7 @@
         page += 1;
       }
     }
-    scrollToActive()
+    scrollToActive();
   }
   function prevFeature() {
     if (page > 0) {
@@ -180,7 +181,186 @@
         page -= 1;
       }
     }
-    scrollToActive()
+    scrollToActive();
+  }
+
+  // fade between two tracks over 1000ms
+  async function fadeToNextTrack(trackInfo: { id: any }) {
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
+    console.log(`player1:`, player1);
+    console.log(`player2:`, player2);
+
+    if (!player1 || !player2) {
+      return;
+    }
+
+    // mark the currently active player as inactive, and the other as active
+    let activePlayer, inactivePlayer;
+    if (player1.paused) {
+      activePlayer = player2;
+      inactivePlayer = player1;
+    } else {
+      activePlayer = player1;
+      inactivePlayer = player2;
+    }
+    activePlayer.setAttribute(`data-active`, `false`);
+    inactivePlayer.setAttribute(`data-active`, `true`);
+    await loadAudio(inactivePlayer, trackInfo);
+
+    //TODO add mute button
+    // if (state.settings.sound) {
+    if (true) {
+      inactivePlayer.volume = 0;
+      activePlayer.volume = 1;
+      inactivePlayer.play();
+      inactivePlayer.volume = 0;
+
+      // I hate Safari
+
+      const fadePerStep = 0.05;
+      const fadeDuration = 1000;
+      const fadeStepsOut = Array(1 / fadePerStep)
+        .fill(1)
+        .map((_, i) => Number((1 - i * fadePerStep).toFixed(2)));
+      const fadeStepsIn = Array(1 / fadePerStep)
+        .fill(1)
+        .map((_, i) => Number((i * fadePerStep).toFixed(2)));
+      fadeStepsIn.unshift(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+      const doFade = (stepIndex: number) => () => {
+        try {
+          inactivePlayer.volume = fadeStepsIn[stepIndex];
+          activePlayer.volume = fadeStepsOut[stepIndex] || 0;
+          if (stepIndex === fadeStepsIn.length - 1) {
+            // stop the active player
+            activePlayer.pause();
+            activePlayer.currentTime = 0;
+            //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+          } else {
+            setTimeout(
+              doFade(stepIndex + 1),
+              fadeDuration / fadeStepsIn.length,
+            );
+          }
+        } catch (err) {
+          console.error(`Error while fading tracks:`, err);
+          inactivePlayer.volume = 1;
+          activePlayer.volume = 0;
+          activePlayer.pause();
+        }
+      };
+
+      // fade
+      doFade(0)();
+    }
+  }
+
+  // fade both tracks out over 1000ms
+  function pausePlayback() {
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
+    console.log(`player1:`, player1);
+    console.log(`player2:`, player2);
+
+    if (!player1 || !player2) {
+      return;
+    }
+
+    // mark the currently active player for later
+    let activePlayer, inactivePlayer;
+    if (player1.paused) {
+      activePlayer = player2;
+      inactivePlayer = player1;
+    } else {
+      activePlayer = player1;
+      inactivePlayer = player2;
+    }
+    activePlayer.setAttribute(`data-active`, `true`);
+    inactivePlayer.setAttribute(`data-active`, `false`);
+
+    player1.volume = 1;
+    player2.volume = 1;
+
+    const fadePerStep = 0.05;
+    const fadeDuration = 750;
+    const fadeSteps = Array(1 / fadePerStep)
+      .fill(1)
+      .map((_, i) => Number((1 - i * fadePerStep).toFixed(2)));
+
+    const doFade = (stepIndex: number) => () => {
+      try {
+        player1.volume = fadeSteps[stepIndex];
+        player2.volume = fadeSteps[stepIndex];
+        if (stepIndex === fadeSteps.length - 1) {
+          // stop the active player
+          player1.pause();
+          player2.pause();
+          //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
+        } else {
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+        }
+      } catch (err) {
+        console.error(`Error while fading tracks:`, err);
+        player1.volume = 0;
+        player2.volume = 0;
+        player1.pause();
+        player2.pause();
+      }
+    };
+
+    // fade
+    doFade(0)();
+  }
+
+  // uses the tag data to determine the previously active player and resumes playback by fading it in
+  function resumePlayback() {
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
+    console.log(`player1:`, player1);
+    console.log(`player2:`, player2);
+
+    if (!player1 || !player2) {
+      return;
+    }
+
+    let activePlayer;
+    if (player1.getAttribute(`data-active`) === `true`) {
+      activePlayer = player1;
+    } else {
+      activePlayer = player2;
+    }
+
+    activePlayer.volume = 0;
+    activePlayer.play();
+
+    const fadePerStep = 0.05;
+    const fadeDuration = 750;
+    const fadeSteps = Array(1 / fadePerStep)
+      .fill(1)
+      .map((_, i) => Number((i * fadePerStep).toFixed(2)));
+
+    const doFade = (stepIndex: number) => () => {
+      try {
+        activePlayer.volume = fadeSteps[stepIndex];
+
+        if (stepIndex !== fadeSteps.length - 1) {
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+        }
+      } catch (err) {
+        console.error(`Error while fading tracks:`, err);
+        activePlayer.volume = 1;
+      }
+    };
+
+    // fade
+    doFade(0)();
   }
 </script>
 
@@ -189,21 +369,27 @@
 {#snippet renderFeature(index, Feature: Component<FeatureProps>)}
   <div class="h-screen" id="feature-{index}">
     <Feature
-        {informationSource}
-        {rankingMetric}
-        {extraFeatures}
-        onNextFeature={() => {
-            nextFeature();
-        }}
-        onPreviousFeature={() => {
-            prevFeature();
-        }}
+      {informationSource}
+      {rankingMetric}
+      {extraFeatures}
+      onNextFeature={() => {
+        nextFeature();
+      }}
+      onPreviousFeature={() => {
+        prevFeature();
+      }}
+      {fadeToNextTrack}
+      {pausePlayback}
+      {resumePlayback}
     />
   </div>
 {/snippet}
 
 {#each features() as feat, index}
-    {#if !feat.skip}
-        {@render renderFeature(index, feat.component)}
-    {/if}
+  {#if !feat.skip}
+    {@render renderFeature(index, feat.component)}
+  {/if}
 {/each}
+
+<audio id="audio-player-1" loop></audio>
+<audio id="audio-player-2" loop></audio>

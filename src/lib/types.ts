@@ -337,6 +337,9 @@ export type FeatureProps = {
   };
   onNextFeature: () => void;
   onPreviousFeature: () => void;
+  fadeToNextTrack: (trackInfo: { id: any }) => Promise<void>;
+  pausePlayback: () => void;
+  resumePlayback: () => void;
 };
 
 // old Rewind report format

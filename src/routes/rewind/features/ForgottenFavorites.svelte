@@ -5,11 +5,20 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
+    import { loadImage } from "$lib/utility/jellyfin-helper";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
-  onMount(() => {});
+  onMount(() => {
+    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource]
+
+    forgottenFavoriteTracks.forEach((track, index) => {
+      const trackPrimaryImage = document.querySelector(`#forgotten-tracks-image-${index}`)
+      const trackBackgroundImage = document.querySelector(`#forgotten-tracks-background-image-${index}`)
+      loadImage([trackPrimaryImage, trackBackgroundImage], track.image, `track`)
+    })
+  });
 </script>
 
 <div class="text-center">

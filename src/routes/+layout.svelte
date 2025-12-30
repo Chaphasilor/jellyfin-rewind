@@ -11,12 +11,5 @@
     <slot />
   </PageTransition>
 
-  <p>Github</p>
 </main>
 
-<style>
-  p {
-    margin: auto;
-    margin-bottom: 0;
-  }
-</style>

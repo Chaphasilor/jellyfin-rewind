@@ -5,11 +5,28 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
+    import { loadImage } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
+  const { informationSource, rankingMetric, extraFeatures, fadeToNextTrack, pausePlayback, resumePlayback }: FeatureProps =
     $props();
 
-  onMount(() => {});
+  let topTrackPrimaryImage: HTMLImageElement;
+  let topTrackBackgroundImage: HTMLImageElement;
+
+  function playTopTrack() {
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0]
+    console.log(`topTrackByDuration:`, topTrackByDuration)
+    fadeToNextTrack(topTrackByDuration)
+  }
+    
+  onMount(() => {
+    console.log(`img:`, topTrackPrimaryImage)
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.[0]
+    console.log(`topTrackByDuration:`, topTrackByDuration)
+    loadImage([topTrackPrimaryImage, topTrackBackgroundImage], topTrackByDuration.image, `track`)
+
+    playTopTrack();
+  });
 </script>
 
 <div class="text-center text-white">
@@ -18,6 +35,7 @@
   </h2>
   <div class="flex mt-10 flex-col">
     <img
+      bind:this={topTrackPrimaryImage}
       id="top-track-image"
       class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]"
     />
@@ -75,5 +93,5 @@
 <div
   class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]"
 >
-  <img id="top-track-background-image" class="w-full h-full" />
+  <img bind:this={topTrackBackgroundImage} id="top-track-background-image" class="w-full h-full" />
 </div>

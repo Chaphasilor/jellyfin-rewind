@@ -5,22 +5,37 @@
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
+  import { loadImage } from "$lib/utility/jellyfin-helper";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
-  onMount(() => {});
+  onMount(() => {
+    const topArtists = $lightRewindReport.jellyfinRewindReport.artists?.[
+      rankingMetric
+    ]?.slice(0, 5);
+
+    topArtists.forEach((artist, index) => {
+      const artistPrimaryImage = document.querySelector(
+        `#top-artists-image-${index}`,
+      );
+      const artistBackgroundImage = document.querySelector(
+        `#top-artists-background-image-${index}`,
+      );
+      console.log(`img:`, artistPrimaryImage);
+      loadImage(
+        [artistPrimaryImage, artistBackgroundImage],
+        artist.images.primary,
+        `artist`,
+      );
+    });
+  });
 </script>
 
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Artists<br />of the year</h2>
   <ol id="top-artists-main-feature" class="flex flex-col gap-2 p-6">
-    {#each       $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
-        ?.slice(0, 5) as
-      artist,
-      index
-      (artist.id)
-    }
+    {#each $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]?.slice(0, 5) as artist, index (artist.id)}
       <li
         class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl"
       >
@@ -31,8 +46,7 @@
           <div
             id={`top-artists-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
-          >
-          </div>
+          ></div>
         </div>
         <div
           class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md"
@@ -42,18 +56,18 @@
               class="flex flex-row w-full justify-start items-center whitespace-nowrap"
             >
               <span class="font-semibold text-base mr-2">{index + 1}.</span>
-              <span class="font-semibold text-base leading-tight">{
-                artist.name
-              }</span>
+              <span class="font-semibold text-base leading-tight"
+                >{artist.name}</span
+              >
             </div>
           </div>
           <div
             class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
           >
             <div>
-              <span class="font-semibold text-black dark:text-white">{
-                showAsNumber(artist.playCount[informationSource])
-              }</span>
+              <span class="font-semibold text-black dark:text-white"
+                >{showAsNumber(artist.playCount[informationSource])}</span
+              >
               streams
             </div>
             <svg
@@ -69,9 +83,9 @@
               <circle cx="12" cy="12" r="4"></circle>
             </svg>
             <div>
-              <span class="font-semibold text-black dark:text-white">{
-                showAsNumber(artist.uniqueTracks)
-              }</span>
+              <span class="font-semibold text-black dark:text-white"
+                >{showAsNumber(artist.uniqueTracks)}</span
+              >
               tracks
             </div>
             <svg
@@ -87,12 +101,11 @@
               <circle cx="12" cy="12" r="4"></circle>
             </svg>
             <div>
-              <span class="font-semibold text-black dark:text-white">{
-                showAsNumber(
-                  artist.totalPlayDuration[informationSource]
-                    .toFixed(0),
-                )
-              }</span>
+              <span class="font-semibold text-black dark:text-white"
+                >{showAsNumber(
+                  artist.totalPlayDuration[informationSource].toFixed(0),
+                )}</span
+              >
               min
             </div>
           </div>
@@ -113,12 +126,7 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
-      ?.slice(5, 20) as
-    artist,
-    index
-    (artist.id)
-  }
+  {#each $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]?.slice(5, 20) as artist, index (artist.id)}
     <li class="relative overflow-hidden w-1/2 mx-auto pl-3">
       <div class="flex flex-col gap-1 w-full">
         <div class="flex flex-col gap-0.25 items-start">
@@ -126,9 +134,9 @@
             class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center"
           >
             <span class="font-semibold mr-2">{index + 1 + 5}.</span>
-            <span
-              class="font-base leading-tight text-ellipsis overflow-hidden"
-            >{artist.name}</span>
+            <span class="font-base leading-tight text-ellipsis overflow-hidden"
+              >{artist.name}</span
+            >
           </div>
         </div>
       </div>
