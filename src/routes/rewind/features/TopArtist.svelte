@@ -14,7 +14,7 @@
 
 <div class="text-center text-white">
   <h2 class="text-2xl mt-5">
-    Your Top Artist<br />of {$lightRewindReport?.year}:
+    Your Top Artist<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
   </h2>
   <div class="flex mt-10 flex-col">
     <img
@@ -24,7 +24,10 @@
     <div class="px-4 py-4 overflow-hidden whitespace-wrap">
       <div class="-rotate-6 mt-16 text-5xl font-semibold">
         <div class="">
-          {$lightRewindReport.artists?.[rankingMetric]?.[0]?.name}
+          {
+            $lightRewindReport.jellyfinRewindReport.artists
+              ?.[rankingMetric]?.[0]?.name
+          }
         </div>
       </div>
     </div>
@@ -35,23 +38,26 @@
     <div>
       Streamed <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.artists?.[rankingMetric]?.[0]?.playCount?.[
-            informationSource
-          ],
+          $lightRewindReport.jellyfinRewindReport.artists
+            ?.[rankingMetric]?.[0]?.playCount?.[
+              informationSource
+            ],
         )
       }</span> times.
     </div>
     <div>
       Listened to <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.artists?.[rankingMetric]?.[0]
+          $lightRewindReport.jellyfinRewindReport.artists
+            ?.[rankingMetric]?.[0]
             ?.uniquePlayedTracks?.[informationSource],
         )
       }</span>
       unique tracks <br />for
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.artists?.[rankingMetric]?.[0]
+          $lightRewindReport.jellyfinRewindReport.artists
+            ?.[rankingMetric]?.[0]
             ?.totalPlayDuration[
               informationSource
             ].toFixed(0),

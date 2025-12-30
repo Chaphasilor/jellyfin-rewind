@@ -21,9 +21,12 @@
       musicDays.set(0, {
         instant: true,
       });
-      musicDays.set($lightRewindReport.generalStats.totalMusicDays, {
-        instant: false,
-      });
+      musicDays.set(
+        $lightRewindReport.jellyfinRewindReport.generalStats.totalMusicDays,
+        {
+          instant: false,
+        },
+      );
     }
   });
 </script>
@@ -44,12 +47,15 @@
         year.</span>
     </div>
     {#if extraFeatures().totalMusicDays}
-      {#if $lightRewindReport.generalStats.totalMusicDays < 364}
+      {#if       $lightRewindReport.jellyfinRewindReport.generalStats
+        .totalMusicDays < 364}
         <div>
           <span class="font-semibold text-sm text-center"
           >What did you do on the {
               (
-                365 - $lightRewindReport.generalStats.totalMusicDays
+                365 -
+                $lightRewindReport.jellyfinRewindReport.generalStats
+                  .totalMusicDays
               ).toFixed(0)
             } missing days?!</span>
         </div>
@@ -66,11 +72,15 @@
     <div class="mt-24 w-full px-10 flex flex-col items-center gap-3">
       <div>
         <span class="font-semibold text-xl"
-        >On those {$lightRewindReport.generalStats.totalMusicDays}
+        >On those {
+            $lightRewindReport.jellyfinRewindReport.generalStats
+              .totalMusicDays
+          }
           days,<br />you listened to
           <span class="text-3xl text-sky-500 font-quicksand">{
             showAsNumber(
-              $lightRewindReport?.generalStats?.minutesPerDay?.mean
+              $lightRewindReport.jellyfinRewindReport?.generalStats
+                ?.minutesPerDay?.mean
                 .toFixed(0),
             )
           }</span> minutes per day on average.</span>
@@ -80,7 +90,8 @@
         >That's <span class="text-2xl text-sky-500 font-quicksand">{
             showAsNumber(
               (
-                $lightRewindReport?.generalStats?.minutesPerDay?.mean /
+                $lightRewindReport.jellyfinRewindReport?.generalStats
+                  ?.minutesPerDay?.mean /
                 60.0
               ).toFixed(2),
             )
@@ -89,7 +100,8 @@
           <span class="text-2xl text-sky-500 font-quicksand">{
               showAsNumber(
                 (
-                  ($lightRewindReport?.generalStats?.minutesPerDay
+                  ($lightRewindReport.jellyfinRewindReport
+                    ?.generalStats?.minutesPerDay
                     ?.mean /
                     60.0 /
                     24.0) *
@@ -101,7 +113,8 @@
       <div class="font-semibold text-sm px-8 pt-6">
         (Median value is <span class="text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport?.generalStats?.minutesPerDay?.median
+            $lightRewindReport.jellyfinRewindReport?.generalStats
+              ?.minutesPerDay?.median
               .toFixed(1),
           )
         }</span> minutes, for those who care)

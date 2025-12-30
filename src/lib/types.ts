@@ -244,7 +244,7 @@ export type ProcessingResults = {
 };
 
 export class Listen {
-  rowId: string;
+  rowId: string | undefined;
   itemId: string;
   itemName: string;
   dateCreated: Date;
@@ -304,8 +304,9 @@ export enum SkipType {
 }
 
 export type ListenQueryRow = {
-  rowid: string;
+  rowid?: string;
   ItemId: string;
+  UserId: string;
   ItemName: string;
   DateCreated: Date;
   PlayDuration: number;
@@ -474,126 +475,144 @@ export type FullRewindReport = {
   rawData: any;
 };
 export type LightRewindReport = {
-  commit: string;
-  year: number;
-  timestamp: string;
-  user: {
-    id: string;
-    name: string;
-  };
-  server: {
-    LocalAddress: string;
-    ServerName: string;
-    Version: string;
-    ProductName: string;
-    OperatingSystem: string;
-    Id: string;
-    StartupWizardCompleted: boolean;
-    PublicAddress: string;
-  };
-  type: "light";
-  playbackReportAvailable: boolean;
-  playbackReportDataMissing: boolean;
-  generalStats: {
-    totalPlaybackDurationByMonth: {
-      [key: number]: number; // in minutes
+  jellyfinRewindReport: {
+    commit: string;
+    year: number;
+    timestamp: string;
+    user: {
+      id: string;
+      name: string;
     };
-    totalPlays: {
-      playbackReport: number;
-      average: number;
-      jellyfin: number;
+    server: {
+      LocalAddress: string;
+      ServerName: string;
+      Version: string;
+      ProductName: string;
+      OperatingSystem: string;
+      Id: string;
+      StartupWizardCompleted: boolean;
+      PublicAddress: string;
     };
-    totalPlaybackDurationMinutes: {
-      playbackReport: number;
-      average: number;
-      jellyfin: number;
-    };
-    totalPlaybackDurationHours: {
-      playbackReport: number;
-      average: number;
-      jellyfin: number;
-    };
-    uniqueTracksPlayed: number;
-    uniqueAlbumsPlayed: number;
-    uniqueArtistsPlayed: number;
-    playbackMethods: {
-      playCount: {
-        [method: string]: number;
+    type: "light";
+    playbackReportAvailable: boolean;
+    playbackReportDataMissing: boolean;
+    generalStats: {
+      totalPlaybackDurationByMonth: {
+        [key: number]: number; // in minutes
       };
-      duration: {
-        [method: string]: number;
+      totalPlays: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
       };
-    };
-    locations: {
-      devices: {
-        [device: string]: number;
+      totalPlaybackDurationMinutes: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
       };
-      clients: {
-        [client: string]: number;
+      totalPlaybackDurationHours: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
       };
-      combinations: {
-        [combination: string]: {
-          device: string;
-          client: string;
-          playCount: number;
+      uniqueTracksPlayed: number;
+      uniqueAlbumsPlayed: number;
+      uniqueArtistsPlayed: number;
+      playbackMethods: {
+        playCount: {
+          [method: string]: number;
+        };
+        duration: {
+          [method: string]: number;
         };
       };
+      locations: {
+        devices: {
+          [device: string]: number;
+        };
+        clients: {
+          [client: string]: number;
+        };
+        combinations: {
+          [combination: string]: {
+            device: string;
+            client: string;
+            playCount: number;
+          };
+        };
+      };
+      mostSuccessivePlays: {
+        track: OldTrack;
+        name: string;
+        artists: OldBaseInfo[];
+        albumArtist: OldAlbumArtistBaseInfo;
+        image: OldImage;
+        playCount: number;
+        totalDuration: number;
+      };
+      totalMusicDays: number;
+      minutesPerDay: {
+        mean: number;
+        median: number;
+        // min, max?
+      };
     };
-    mostSuccessivePlays: {
-      track: OldTrack;
-      name: string;
-      artists: OldBaseInfo[];
-      albumArtist: OldAlbumArtistBaseInfo;
-      image: OldImage;
-      playCount: number;
-      totalDuration: number;
+    featureDelta?: {
+      listeningActivityDifference: {
+        uniquePlays: {
+          tracks: number;
+          albums: number;
+          artists: number;
+        };
+        totalPlays: {
+          average: number;
+          jellyfin: number;
+          playbackReport: number;
+        };
+      };
+      favoriteDifference: number;
+      year: number;
     };
-    totalMusicDays: number;
-    minutesPerDay: {
-      mean: number;
-      median: number;
-      // min, max?
-    };
-  };
-  tracks: {
-    duration: OldTrack[];
-    playCount: OldTrack[];
-    leastSkipped: OldTrack[];
-    mostSkipped: OldTrack[];
-    forgottenFavoriteTracks: OldTrack[];
-  };
-  albums: {
-    duration: OldAlbum[];
-    playCount: OldAlbum[];
-  };
-  artists: {
-    duration: OldArtist[];
-    playCount: OldArtist[];
-  };
-  genres: {
-    duration: OldGenre[];
-    playCount: OldGenre[];
-  };
-  libraryStats: {
     tracks: {
-      total: number;
-      favorite: number;
+      duration: OldTrack[];
+      playCount: OldTrack[];
+      leastSkipped: OldTrack[];
+      mostSkipped: OldTrack[];
+      forgottenFavoriteTracks: OldTrack[];
     };
     albums: {
-      total: number;
+      duration: OldAlbum[];
+      playCount: OldAlbum[];
     };
     artists: {
-      total: number;
+      duration: OldArtist[];
+      playCount: OldArtist[];
     };
-    trackLength: {
-      mean: number;
-      median: number;
-      min: number;
-      max: number;
+    genres: {
+      duration: OldGenre[];
+      playCount: OldGenre[];
     };
-    totalRuntime: number;
+    libraryStats: {
+      tracks: {
+        total: number;
+        favorite: number;
+      };
+      albums: {
+        total: number;
+      };
+      artists: {
+        total: number;
+      };
+      trackLength: {
+        mean: number;
+        median: number;
+        min: number;
+        max: number;
+      };
+      totalRuntime: number;
+    };
+    playbackReportComplete: boolean;
   };
-  playbackReportComplete: boolean;
 };
 
 interface OldBaseInfo {

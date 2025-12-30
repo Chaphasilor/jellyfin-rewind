@@ -11,18 +11,8 @@
   let userName: string = "";
   let userPassword: string = "";
 
-  function proceedToLoading() {
-    processing()
-      .then(async (result) => {
-        if (result.success) {
-          processingResult.set(result.data);
-          lightRewindReport.set(
-            await processingResultToRewindReport($processingResult),
-          );
-          goto("/rewind");
-        }
-      });
-    goto("/loading");
+  function proceed() {
+    goto("/importLastYearsReport");
   }
 
   // only when devin' attempt an auto login
@@ -33,7 +23,7 @@
       userPassword = i.PUBLIC_JELLYFIN_PASSWORD;
       await pingServer();
       await authenticate();
-      proceedToLoading();
+      proceed();
     });
   }
 
@@ -139,7 +129,7 @@
           loginValid = auth.success;
           if (auth.success) {
             error = undefined;
-            proceedToLoading();
+            proceed();
             return;
           }
           jellyfin.terminateSession();
@@ -155,7 +145,7 @@
 
 <button
   disabled={!serverValid || !loginValid || !userName || !userPassword}
-  on:click={() => proceedToLoading}
+  on:click={() => proceed}
 >
   Continue To Rewind
 </button>

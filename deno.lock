@@ -7,6 +7,7 @@
     "npm:@tailwindcss/vite@^4.1.18": "4.1.18_vite@7.3.0__sass-embedded@1.97.1__picomatch@4.0.3_sass-embedded@1.97.1",
     "npm:@types/chart.js@^4.0.1": "4.0.1",
     "npm:@types/chartjs@^0.0.31": "0.0.31",
+    "npm:blurhash@^2.0.5": "2.0.5",
     "npm:chart.js@^4.5.1": "4.5.1",
     "npm:sass-embedded@^1.97.1": "1.97.1",
     "npm:svelte-check@^4.3.5": "4.3.5_svelte@5.46.1__acorn@8.15.0_typescript@5.9.3",
@@ -563,6 +564,9 @@
     },
     "axobject-query@4.1.0": {
       "integrity": "sha512-qIj0G9wZbMGNLjLmg1PT6v2mE9AH2zlnADJD/2tC6E00hgmhUOfEB6greHPAfLRSufHqROIUTkw6E+M3lH0PTQ=="
+    },
+    "blurhash@2.0.5": {
+      "integrity": "sha512-cRygWd7kGBQO3VEhPiTgq4Wc43ctsM+o46urrmPOiuAe+07fzlSB9OJVdpgDL0jPqXUVQ9ht7aq7kxOeJHRK+w=="
     },
     "braces@3.0.3": {
       "integrity": "sha512-yQbXgO/OSZVD2IsiLlro+7Hf6Q18EJrKSEsdoMzKePKXct3gvD8oLcOQdIzGupr5Fj+EDe8gO/lxc1BzfMpxvA==",
@@ -1161,6 +1165,7 @@
         "npm:@tailwindcss/vite@^4.1.18",
         "npm:@types/chart.js@^4.0.1",
         "npm:@types/chartjs@^0.0.31",
+        "npm:blurhash@^2.0.5",
         "npm:chart.js@^4.5.1",
         "npm:sass-embedded@^1.97.1",
         "npm:svelte-check@^4.3.5",

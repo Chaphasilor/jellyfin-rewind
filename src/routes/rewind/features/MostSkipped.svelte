@@ -16,7 +16,8 @@
   <h2 class="text-2xl mt-5">Sick of it:<br />Tracks you skipped the most</h2>
   {#if extraFeatures().mostSkippedTracks}
     <ol id="most-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
-      {#each $lightRewindReport.tracks?.[`mostSkipped`]?.slice(0, 5) as
+      {#each       $lightRewindReport.jellyfinRewindReport.tracks?.[`mostSkipped`]
+        ?.slice(0, 5) as
         track,
         index
         (track.id)
@@ -167,7 +168,10 @@
   <ol
     class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
   >
-    {#each $lightRewindReport.tracks?.[`mostSkipped`]?.slice(5, 20) as
+    {#each     $lightRewindReport.jellyfinRewindReport.tracks?.[`mostSkipped`]?.slice(
+      5,
+      20,
+    ) as
       track,
       index
       (track.id)

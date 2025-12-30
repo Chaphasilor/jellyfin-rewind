@@ -200,7 +200,7 @@ export async function getTracksForLibrary(libraryId: string) {
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=Audio`);
   query.push(`recursive=true`);
-  query.push(`fields=Genres,ParentId,AudioInfo,ParentId,Ak`);
+  query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
   const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
@@ -212,7 +212,7 @@ export async function getAlbumsForLibrary(libraryId: string) {
   query.push(`includeItemTypes=MusicAlbum`);
   query.push(`recursive=true`);
   //TODO match against old queries
-  query.push(`fields=Genres,ParentId,AudioInfo,ParentId,Ak`);
+  query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
   const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinAlbum[] }>;
@@ -253,6 +253,55 @@ export async function getGenresForLibrary(libraryId: string) {
   const route = `Genres?${query.join(`&`)}`;
   console.log(`route:`, route);
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinGenre[] }>;
+}
+
+export async function loadItemInfoBatched(itemIds: string[]) {
+  let combinedResponse = {
+    Items: [] as JellyfinTrack[],
+  };
+  const batchSize = 200;
+  let response;
+  for (
+    let batchIndex = 0;
+    batchIndex < Math.ceil(itemIds.length / batchSize);
+    batchIndex++
+  ) {
+    console.info(`Fetching item batch info`);
+    response = await loadItemInfo(
+      itemIds.slice(batchSize * batchIndex, batchSize * (batchIndex + 1)),
+    );
+    if (response.success) {
+      if (!combinedResponse) {
+        combinedResponse = response.data;
+      } else {
+        combinedResponse.Items.push(...response.data.Items);
+      }
+      console.log(
+        `combinedResponse.Items.length:`,
+        combinedResponse.Items.length,
+      );
+    }
+  }
+
+  return logAndReturn("loadItemInfoBatched", {
+    success: true,
+    data: combinedResponse,
+  });
+}
+
+export async function loadItemInfo(
+  itemIds: string[],
+): Promise<Result<{ Items: JellyfinTrack[] }>> {
+  const query: string[] = [];
+  query.push(`includeItemTypes=Audio`);
+  query.push(`recursive=true`);
+  query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
+  query.push(`enableImageTypes=Primary`);
+  if (itemIds.length > 0) {
+    query.push(`ids=${[...new Set(itemIds)].join(",")}`);
+  }
+  const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
+  return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
 }
 
 export function compactTrack(track: JellyfinTrack): Track {
@@ -320,8 +369,8 @@ export function increaseCachesForPlaybackReportingTrack(
   playbackCache.setAndGetKey(playbackMethodKey, () => null);
   playbackCache.count(playbackMethodKey, source, delta);
 
-  listensCache.setAndGetKey(listen.rowId, () => listen);
-  listensCache.count(listen.rowId, source, {
+  listensCache.setAndGetKey(listen.rowId!, () => listen);
+  listensCache.count(listen.rowId!, source, {
     ...delta,
     listens: undefined, // avoid double counting
   });
@@ -357,7 +406,7 @@ function generateCountsDelta(
       partialSkips: listen.isPartialSkip ? 1 : 0,
       fullSkips: listen.isSkip ? 1 : 0,
       listenDuration: listen.playDuration,
-      listens: new Set([listen.rowId]),
+      listens: new Set([listen.rowId!]),
     }
     : {
       // Jellyfin only counts listens and cannot recognize skips

@@ -11,7 +11,7 @@ import {
   type Result,
 } from "$lib/types.ts";
 import { logAndReturn } from "$lib/utility/logging.ts";
-import allListens from "$lib/jellyfin/queries/api/allListens.ts";
+import allListens from "../../api/playbackReporting.ts";
 import {
   compactTrack,
   getAlbumsForLibrary,
@@ -254,7 +254,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       detail: rawListen.ItemId,
     }));
 
-    const listen = listensCache.setAndGetValue(rawListen.rowid, () => {
+    const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
       return new Listen(rawListen, tracksCache.get(rawListen.ItemId));
     });
 

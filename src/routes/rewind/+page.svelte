@@ -23,8 +23,9 @@
   import Summary from "./features/Summary.svelte";
   import Outro from "./features/Outro.svelte";
   import Intro from "./features/Intro.svelte";
+  import FeatureDelta from "./features/FeatureDelta.svelte";
 
-  if (!$lightRewindReport) {
+  if (!$lightRewindReport?.jellyfinRewindReport) {
     goto("/login");
   }
 
@@ -35,20 +36,37 @@
   let rankingMetric: FeatureProps["rankingMetric"] = $state("playCount");
 
   let extraFeatures: FeatureProps["extraFeatures"] = $derived(() => {
+    if (!$lightRewindReport?.jellyfinRewindReport) {
+      return {
+        fullReport: false,
+        totalPlaytimeGraph: false,
+        leastSkippedTracks: false,
+        mostSkippedTracks: false,
+        totalMusicDays: false,
+        mostSuccessivePlays: false,
+        listeningActivityDifference: false,
+      };
+    }
     return {
       //@ts-ignore: compatibility with the full report
-      fullReport: $lightRewindReport.type === `full`,
-      totalPlaytimeGraph: $lightRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.playbackReportDataMissing,
-      leastSkippedTracks: $lightRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.playbackReportDataMissing,
-      mostSkippedTracks: $lightRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.playbackReportDataMissing,
-      totalMusicDays: $lightRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.playbackReportDataMissing,
-      mostSuccessivePlays: !!$lightRewindReport.generalStats
+      fullReport: $lightRewindReport.jellyfinRewindReport.type === `full`,
+      totalPlaytimeGraph:
+        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
+        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+      leastSkippedTracks:
+        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
+        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+      mostSkippedTracks:
+        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
+        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+      totalMusicDays:
+        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
+        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+      mostSuccessivePlays: !!$lightRewindReport.jellyfinRewindReport
+        .generalStats
         .mostSuccessivePlays,
-      listeningActivityDifference: false, //TODO implement delta
+      listeningActivityDifference: !!$lightRewindReport.jellyfinRewindReport
+        .featureDelta,
     };
   });
 
@@ -84,7 +102,9 @@
     {
       component: TopAlbums,
     },
-    //TODO feature delta
+    {
+      component: FeatureDelta,
+    },
     //TODO forgotten favorites
     {
       component: TopGenres,

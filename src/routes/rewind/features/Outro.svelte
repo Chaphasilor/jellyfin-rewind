@@ -44,10 +44,10 @@
   <button
     class="px-6 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-3 flex flex-row gap-4 items-center mx-auto"
     on:click|stopPropagation={() => {
-      if (!$lightRewindReport.rawData) {
+      if (!$lightRewindReport.jellyfinRewindReport.rawData) {
         showIncompleteReportOverlay();
       } else {
-        downloadRewindReportData($lightRewindReport);
+        downloadRewindReportData($lightRewindReport.jellyfinRewindReport);
         rewindReportDownloaded = true;
       }
     }}
@@ -133,10 +133,10 @@
         //     <button
         //       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
         //       on:click|stopPropagation={() => {n}(e) => {
-        //         if (!$lightRewindReport.rawData) {
+        //         if (!$lightRewindReport.jellyfinRewindReport.rawData) {
         //           showIncompleteReportOverlay(closeJellyfinRewind);
         //         } else {
-        //           window.downloadRewindReportData($lightRewindReport);
+        //           window.downloadRewindReportData($lightRewindReport.jellyfinRewindReport);
         //           state.rewindReportDownloaded = true;
         //         }
         //       })}"

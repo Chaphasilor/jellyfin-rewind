@@ -31,7 +31,8 @@
     id="top-genres-main-feature"
     class="flex flex-col gap-2 p-6 dark:text-black"
   >
-    {#each $lightRewindReport.genres?.[rankingMetric]?.slice(0, 5) as
+    {#each       $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]
+        ?.slice(0, 5) as
       genre,
       index
       (genre.id)
@@ -119,7 +120,10 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-48"
 >
-  {#each $lightRewindReport.genres?.[rankingMetric]?.slice(5, 20) as
+  {#each     $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]?.slice(
+      5,
+      20,
+    ) as
     genre,
     index
     (genre.id)

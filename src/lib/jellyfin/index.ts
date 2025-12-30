@@ -10,10 +10,10 @@ import { logAndReturn } from "$lib/utility/logging.ts";
 import { stringToUrl } from "$lib/utility/other.ts";
 
 class Jellyfin {
-  private token?: string;
+  token?: string;
   baseurl?: string;
   user?: User;
-  private header?: string;
+  header?: string;
 
   constructor() {
     // this.load();
@@ -158,12 +158,21 @@ class Jellyfin {
     );
   }
 
+  get deviceProfile() {
+    return {
+      clientName: `Jellyfin Rewind`,
+      clientVersion: `0.2025.0`, //TODO: update version dynamically
+      deviceName: `Chrome`,
+      deviceId: `90a83627-401a-4f19-bf93-be8ccf521b27`,
+    };
+  }
+
   private updateHeader(token: string = this.token || "") {
     this.header = "MediaBrowser ";
-    this.header += 'Client="Jellyfin Rewind", ';
-    this.header += 'Device="Chrome", ';
-    this.header += 'DeviceId="90a83627-401a-4f19-bf93-be8ccf521b27", ';
-    this.header += `Version="0.${new Date().getFullYear()}.0", `;
+    this.header += `Client="${this.deviceProfile.clientName}", `;
+    this.header += `Device="${this.deviceProfile.deviceName}", `;
+    this.header += `DeviceId="${this.deviceProfile.deviceId}", `;
+    this.header += `Version="${this.deviceProfile.clientVersion}", `;
     this.header += `Token="${token}", `;
     logAndReturn("updateHeader", this.header);
   }

@@ -7,8 +7,6 @@
 </script>
 
 <main>
-  <JellyfinRewindLogo />
-
   <PageTransition path={page.url.href}>
     <slot />
   </PageTransition>

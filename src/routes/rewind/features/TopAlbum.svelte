@@ -14,7 +14,7 @@
 
 <div class="text-center text-white">
   <h2 class="text-2xl mt-5">
-    Your Top Album<br />of {$lightRewindReport?.year}:
+    Your Top Album<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
   </h2>
   <div class="flex mt-10 flex-col items-center">
     <img
@@ -24,11 +24,15 @@
     <div class="px-4 py-4 overflow-hidden whitespace-wrap">
       <div class="-rotate-6 mt-10 text-4xl font-semibold">
         <div class="-ml-4">
-          {$lightRewindReport.albums?.[rankingMetric]?.[0].name}
+          {
+            $lightRewindReport.jellyfinRewindReport.albums
+              ?.[rankingMetric]?.[0].name
+          }
         </div>
         <div class="ml-4 mt-8 max-h-[3.5em]">
           by {
-            $lightRewindReport.albums?.[rankingMetric]?.[0]
+            $lightRewindReport.jellyfinRewindReport.albums
+              ?.[rankingMetric]?.[0]
               ?.artists.reduce(
                 (acc, cur, index) =>
                   index > 0 ? `${acc} & ${cur.name}` : cur.name,
@@ -45,16 +49,18 @@
     <div>
       Streamed <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.albums?.[rankingMetric]?.[0]?.playCount[
-            informationSource
-          ],
+          $lightRewindReport.jellyfinRewindReport.albums
+            ?.[rankingMetric]?.[0]?.playCount[
+              informationSource
+            ],
         )
       }</span> times.
     </div>
     <div>
       Listened for <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.albums?.[rankingMetric]?.[0]
+          $lightRewindReport.jellyfinRewindReport.albums
+            ?.[rankingMetric]?.[0]
             ?.totalPlayDuration[
               informationSource
             ]?.toFixed(0),

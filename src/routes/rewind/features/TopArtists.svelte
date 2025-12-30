@@ -15,7 +15,8 @@
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Artists<br />of the year</h2>
   <ol id="top-artists-main-feature" class="flex flex-col gap-2 p-6">
-    {#each $lightRewindReport.artists?.[rankingMetric]?.slice(0, 5) as
+    {#each       $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
+        ?.slice(0, 5) as
       artist,
       index
       (artist.id)
@@ -112,7 +113,8 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each $lightRewindReport.artists?.[rankingMetric]?.slice(5, 20) as
+  {#each     $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
+      ?.slice(5, 20) as
     artist,
     index
     (artist.id)

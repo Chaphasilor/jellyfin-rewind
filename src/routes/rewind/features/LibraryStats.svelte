@@ -22,7 +22,8 @@
       >{
         showAsNumber(
           (
-            $lightRewindReport?.libraryStats?.totalRuntime /
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.totalRuntime /
             60.0 /
             60.0
           ).toFixed(0),
@@ -33,7 +34,8 @@
       That's <span class="font-semibold text-3xl text-sky-500 font-quicksand">{
         showAsNumber(
           (
-            $lightRewindReport?.libraryStats?.totalRuntime /
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.totalRuntime /
             60.0 /
             60.0 /
             24.0
@@ -49,7 +51,8 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.tracks?.favorite,
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.tracks?.favorite,
           )
         }</span> favorite tracks.</span>
     </div>
@@ -58,7 +61,8 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.tracks?.total,
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.tracks?.total,
           )
         }</span> unique tracks.</span>
     </div>
@@ -67,7 +71,8 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.albums?.total,
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.albums?.total,
           )
         }</span> albums.</span>
     </div>
@@ -76,7 +81,8 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.artists?.total,
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.artists?.total,
           )
         }</span> artists.</span>
     </div>
@@ -90,7 +96,8 @@
           class="text-2xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.trackLength?.mean
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.trackLength?.mean
               .toFixed(0),
           )
         }</span> seconds.</span>
@@ -99,7 +106,8 @@
       <span class="font-semibold -mt-1"
       >(Median: <span class="text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.trackLength?.median
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.trackLength?.median
               .toFixed(0),
           )
         }</span>)</span>
@@ -108,7 +116,8 @@
       <span class="font-semibold text-xl"
       >Shortest: <span class="text-2xl text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.trackLength?.min
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.trackLength?.min
               .toFixed(0),
           )
         }</span> seconds.</span>
@@ -117,7 +126,8 @@
       <span class="font-semibold text-xl"
       >Longest: <span class="text-2xl text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport?.libraryStats?.trackLength?.max
+            $lightRewindReport.jellyfinRewindReport?.libraryStats
+              ?.trackLength?.max
               .toFixed(0),
           )
         }</span> seconds.</span>

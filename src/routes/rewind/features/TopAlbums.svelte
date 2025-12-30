@@ -15,7 +15,8 @@
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Albums<br />of the year</h2>
   <ol id="top-albums-main-feature" class="flex flex-col gap-2 p-6">
-    {#each $lightRewindReport.albums?.[rankingMetric]?.slice(0, 5) as
+    {#each       $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]
+        ?.slice(0, 5) as
       album,
       index
       (album.id)
@@ -103,7 +104,10 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each $lightRewindReport.albums?.[rankingMetric]?.slice(5, 20) as
+  {#each     $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]?.slice(
+      5,
+      20,
+    ) as
     album,
     index
     (album.id)

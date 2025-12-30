@@ -25,7 +25,9 @@
   <h2
     class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200"
   >
-    Welcome to<br />Jellyfin Rewind {$lightRewindReport?.year}!
+    Welcome to<br />Jellyfin Rewind {
+      $lightRewindReport.jellyfinRewindReport?.year
+    }!
   </h2>
 
   <div

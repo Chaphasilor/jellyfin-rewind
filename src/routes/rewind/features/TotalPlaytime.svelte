@@ -108,7 +108,9 @@
 
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">
-    Your Total Playtime<br />of {$lightRewindReport?.year}<span
+    Your Total Playtime<br />of {
+      $lightRewindReport.jellyfinRewindReport?.year
+    }<span
       class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
       on:click|stopPropagation={() => {
         //TODO showOverlayDataAccuracy
@@ -140,9 +142,10 @@
   <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl">
     <span class="font-quicksand-bold">{
       showAsNumber(
-        $lightRewindReport.generalStats.totalPlaybackDurationMinutes[
-          informationSource
-        ].toFixed(0),
+        $lightRewindReport.jellyfinRewindReport.generalStats
+          .totalPlaybackDurationMinutes[
+            informationSource
+          ].toFixed(0),
       )
     }</span> min
   </div>
@@ -151,7 +154,8 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.generalStats?.[`totalPlays`]
+          $lightRewindReport.jellyfinRewindReport.generalStats
+            ?.[`totalPlays`]
             ?.[informationSource],
         )
       }</span> total streams.
@@ -159,21 +163,24 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.generalStats?.[`uniqueTracksPlayed`],
+          $lightRewindReport.jellyfinRewindReport.generalStats
+            ?.[`uniqueTracksPlayed`],
         )
       }</span> unique tracks.
     </div>
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.generalStats?.[`uniqueArtistsPlayed`],
+          $lightRewindReport.jellyfinRewindReport.generalStats
+            ?.[`uniqueArtistsPlayed`],
         )
       }</span> unique artists.
     </div>
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.generalStats?.[`uniqueAlbumsPlayed`],
+          $lightRewindReport.jellyfinRewindReport.generalStats
+            ?.[`uniqueAlbumsPlayed`],
         )
       }</span> unique albums.
     </div>

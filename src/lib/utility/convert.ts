@@ -2,6 +2,7 @@ import {
   type Album,
   type Artist,
   CounterSources,
+  type FullRewindReport,
   type Genre,
   type LightRewindReport,
   type OldAlbum,
@@ -10,14 +11,17 @@ import {
   type OldTrack,
   type PlaybackCounter,
   type ProcessingResults,
+  type Result,
   type Track,
 } from "../types.ts";
-import { end } from "$lib/globals.ts";
+import { end, oldReport } from "$lib/globals.ts";
 import Jellyfin from "$lib/jellyfin/index.ts";
+import { getFeatureDelta } from "./oldReportDelta.ts";
+import { logAndReturn } from "./logging.ts";
 
 export async function processingResultToRewindReport(
   result: ProcessingResults,
-): Promise<LightRewindReport> {
+): Promise<Result<LightRewindReport>> {
   const serverInfoResult = await Jellyfin.pingServer();
   const serverInfo = serverInfoResult.success ? serverInfoResult.data : null;
 
@@ -380,312 +384,343 @@ export async function processingResultToRewindReport(
     0,
   );
 
-  return {
-    //TODO commit:
-    year: end.getFullYear(),
-    timestamp: new Date().toISOString(),
-    user: userInfo,
-    server: { ...serverInfo!, PublicAddress: Jellyfin.baseurl! },
-    type: "light",
-    playbackReportAvailable: result.playbackCache.len > 0,
-    playbackReportDataMissing: result.playbackCache.len === 0,
-    generalStats: {
-      // in minutes
-      totalPlaybackDurationByMonth: result.monthOfYear.entries.map((
-        [month, value],
-      ) => [
-        Number(month),
-        Math.ceil(value.counters.playbackReporting.listenDuration / 60),
-      ])
-        .reduce(
-          (current, [month, value]) => {
-            current[month] = value;
-            return current;
-          },
-          {
-            0: 0,
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-            7: 0,
-            8: 0,
-            9: 0,
-            10: 0,
-            11: 0,
-          } as Record<number, number>,
-        ),
-      totalPlays: {
-        // playbackReport:
-        playbackReport: result.tracksCache.entries.reduce(
-          (sum, [id, value]) =>
-            sum +
-            value.counters.playbackReporting.fullPlays +
-            value.counters.playbackReporting.partialSkips +
-            value.counters.playbackReporting.fullSkips, //TODO change this to exclude full skips at the end, that seems more correct than the old behavior
-          0,
-        ),
-        average: result.tracksCache.entries.reduce(
-          (sum, [id, value]) =>
-            sum +
-            value.counters.average.fullPlays +
-            value.counters.average.partialSkips +
-            value.counters.average.fullSkips,
-          0,
-        ),
-        jellyfin: result.tracksCache.entries.reduce(
-          (sum, [id, value]) =>
-            sum +
-            value.counters.jellyfin.fullPlays +
-            value.counters.jellyfin.partialSkips +
-            value.counters.jellyfin.fullSkips,
-          0,
-        ),
-      },
-      totalPlaybackDurationMinutes: {
-        playbackReport: Number((result.tracksCache.entries.reduce(
-          (sum, [id, value]) =>
-            sum +
-            value.counters.playbackReporting.listenDuration,
-          0,
-        ) / 60).toFixed(1)),
-        average: Number((result.tracksCache.entries.reduce(
-          (sum, [id, value]) => sum + value.counters.average.listenDuration,
-          0,
-        ) / 60).toFixed(1)),
-        jellyfin: Number((result.tracksCache.entries.reduce(
-          (sum, [id, value]) => sum + value.counters.jellyfin.listenDuration,
-          0,
-        ) / 60).toFixed(1)),
-      },
-      totalPlaybackDurationHours: {
-        playbackReport: Number(
-          (result.generalCounter.playbackReporting.listenDuration / 3600)
-            .toFixed(1),
-        ),
-        average: Number(
-          (result.generalCounter.average.listenDuration / 3600).toFixed(1),
-        ),
-        jellyfin: Number(
-          (result.generalCounter.jellyfin.listenDuration / 3600).toFixed(1),
-        ),
-      },
-      uniqueTracksPlayed: result.tracksCache.len,
-      uniqueAlbumsPlayed: result.albumsCache.len,
-      uniqueArtistsPlayed: result.artistCache.len,
-      playbackMethods: {
-        playCount: result.playbackCache.entries.reduce(
-          (current, [method, value]) => {
-            current[method] = value.counters.playbackReporting.fullPlays +
+  const newReport: LightRewindReport = {
+    jellyfinRewindReport: {
+      //TODO commit:
+      year: end.getFullYear(),
+      timestamp: new Date().toISOString(),
+      user: userInfo,
+      server: { ...serverInfo!, PublicAddress: Jellyfin.baseurl! },
+      type: "light",
+      playbackReportAvailable: result.playbackCache.len > 0,
+      playbackReportDataMissing: result.playbackCache.len === 0,
+      generalStats: {
+        // in minutes
+        totalPlaybackDurationByMonth: result.monthOfYear.entries.map((
+          [month, value],
+        ) => [
+          Number(month),
+          Math.ceil(value.counters.playbackReporting.listenDuration / 60),
+        ])
+          .reduce(
+            (current, [month, value]) => {
+              current[month] = value;
+              return current;
+            },
+            {
+              0: 0,
+              1: 0,
+              2: 0,
+              3: 0,
+              4: 0,
+              5: 0,
+              6: 0,
+              7: 0,
+              8: 0,
+              9: 0,
+              10: 0,
+              11: 0,
+            } as Record<number, number>,
+          ),
+        totalPlays: {
+          // playbackReport:
+          playbackReport: result.tracksCache.entries.reduce(
+            (sum, [id, value]) =>
+              sum +
+              value.counters.playbackReporting.fullPlays +
               value.counters.playbackReporting.partialSkips +
-              value.counters.playbackReporting.fullSkips;
-            return current;
-          },
-          {
-            directPlay: 0,
-            directStream: 0,
-            transcode: 0,
-          } as Record<string, number>,
-        ),
-        duration: result.playbackCache.entries.reduce(
-          (current, [method, value]) => {
-            current[method] = value.counters.playbackReporting.listenDuration /
-              60.0;
-            return current;
-          },
-          {
-            directPlay: 0,
-            directStream: 0,
-            transcode: 0,
-          } as Record<string, number>,
-        ),
-      },
-      locations: {
-        devices: result.deviceCache.entries.reduce(
-          (current, [device, value]) => {
-            current[device] = value.counters.playbackReporting.fullPlays +
-              value.counters.playbackReporting.partialSkips +
-              value.counters.playbackReporting.fullSkips;
-            return current;
-          },
-          {} as Record<string, number>,
-        ),
-        clients: result.clientCache.entries.reduce(
-          (current, [client, value]) => {
-            current[client] = value.counters.playbackReporting.fullPlays +
-              value.counters.playbackReporting.partialSkips +
-              value.counters.playbackReporting.fullSkips;
-            return current;
-          },
-          {} as Record<string, number>,
-        ),
-        combinations: result.combinedDeviceClientCache.entries.reduce(
-          (current, [deviceAndClient, value]) => {
-            current[deviceAndClient] = {
-              ...value.data,
-              playCount: value.counters.playbackReporting.fullPlays +
+              value.counters.playbackReporting.fullSkips, //TODO change this to exclude full skips at the end, that seems more correct than the old behavior
+            0,
+          ),
+          average: result.tracksCache.entries.reduce(
+            (sum, [id, value]) =>
+              sum +
+              value.counters.average.fullPlays +
+              value.counters.average.partialSkips +
+              value.counters.average.fullSkips,
+            0,
+          ),
+          jellyfin: result.tracksCache.entries.reduce(
+            (sum, [id, value]) =>
+              sum +
+              value.counters.jellyfin.fullPlays +
+              value.counters.jellyfin.partialSkips +
+              value.counters.jellyfin.fullSkips,
+            0,
+          ),
+        },
+        totalPlaybackDurationMinutes: {
+          playbackReport: Number((result.tracksCache.entries.reduce(
+            (sum, [id, value]) =>
+              sum +
+              value.counters.playbackReporting.listenDuration,
+            0,
+          ) / 60).toFixed(1)),
+          average: Number((result.tracksCache.entries.reduce(
+            (sum, [id, value]) => sum + value.counters.average.listenDuration,
+            0,
+          ) / 60).toFixed(1)),
+          jellyfin: Number((result.tracksCache.entries.reduce(
+            (sum, [id, value]) => sum + value.counters.jellyfin.listenDuration,
+            0,
+          ) / 60).toFixed(1)),
+        },
+        totalPlaybackDurationHours: {
+          playbackReport: Number(
+            (result.generalCounter.playbackReporting.listenDuration / 3600)
+              .toFixed(1),
+          ),
+          average: Number(
+            (result.generalCounter.average.listenDuration / 3600).toFixed(1),
+          ),
+          jellyfin: Number(
+            (result.generalCounter.jellyfin.listenDuration / 3600).toFixed(1),
+          ),
+        },
+        uniqueTracksPlayed: result.tracksCache.len,
+        uniqueAlbumsPlayed: result.albumsCache.len,
+        uniqueArtistsPlayed: result.artistCache.len,
+        playbackMethods: {
+          playCount: result.playbackCache.entries.reduce(
+            (current, [method, value]) => {
+              current[method] = value.counters.playbackReporting.fullPlays +
                 value.counters.playbackReporting.partialSkips +
-                value.counters.playbackReporting.fullSkips,
-            };
-            return current;
-          },
-          {} as Record<string, {
-            device: string;
-            client: string;
-            playCount: number;
-          }>,
-        ),
+                value.counters.playbackReporting.fullSkips;
+              return current;
+            },
+            {
+              directPlay: 0,
+              directStream: 0,
+              transcode: 0,
+            } as Record<string, number>,
+          ),
+          duration: result.playbackCache.entries.reduce(
+            (current, [method, value]) => {
+              current[method] =
+                value.counters.playbackReporting.listenDuration /
+                60.0;
+              return current;
+            },
+            {
+              directPlay: 0,
+              directStream: 0,
+              transcode: 0,
+            } as Record<string, number>,
+          ),
+        },
+        locations: {
+          devices: result.deviceCache.entries.reduce(
+            (current, [device, value]) => {
+              current[device] = value.counters.playbackReporting.fullPlays +
+                value.counters.playbackReporting.partialSkips +
+                value.counters.playbackReporting.fullSkips;
+              return current;
+            },
+            {} as Record<string, number>,
+          ),
+          clients: result.clientCache.entries.reduce(
+            (current, [client, value]) => {
+              current[client] = value.counters.playbackReporting.fullPlays +
+                value.counters.playbackReporting.partialSkips +
+                value.counters.playbackReporting.fullSkips;
+              return current;
+            },
+            {} as Record<string, number>,
+          ),
+          combinations: result.combinedDeviceClientCache.entries.reduce(
+            (current, [deviceAndClient, value]) => {
+              current[deviceAndClient] = {
+                ...value.data,
+                playCount: value.counters.playbackReporting.fullPlays +
+                  value.counters.playbackReporting.partialSkips +
+                  value.counters.playbackReporting.fullSkips,
+              };
+              return current;
+            },
+            {} as Record<string, {
+              device: string;
+              client: string;
+              playCount: number;
+            }>,
+          ),
+        },
+        //TODO mostSuccessivePlays:
+        totalMusicDays: result.dayOfYear.len,
+        //!!! this is correct, the old Report didn't sort the durations before calculating the median
+        minutesPerDay: {
+          //TODO we can calculate the mean for jellyfin too
+          mean: result.dayOfYear.entries.reduce(
+            (sum, [day, value]) =>
+              sum + value.counters.playbackReporting.listenDuration / 60,
+            0,
+          ) / result.dayOfYear.len,
+          median: (() => {
+            const durations = result.dayOfYear.entries
+              .map(([day, value]) =>
+                value.counters.playbackReporting.listenDuration / 60
+              )
+              .sort((a, b) => a - b);
+            const mid = Math.floor(durations.length / 2);
+            return durations.length % 2 !== 0
+              ? durations[mid]
+              : (durations[mid - 1] + durations[mid]) / 2;
+          })(),
+        },
       },
-      //TODO mostSuccessivePlays:
-      totalMusicDays: result.dayOfYear.len,
-      //!!! this is correct, the old Report didn't sort the durations before calculating the median
-      minutesPerDay: {
-        //TODO we can calculate the mean for jellyfin too
-        mean: result.dayOfYear.entries.reduce(
-          (sum, [day, value]) =>
-            sum + value.counters.playbackReporting.listenDuration / 60,
-          0,
-        ) / result.dayOfYear.len,
-        median: (() => {
-          const durations = result.dayOfYear.entries
-            .map(([day, value]) =>
-              value.counters.playbackReporting.listenDuration / 60
-            )
-            .sort((a, b) => a - b);
-          const mid = Math.floor(durations.length / 2);
-          return durations.length % 2 !== 0
-            ? durations[mid]
-            : (durations[mid - 1] + durations[mid]) / 2;
-        })(),
-      },
-    },
-    //TODO this doesn't differentiate between playback reporting and jellyfin data yet
-    tracks: {
-      duration: result.tracksCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        "listenDuration",
-        "DESC",
-      ).slice(0, 10)
-        .map(
-          cacheTrackToOldTrack,
-        ),
-      playCount: result.tracksCache.sorted(CounterSources.PLAYBACK_REPORTING, [
-        "fullPlays",
-        "partialSkips",
-      ], "DESC").slice(0, 10).map(
-        cacheTrackToOldTrack,
-      ),
-      mostSkipped: result.tracksCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        ["partialSkips", "fullSkips"],
-        "DESC",
-      )
-        .slice(0, 10).map(
-          cacheTrackToOldTrack,
-        ),
-      leastSkipped: result.tracksCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        ["partialSkips", "fullSkips"],
-      )
-        .slice(0, 10).map(
-          cacheTrackToOldTrack,
-        ),
-      //TODO forgottenFavoriteTracks:
-    },
-    albums: {
-      duration: result.albumsCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        "listenDuration",
-        "DESC",
-      ).slice(0, 10)
-        .map(
-          cacheAlbumToOldAlbum,
-        ),
-      playCount: result.albumsCache.sorted(CounterSources.PLAYBACK_REPORTING, [
-        "fullPlays",
-        "partialSkips",
-      ], "DESC").slice(
-        0,
-        10,
-      ).map(
-        cacheAlbumToOldAlbum,
-      ),
-    },
-    artists: {
-      duration: result.artistCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        "listenDuration",
-        "DESC",
-      ).slice(0, 10)
-        .map(
-          cacheArtistToOldArtist,
-        ),
-      playCount: result.artistCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        ["fullPlays", "partialSkips"],
-        "DESC",
-      ).slice(0, 10).map(cacheArtistToOldArtist),
-    },
-    genres: {
-      duration: result.genresCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        "listenDuration",
-        "DESC",
-      ).slice(0, 10)
-        .map(
-          cacheGenreToOldGenre,
-        ),
-      playCount: result.genresCache.sorted(
-        CounterSources.PLAYBACK_REPORTING,
-        ["fullPlays", "partialSkips"],
-        "DESC",
-      ).slice(
-        0,
-        10,
-      ).map(cacheGenreToOldGenre),
-    },
-    libraryStats: {
+      //TODO this doesn't differentiate between playback reporting and jellyfin data yet
       tracks: {
-        total: result.tracksCache.len,
-        favorite:
-          result.tracksCache.entries.filter(([id, value]) =>
-            value.data.favorite
-          ).length,
+        duration: result.tracksCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          "listenDuration",
+          "DESC",
+        ).slice(0, 10)
+          .map(
+            cacheTrackToOldTrack,
+          ),
+        playCount: result.tracksCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          [
+            "fullPlays",
+            "partialSkips",
+          ],
+          "DESC",
+        ).slice(0, 10).map(
+          cacheTrackToOldTrack,
+        ),
+        mostSkipped: result.tracksCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          ["partialSkips", "fullSkips"],
+          "DESC",
+        )
+          .slice(0, 10).map(
+            cacheTrackToOldTrack,
+          ),
+        leastSkipped: result.tracksCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          ["partialSkips", "fullSkips"],
+        )
+          .slice(0, 10).map(
+            cacheTrackToOldTrack,
+          ),
+        //TODO forgottenFavoriteTracks:
       },
       albums: {
-        total: result.albumsCache.len,
+        duration: result.albumsCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          "listenDuration",
+          "DESC",
+        ).slice(0, 10)
+          .map(
+            cacheAlbumToOldAlbum,
+          ),
+        playCount: result.albumsCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          [
+            "fullPlays",
+            "partialSkips",
+          ],
+          "DESC",
+        ).slice(
+          0,
+          10,
+        ).map(
+          cacheAlbumToOldAlbum,
+        ),
       },
       artists: {
-        total: result.artistCache.len,
+        duration: result.artistCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          "listenDuration",
+          "DESC",
+        ).slice(0, 10)
+          .map(
+            cacheArtistToOldArtist,
+          ),
+        playCount: result.artistCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          ["fullPlays", "partialSkips"],
+          "DESC",
+        ).slice(0, 10).map(cacheArtistToOldArtist),
       },
-      trackLength: {
-        mean: totalTracksLength / result.tracksCache.len,
-        median: (() => {
-          const durations = result.tracksCache.entries
-            .map(([id, value]) => value.data.duration)
-            .sort((a, b) => a - b);
-          const mid = Math.floor(durations.length / 2);
-          return durations.length % 2 !== 0
-            ? durations[mid]
-            : (durations[mid - 1] + durations[mid]) / 2;
-        })(),
-        min: result.tracksCache.entries.reduce(
-          (min, [id, value]) =>
-            value.data.duration < min ? value.data.duration : min,
-          Infinity,
-        ),
-        max: result.tracksCache.entries.reduce(
-          (max, [id, value]) =>
-            value.data.duration > max ? value.data.duration : max,
+      genres: {
+        duration: result.genresCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          "listenDuration",
+          "DESC",
+        ).slice(0, 10)
+          .map(
+            cacheGenreToOldGenre,
+          ),
+        playCount: result.genresCache.sorted(
+          CounterSources.PLAYBACK_REPORTING,
+          ["fullPlays", "partialSkips"],
+          "DESC",
+        ).slice(
           0,
-        ),
+          10,
+        ).map(cacheGenreToOldGenre),
       },
-      totalRuntime: totalTracksLength,
+      libraryStats: {
+        tracks: {
+          total: result.tracksCache.len,
+          favorite:
+            result.tracksCache.entries.filter(([id, value]) =>
+              value.data.favorite
+            ).length,
+        },
+        albums: {
+          total: result.albumsCache.len,
+        },
+        artists: {
+          total: result.artistCache.len,
+        },
+        trackLength: {
+          mean: totalTracksLength / result.tracksCache.len,
+          median: (() => {
+            const durations = result.tracksCache.entries
+              .map(([id, value]) => value.data.duration)
+              .sort((a, b) => a - b);
+            const mid = Math.floor(durations.length / 2);
+            return durations.length % 2 !== 0
+              ? durations[mid]
+              : (durations[mid - 1] + durations[mid]) / 2;
+          })(),
+          min: result.tracksCache.entries.reduce(
+            (min, [id, value]) =>
+              value.data.duration < min ? value.data.duration : min,
+            Infinity,
+          ),
+          max: result.tracksCache.entries.reduce(
+            (max, [id, value]) =>
+              value.data.duration > max ? value.data.duration : max,
+            0,
+          ),
+        },
+        totalRuntime: totalTracksLength,
+      },
+      playbackReportComplete: result.monthOfYear.entries.filter(
+        ([month, value]) => value.counters.playbackReporting.listenDuration > 0,
+      ).length === 12,
     },
-    playbackReportComplete: result.monthOfYear.entries.filter(
-      ([month, value]) => value.counters.playbackReporting.listenDuration > 0,
-    ).length === 12,
   };
+  const $oldReport = await new Promise<FullRewindReport | undefined>((
+    resolve,
+    reject,
+  ) =>
+    oldReport.subscribe((value) => {
+      resolve(value);
+    })
+  );
+  console.log(`oldReport:`, oldReport);
+  if ($oldReport) {
+    newReport.jellyfinRewindReport.featureDelta = getFeatureDelta(
+      $oldReport,
+      newReport,
+    );
+  }
+
+  return logAndReturn("Generated LightRewindReport", {
+    success: true,
+    data: newReport,
+  });
 }
