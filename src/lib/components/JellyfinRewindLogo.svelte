@@ -2,10 +2,10 @@
 </script>
 
 <header>
-  <img
-    src="/jellyfin/banner-dark.svg"
-    alt="a Jellyfin banner with 'Recap' as an added subtitle"
-  />
+  <!-- src={state.settings.darkMode
+          ? "/media/banner-dark.svg"
+          : "/media/banner-light.svg"} -->
+  <img src="/jellyfin/banner-dark.svg" alt="Jellyfin Rewind Logo" />
 </header>
 
 <style>

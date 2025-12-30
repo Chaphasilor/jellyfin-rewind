@@ -1,7 +1,4 @@
 @use "sass:color";
-// Realtime colors configuration
-@import url("https://fonts.googleapis.com/css?family=Mallanna:700|Blinker:400");
-@import url("https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap");
 
 body {
   font-family: "Blinker";
@@ -96,7 +93,7 @@ main {
   flex-direction: column;
 }
 .content {
-  overflow-y: scroll;
+  overflow-y: none;
   margin-top: 2rem;
 }
 :not(:disabled) .warning {

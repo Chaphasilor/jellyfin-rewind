@@ -2,9 +2,10 @@
   import { dev } from "$app/environment";
   import { goto } from "$app/navigation";
   import Error from "$lib/components/Error.svelte";
-  import { processingResult } from "$lib/globals";
+  import { lightRewindReport, processingResult } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import processing from "$lib/jellyfin/queries/local/processing";
+  import { processingResultToRewindReport } from "$lib/utility/convert";
 
   let serverUrl: string = "";
   let userName: string = "";
@@ -12,9 +13,12 @@
 
   function proceedToLoading() {
     processing()
-      .then((result) => {
+      .then(async (result) => {
         if (result.success) {
           processingResult.set(result.data);
+          lightRewindReport.set(
+            await processingResultToRewindReport($processingResult),
+          );
           goto("/rewind");
         }
       });

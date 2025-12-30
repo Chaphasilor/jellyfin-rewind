@@ -12,9 +12,11 @@
     "format": "prettier  --write ."
   },
   "dependencies": {
+    "@tailwindcss/vite": "^4.1.18",
     "@types/chart.js": "^4.0.1",
     "@types/chartjs": "^0.0.31",
-    "chart.js": "^4.5.1"
+    "chart.js": "^4.5.1",
+    "tailwindcss": "^4.1.18"
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.10",

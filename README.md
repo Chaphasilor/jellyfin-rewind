@@ -168,7 +168,7 @@ And be Used like
 <Progress {progress} />
 <br />
 <button
-  on:click={() => {
+  onclick={() => {
     progress += 0.1;
   }}
 />

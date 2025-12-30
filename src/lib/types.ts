@@ -319,6 +319,22 @@ export type CombinedDeviceClientInfo = {
   client: string;
 };
 
+export type FeatureProps = {
+  informationSource: "playbackReport" | "jellyfin" | "average";
+  rankingMetric: "duration" | "playCount";
+  extraFeatures: () => {
+    totalPlaytimeGraph: boolean;
+    totalMusicDays: boolean;
+    listeningActivityDifference: boolean;
+    leastSkippedTracks: boolean;
+    mostSkippedTracks: boolean;
+    mostSuccessivePlays: boolean;
+    fullReport: boolean;
+  };
+  onNextFeature: () => void;
+  onPreviousFeature: () => void;
+};
+
 // old Rewind report format
 
 export type FullRewindReport = {

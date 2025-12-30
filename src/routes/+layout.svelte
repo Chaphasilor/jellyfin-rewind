@@ -1,12 +1,13 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import JfRecap from "$lib/components/JFRecap.svelte";
+  import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import PageTransition from "$lib/components/PageTransition.svelte";
+  import "./global.css";
   import "./global.scss";
 </script>
 
 <main>
-  <JfRecap />
+  <JellyfinRewindLogo />
 
   <PageTransition path={page.url.href}>
     <slot />

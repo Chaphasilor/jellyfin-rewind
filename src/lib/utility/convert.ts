@@ -303,7 +303,7 @@ export async function processingResultToRewindReport(
               artistId === artist.id
             ) || trackValue.data.albumArtists.find((artistId) =>
               artistId === artist.id
-            )) && trackValue.counters.jellyfin.listenDuration > 0
+            )) && trackValue.counters.jellyfin.fullPlays > 0
           ).length,
         playbackReport:
           result.tracksCache.entries.filter(([, trackValue]) =>
@@ -311,7 +311,7 @@ export async function processingResultToRewindReport(
               artistId === artist.id
             ) || trackValue.data.albumArtists.find((artistId) =>
               artistId === artist.id
-            )) && trackValue.counters.playbackReporting.listenDuration > 0
+            )) && trackValue.counters.playbackReporting.fullPlays > 0
           ).length,
         average:
           result.tracksCache.entries.filter(([, trackValue]) =>
@@ -319,7 +319,7 @@ export async function processingResultToRewindReport(
               artistId === artist.id
             ) || trackValue.data.albumArtists.find((artistId) =>
               artistId === artist.id
-            )) && trackValue.counters.average.listenDuration > 0
+            )) && trackValue.counters.average.fullPlays > 0
           ).length,
       },
       plays: playsSortedOldestToNewest,

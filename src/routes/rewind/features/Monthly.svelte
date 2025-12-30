@@ -3,11 +3,14 @@
   import { processingResult } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources } from "$lib/types";
+  import { CounterSources, type FeatureProps } from "$lib/types";
 
   let canvas: HTMLCanvasElement;
 
-  let informationSource: CounterSources = $state(
+  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
+    $props();
+
+  let actualInformationSource: CounterSources = $state(
     CounterSources.PLAYBACK_REPORTING,
   );
 
@@ -49,12 +52,12 @@
     rawData.forEach(([month, d]) => {
       const i = parseInt(month);
       duration[i] = Math.round(
-        d.counters[informationSource].listenDuration / 60,
+        d.counters[actualInformationSource].listenDuration / 60,
       );
-      plays[i] = d.counters[informationSource].fullPlays +
-        d.counters[informationSource].partialSkips;
-      skips[i] = d.counters[informationSource].fullSkips +
-        d.counters[informationSource].partialSkips;
+      plays[i] = d.counters[actualInformationSource].fullPlays +
+        d.counters[actualInformationSource].partialSkips;
+      skips[i] = d.counters[actualInformationSource].fullSkips +
+        d.counters[actualInformationSource].partialSkips;
     });
 
     mostDuration = indexOfMax(duration);
@@ -116,35 +119,40 @@
       },
       data: {
         yLabels: months,
-        datasets: [{
-          label: "Listen duration",
-          data: duration,
-          xAxisID: "playtime",
-          backgroundColor: "rgba(241, 181, 57, 0.2)",
-          borderRadius: 6,
-          borderColor: "rgba(241, 181, 57, 0.7)",
-          borderWidth: 1,
-        }, {
-          label: "Plays",
-          data: plays,
-          xAxisID: "plays",
-          backgroundColor: "rgba(133, 181, 227, 0.2)",
-          borderRadius: 6,
-          borderColor: "rgba(133, 181, 227, 0.7)",
-          borderWidth: 1,
-        }],
+        datasets: [
+          {
+            label: "Listen duration",
+            data: duration,
+            xAxisID: "playtime",
+            backgroundColor: "rgba(241, 181, 57, 0.2)",
+            borderRadius: 6,
+            borderColor: "rgba(241, 181, 57, 0.7)",
+            borderWidth: 1,
+          },
+          {
+            label: "Plays",
+            data: plays,
+            xAxisID: "plays",
+            backgroundColor: "rgba(133, 181, 227, 0.2)",
+            borderRadius: 6,
+            borderColor: "rgba(133, 181, 227, 0.7)",
+            borderWidth: 1,
+          },
+        ],
       },
     });
   });
 </script>
 
-<br><br><br><br>
+<br /><br /><br /><br />
 
 {#if monthWithMostDuration == monthWithMostPlays}
   <h4>
     In <b>{monthWithMostDuration}</b>
-    you had the most playbacks and playtime with <b>{duration[mostDuration]}
-      minutes</b> during
+    you had the most playbacks and playtime with
+    <b>{duration[mostDuration]}
+      minutes</b>
+    during
     <b>{plays[mostPlays]} plays</b>!
   </h4>
 {:else}
@@ -153,7 +161,7 @@
     you listened to the most amount of music at a wrapping
     <b>{duration[mostDuration]} minutes</b>!
   </h4>
-  <br>
+  <br />
   <h4>
     The most playbacks happened during
     <b>{monthWithMostPlays}</b>
@@ -161,7 +169,7 @@
   </h4>
 {/if}
 
-<br><br>
+<br /><br />
 
 {#if monthWithLeastDuration == monthWithLeastPlays}
   <h5>
@@ -177,23 +185,23 @@
     <b>{duration[leastDuration]} minutes</b>
     of playback.
   </h5>
-  <br>
+  <br />
   <h5>
     With only <b>{plays[leastPlays]} plays</b> the month of
     <b>{monthWithLeastPlays}</b> holds the record for least plays.
   </h5>
 {/if}
 
-<br><br>
+<br /><br />
 
 <h5>
   <b>{monthWithLeastSkips}</b> made you listen more actively than any other
   month with just <b>{skips[leastSkips]} skips</b> while
-  <b>{monthWithMostSkips}</b> was the month with the most skips at a total of <b
-  >{skips[mostSkips]}</b>.
+  <b>{monthWithMostSkips}</b> was the month with the most skips at a total of
+  <b>{skips[mostSkips]}</b>.
 </h5>
 
-<br><br><br><br><br><br>
+<br /><br /><br /><br /><br /><br />
 
 <h2>You can also inspect the data yourself!</h2>
 
@@ -203,7 +211,8 @@
   canvas {
     max-height: 40rem;
   }
-  h4, h5 {
+  h4,
+  h5 {
     max-width: 30rem;
     margin: auto;
   }

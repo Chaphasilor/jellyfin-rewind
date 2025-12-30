@@ -20,3 +20,7 @@ export function secondsToTimeStamp(s: number) {
     " seconds"
   );
 }
+
+export function showAsNumber(number: number | string | undefined) {
+  return number?.toString()?.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
