@@ -368,6 +368,58 @@ export async function processingResultToRewindReport(
     };
   };
 
+  function getForgottenFavoriteTracks(
+    dataSource: "jellyfin" | "playbackReporting" | "average",
+  ) {
+    const minimumLastPlayAge = 120; // in days
+    const numberOfTracksToReturn = 20;
+    const trackList = result.tracksCache.entries;
+
+    // Only look at songs that were played
+    const playedSongs = trackList.filter(([, trackValue]) =>
+      trackValue.counters[dataSource].fullPlays > 0
+    );
+
+    const today = new Date();
+    const millisecondsPerDay = 86_400_000;
+    const playCountWeight = 20;
+
+    // Weighted sort using days since last play and total number of plays
+    playedSongs.sort((a, b) => {
+      const daysSinceLastPlayA =
+        (today.getTime() - (a[1].data.lastPlayed?.getTime?.() ?? 0)) /
+        millisecondsPerDay;
+      const daysSinceLastPlayB =
+        (today.getTime() - (b[1].data.lastPlayed?.getTime?.() ?? 0)) /
+        millisecondsPerDay;
+      const weightedPlayCountA = a[1].counters[dataSource].fullPlays *
+        playCountWeight;
+      const weightedPlayCountB = b[1].counters[dataSource].fullPlays *
+        playCountWeight;
+
+      return (daysSinceLastPlayB + weightedPlayCountB) -
+        (daysSinceLastPlayA + weightedPlayCountA);
+    });
+
+    const forgottenFavoriteTracks = [];
+
+    // Loop through sorted track list and get top tracks that are older than age threshold
+    for (let i = 0; i < playedSongs.length; i++) {
+      if (
+        (today.getTime() -
+              (playedSongs[i][1].data.lastPlayed?.getTime?.() ?? 0)) /
+            millisecondsPerDay > minimumLastPlayAge
+      ) {
+        forgottenFavoriteTracks.push(playedSongs[i]);
+
+        // Exit once we hit the needed number of tracks
+        if (forgottenFavoriteTracks.length === numberOfTracksToReturn) break;
+      }
+    }
+
+    return forgottenFavoriteTracks;
+  }
+
   const userInfo = {
     id: Jellyfin.user!.id,
     name: Jellyfin.user!.name,
@@ -602,7 +654,17 @@ export async function processingResultToRewindReport(
           .slice(0, 10).map(
             cacheTrackToOldTrack,
           ),
-        //TODO forgottenFavoriteTracks:
+        forgottenFavoriteTracks: {
+          jellyfin: getForgottenFavoriteTracks("jellyfin").map(
+            cacheTrackToOldTrack,
+          ),
+          playbackReport: getForgottenFavoriteTracks("playbackReporting").map(
+            cacheTrackToOldTrack,
+          ),
+          average: getForgottenFavoriteTracks("average").map(
+            cacheTrackToOldTrack,
+          ),
+        },
       },
       albums: {
         duration: result.albumsCache.sorted(

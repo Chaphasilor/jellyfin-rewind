@@ -440,7 +440,11 @@ export type FullRewindReport = {
       playCount: OldTrack[];
       leastSkipped: OldTrack[];
       mostSkipped: OldTrack[];
-      forgottenFavoriteTracks: OldTrack[];
+      forgottenFavoriteTracks: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
     };
     albums: {
       duration: OldAlbum[];
@@ -581,7 +585,11 @@ export type LightRewindReport = {
       playCount: OldTrack[];
       leastSkipped: OldTrack[];
       mostSkipped: OldTrack[];
-      forgottenFavoriteTracks: OldTrack[];
+      forgottenFavoriteTracks: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
     };
     albums: {
       duration: OldAlbum[];

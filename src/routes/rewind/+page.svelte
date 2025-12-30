@@ -24,6 +24,7 @@
   import Outro from "./features/Outro.svelte";
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
+    import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
 
   if (!$lightRewindReport?.jellyfinRewindReport) {
     goto("/login");
@@ -71,7 +72,7 @@
   });
 
   let page = $state(0);
-  let features = [
+  let features = () => [
     {
       component: Intro,
     },
@@ -105,7 +106,10 @@
     {
       component: FeatureDelta,
     },
-    //TODO forgotten favorites
+    {
+      skip: !$lightRewindReport.jellyfinRewindReport.tracks?.forgottenFavoriteTracks[informationSource]?.length,
+      component: ForgottenFavorites,
+    },
     {
       component: TopGenres,
     },
@@ -142,10 +146,30 @@
     }
   }
   function nextFeature() {
-    if (page < features.length - 1) page += 1;
+    if (page < features().length - 1) {
+      if (features()[page + 1].skip) {
+        if (page + 2 < features().length) {
+          page += 2;
+        } else {
+          // nop
+        }
+      } else {
+        page += 1;
+      }
+    }
   }
   function prevFeature() {
-    if (page > 0) page -= 1;
+    if (page > 0) {
+      if (features()[page - 1].skip) {
+        if (page - 2 >= 0) {
+          page -= 2;
+        } else {
+          // nop
+        }
+      } else {
+        page -= 1;
+      }
+    }
   }
 </script>
 
@@ -166,5 +190,5 @@
 {/snippet}
 
 <PageTransition path={page}>
-  {@render renderFeature(features[page].component)}
+  {@render renderFeature(features()[page].component)}
 </PageTransition>
