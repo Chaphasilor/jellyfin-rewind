@@ -132,7 +132,7 @@
   ];
 
   let lastScrollTime = 0;
-  const DEBOUNCE_DELAY = 1000;
+  const DEBOUNCE_DELAY = 0;
 
   function handleWheel(event: WheelEvent) {
     const now = Date.now();
@@ -145,6 +145,15 @@
       prevFeature();
     }
   }
+  function scrollToActive() {
+    const element = document.getElementById(`feature-${page}`)
+    element?.scrollIntoView({
+        behavior: "smooth",
+        inline: "center",
+        block: "start"
+    })
+  }
+
   function nextFeature() {
     if (page < features().length - 1) {
       if (features()[page + 1].skip) {
@@ -157,6 +166,7 @@
         page += 1;
       }
     }
+    scrollToActive()
   }
   function prevFeature() {
     if (page > 0) {
@@ -170,25 +180,30 @@
         page -= 1;
       }
     }
+    scrollToActive()
   }
 </script>
 
 <svelte:document on:wheel={handleWheel} />
 
-{#snippet renderFeature(Feature: Component<FeatureProps>)}
-  <Feature
-    {informationSource}
-    {rankingMetric}
-    {extraFeatures}
-    onNextFeature={() => {
-      nextFeature();
-    }}
-    onPreviousFeature={() => {
-      prevFeature();
-    }}
-  />
+{#snippet renderFeature(index, Feature: Component<FeatureProps>)}
+  <div class="h-screen" id="feature-{index}">
+    <Feature
+        {informationSource}
+        {rankingMetric}
+        {extraFeatures}
+        onNextFeature={() => {
+            nextFeature();
+        }}
+        onPreviousFeature={() => {
+            prevFeature();
+        }}
+    />
+  </div>
 {/snippet}
 
-<PageTransition path={page}>
-  {@render renderFeature(features()[page].component)}
-</PageTransition>
+{#each features() as feat, index}
+    {#if !feat.skip}
+        {@render renderFeature(index, feat.component)}
+    {/if}
+{/each}

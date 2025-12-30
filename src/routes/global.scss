@@ -79,6 +79,7 @@ body {
   padding-top: 2rem;
   padding-bottom: 2rem;
   color: $text;
+  overflow-x: hidden;
 }
 
 main {
@@ -91,6 +92,7 @@ main {
 
   display: flex;
   flex-direction: column;
+  overflow-y: scroll;
 }
 .content {
   overflow-y: none;

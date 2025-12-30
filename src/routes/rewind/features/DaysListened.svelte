@@ -6,13 +6,14 @@
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { Spring } from "svelte/motion";
+    import Unavailable from "$lib/components/Unavailable.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
   const musicDays = new Spring(0, {
-    stiffness: 0.005,
-    damping: 0.015,
+    stiffness: 0.03,
+    damping: 0.06,
     precision: 0.075,
   });
 
@@ -123,43 +124,6 @@
   {/if}
 
   {#if !extraFeatures().totalMusicDays}
-    <div
-      class="absolute top-0 left-0 grid content-center w-full h-full px-8 bg-black/50 backdrop-saturate-25"
-    >
-      <div
-        class="flex flex-col items-center justify-center gap-12 bg-black/75 p-8 pt-16 rounded-xl"
-      >
-        <span class="text-5xl rotate-12 text-[#00A4DC] tracking-wider font-bold"
-        >Unavailable</span>
-        <button
-          on:click|stopPropagation={() => {
-            //TODO showOverlayFeatureUnavailableMissingPlaybackReporting(),
-          }}
-          class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="w-5 h-5 icon icon-tabler icon-tabler-info-square-rounded"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            stroke-width="2"
-            stroke="currentColor"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-            <path d="M12 8h.01"></path>
-            <path d="M11 12h1v4h1"></path>
-            <path
-              d="M12 3c7.2 0 9 1.8 9 9s-1.8 9 -9 9s-9 -1.8 -9 -9s1.8 -9 9 -9z"
-            >
-            </path>
-          </svg>
-          <span class="font-medium">Learn why</span>
-        </button>
-      </div>
-    </div>
+    <Unavailable />
   {/if}
 </div>

@@ -43,31 +43,34 @@
       </div>
     </div>
   </div>
-  <div
-    class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
-  >
-    <div>
-      Streamed <span class="font-semibold">{
-        showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.albums
-            ?.[rankingMetric]?.[0]?.playCount[
-              informationSource
-            ],
-        )
-      }</span> times.
-    </div>
-    <div>
-      Listened for <span class="font-semibold">{
-        showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.albums
-            ?.[rankingMetric]?.[0]
-            ?.totalPlayDuration[
-              informationSource
-            ]?.toFixed(0),
-        )
-      }</span> minutes.
+  <div class="relative">
+    <div
+        class="absolute bottom-20 left-0 w-full flex flex-col items-center gap-3"
+    >
+        <div>
+        Streamed <span class="font-semibold">{
+            showAsNumber(
+            $lightRewindReport.jellyfinRewindReport.albums
+                ?.[rankingMetric]?.[0]?.playCount[
+                informationSource
+                ],
+            )
+        }</span> times.
+        </div>
+        <div>
+        Listened for <span class="font-semibold">{
+            showAsNumber(
+            $lightRewindReport.jellyfinRewindReport.albums
+                ?.[rankingMetric]?.[0]
+                ?.totalPlayDuration[
+                informationSource
+                ]?.toFixed(0),
+            )
+        }</span> minutes.
+        </div>
     </div>
   </div>
+
 </div>
 <div
   class="fixed -top-16 blur-xl brightness-75 bg-gray-800 -left-40 md:translate-x-1/3 w-[125vh] h-[125vh] z-[-1] rotate-[17deg]"

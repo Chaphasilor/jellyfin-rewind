@@ -5,8 +5,8 @@
 
 {#key path}
   <div
-    in:fly={{ duration: 300, delay: 400 }}
-    out:fly={{ duration: 50 }}
+    in:fly={{ y: 200, duration: 300, delay: 300 }}
+    out:fly={{ y: -200, duration: 300 }}
     class="content"
   >
     <slot />
