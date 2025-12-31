@@ -1,0 +1,270 @@
+<script lang="ts">
+  import Chart from "chart.js/auto";
+  import {
+    isAccuracyDisclaimerOpen,
+    lightRewindReport,
+  } from "$lib/globals";
+  import { onMount } from "svelte";
+  import { indexOfMax, indexOfMin } from "$lib/utility/other";
+  import { CounterSources, type FeatureProps } from "$lib/types";
+  import { showAsNumber } from "$lib/utility/format";
+  import Unavailable from "$lib/components/Unavailable.svelte";
+
+  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
+    $props();
+
+  let canvas: HTMLCanvasElement;
+  let doPollCanvas = $state(false);
+
+  function showPlaytimeByMonthChart() {
+    console.log(`Loading chart...`);
+
+    let canvas: HTMLCanvasElement | null;
+
+    const initializeChart = () => {
+      console.log(`initializeChart:`, canvas);
+      if (canvas === null) {
+        console.warn(`Canvas is null, cannot initialize chart.`);
+        return;
+      }
+      new Chart(canvas, {
+        type: "bar",
+        data,
+        plugins: [],
+        options: {
+          plugins: {
+            legend: {
+              display: false,
+            },
+          },
+          responsive: false,
+          maintainAspectRatio: false,
+          aspectRatio: 2 / 3,
+          backgroundColor: `#ffffff`,
+          animation: {
+            duration: 2000,
+            easing: `easeOutCubic`,
+          },
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+              border: {
+                width: 3,
+                color: `#002633`,
+              },
+            },
+            y: {
+              beginAtZero: true,
+              grid: {
+                display: false,
+              },
+              border: {
+                width: 3,
+                color: `#002633`,
+              },
+            },
+          },
+          layout: {},
+          elements: {
+            bar: {
+              backgroundColor: "#00a4dc",
+              borderWidth: 0,
+              borderRadius: 4,
+              borderSkipped: `bottom`,
+              minBarLength: 32,
+            },
+          },
+        },
+      });
+      doPollCanvas = false;
+    };
+
+    const months = [
+      `January`,
+      `February`,
+      `March`,
+      `April`,
+      `May`,
+      `June`,
+      `July`,
+      `August`,
+      `September`,
+      `October`,
+      `November`,
+      `December`,
+    ];
+
+    let monthData = Object.keys(
+      $lightRewindReport.jellyfinRewindReport.generalStats
+        .totalPlaybackDurationByMonth,
+    ).reduce(
+      (acc, month) => {
+        acc[months[Number(month)]] =
+          $lightRewindReport.jellyfinRewindReport.generalStats
+            .totalPlaybackDurationByMonth[
+              Number(month)
+            ];
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
+
+    let data = {
+      labels: months,
+      datasets: [
+        {
+          label: `Playtime in minutes`,
+          data: extraFeatures().totalPlaytimeGraph
+            ? monthData
+            : [300, 600, 367, 763, 823, 285, 506, 583, 175, 286, 1204, 496],
+        },
+      ],
+    };
+
+    doPollCanvas = true;
+    const pollCanvas = () => {
+      if (!doPollCanvas) {
+        return;
+      }
+      canvas = document.querySelector(`#playtime-by-month-chart`);
+      console.log(`canvas:`, canvas);
+      if (canvas === null) {
+        setTimeout(pollCanvas, 100);
+      } else {
+        try {
+          initializeChart();
+        } catch (err) {
+          console.warn(`Error initializing chart:`, err);
+        }
+      }
+    };
+    pollCanvas();
+  }
+
+  function destroyPlayTimeByMonthChart() {
+    Chart.getChart(`playtime-by-month-chart`)?.destroy();
+  }
+
+  export function onEnter() {
+    destroyPlayTimeByMonthChart();
+    showPlaytimeByMonthChart();
+  }
+  export function onExit() {
+    // destroyPlayTimeByMonthChart();
+    doPollCanvas = false;
+  }
+
+  onMount(() => {
+    showPlaytimeByMonthChart();
+  });
+</script>
+
+<div class="relative h-screen text-center">
+  <h2 class="text-2xl font-medium mt-5">
+    Your Total Playtime{#if informationSource !== "playbackReport"}
+      <!-- svelte-ignore event_directive_deprecated -->
+      <button
+        class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
+        title="Learn about data accuracy"
+        role="button"
+        tabindex="0"
+        on:keydown|stopPropagation={() => {
+          isAccuracyDisclaimerOpen.set(true);
+        }}
+        on:click|stopPropagation={() => {
+          console.log(`click:`);
+          isAccuracyDisclaimerOpen.set(true);
+        }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 icon icon-tabler icon-tabler-asterisk"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M12 12l8 -4.5"></path>
+          <path d="M12 12v9"></path>
+          <path d="M12 12l-8 -4.5"></path>
+          <path d="M12 12l8 4.5"></path>
+          <path d="M12 3v9"></path>
+          <path d="M12 12l-8 4.5"></path>
+        </svg>
+      </button>
+    {/if}<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
+  </h2>
+
+  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl">
+    <span class="font-quicksand-bold">{
+      showAsNumber(
+        $lightRewindReport.jellyfinRewindReport.generalStats
+          .totalPlaybackDurationMinutes[
+            informationSource
+          ].toFixed(0),
+      )
+    }</span> min
+  </div>
+
+  <div class="mt-12 w-full flex flex-col items-center gap-0.5 text-sm">
+    <div>
+      <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+            `totalPlays`
+          ]?.[informationSource],
+        )
+      }</span> total streams.
+    </div>
+    <div>
+      <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+            `uniqueTracksPlayed`
+          ],
+        )
+      }</span> unique tracks.
+    </div>
+    <div>
+      <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+            `uniqueArtistsPlayed`
+          ],
+        )
+      }</span> unique artists.
+    </div>
+    <div>
+      <span class="font-semibold">{
+        showAsNumber(
+          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+            `uniqueAlbumsPlayed`
+          ],
+        )
+      }</span> unique albums.
+    </div>
+  </div>
+
+  <div class="absolute w-full bottom-25">
+    <div class="w-full flex flex-row justify-center">
+      <canvas
+        id="playtime-by-month-chart"
+        class={extraFeatures().totalPlaytimeGraph
+          ? `h-full`
+          : `h-fullopacity-30`}
+      ></canvas>
+      {#if extraFeatures().totalPlaytimeGraph}
+        <br />
+      {:else}
+        <Unavailable />
+      {/if}
+    </div>
+  </div>
+</div>
