@@ -218,14 +218,6 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       const genre = lib.genres[i];
       await nextProcessing(genre.Name);
       const processedGenre = processGenre(genre);
-      if (genre.Name === `Dance`) {
-        console.log(
-          `genre, processedGenre, genresCache.get(processedGenre):`,
-          genre,
-          processedGenre,
-          genresCache.get(processedGenre),
-        );
-      }
       updateCountersForGenre(CounterSources.JELLYFIN, genre);
     }
   }

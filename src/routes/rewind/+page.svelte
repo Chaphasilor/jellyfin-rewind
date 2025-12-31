@@ -25,19 +25,42 @@
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
   import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
-  import { loadAudio } from "$lib/utility/jellyfin-helper";
+  import {
+    checkPlaybackReportingSetup,
+    loadAudio,
+  } from "$lib/utility/jellyfin-helper";
   import type { Features } from "tailwindcss";
   import type { Point } from "chart.js";
-
-  onMount(() => document.documentElement.requestFullscreen());
+  import { page } from "$app/state";
 
   if (!$lightRewindReport?.jellyfinRewindReport) {
-    goto("/login");
+    goto("/welcome");
   }
 
-  let informationSource: FeatureProps["informationSource"] = $state(
-    "playbackReport",
-  );
+  let optimalDataSource: `jellyfin` | `playbackReport` | `average` =
+    $derived.by(() => {
+      if ($lightRewindReport.jellyfinRewindReport.playbackReportAvailable) {
+        if (
+          !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing
+        ) {
+          if (
+            $lightRewindReport.jellyfinRewindReport.playbackReportComplete
+          ) {
+            return `playbackReport`;
+          } else {
+            return `average`;
+          }
+        } else {
+          return `jellyfin`;
+        }
+      } else {
+        return `jellyfin`;
+      }
+    });
+
+  let informationSource: FeatureProps["informationSource"] =
+    // svelte-ignore state_referenced_locally
+    $state(optimalDataSource);
 
   let rankingMetric: FeatureProps["rankingMetric"] = $state("playCount");
 
@@ -76,7 +99,7 @@
     };
   });
 
-  let page = $state(0);
+  let currentFeatureIndex = $state(0);
   let features = () => [
     {
       component: Intro,
@@ -163,7 +186,9 @@
   let featureInstances: Record<number, FeatureEvents> = {};
 
   function scrollToActive() {
-    const element = document.getElementById(`feature-${page}`);
+    const element = document.getElementById(
+      `feature-${currentFeatureIndex}`,
+    );
     element?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
@@ -172,36 +197,36 @@
   }
 
   function nextFeature() {
-    const oldPage = page;
-    if (page < features().length - 1) {
-      if (features()[page + 1].skip) {
-        if (page + 2 < features().length) {
-          page += 2;
+    const oldPage = currentFeatureIndex;
+    if (currentFeatureIndex < features().length - 1) {
+      if (features()[currentFeatureIndex + 1].skip) {
+        if (currentFeatureIndex + 2 < features().length) {
+          currentFeatureIndex += 2;
         } else {
           // nop
         }
       } else {
-        page += 1;
+        currentFeatureIndex += 1;
       }
     }
-    featureInstances[page]?.onEnter?.();
+    featureInstances[currentFeatureIndex]?.onEnter?.();
     featureInstances[oldPage]?.onExit?.();
     scrollToActive();
   }
   function prevFeature() {
-    const oldPage = page;
-    if (page > 0) {
-      if (features()[page - 1].skip) {
-        if (page - 2 >= 0) {
-          page -= 2;
+    const oldPage = currentFeatureIndex;
+    if (currentFeatureIndex > 0) {
+      if (features()[currentFeatureIndex - 1].skip) {
+        if (currentFeatureIndex - 2 >= 0) {
+          currentFeatureIndex -= 2;
         } else {
           // nop
         }
       } else {
-        page -= 1;
+        currentFeatureIndex -= 1;
       }
     }
-    featureInstances[page]?.onEnter?.();
+    featureInstances[currentFeatureIndex]?.onEnter?.();
     featureInstances[oldPage]?.onExit?.();
     scrollToActive();
   }
@@ -234,9 +259,7 @@
     inactivePlayer.setAttribute(`data-active`, `true`);
     await loadAudio(inactivePlayer, trackInfo);
 
-    //TODO add mute button
-    // if (state.settings.sound) {
-    if (true) {
+    if (!soundMuted) {
       inactivePlayer.volume = 0;
       activePlayer.volume = 1;
       inactivePlayer.play();
@@ -396,6 +419,8 @@
     // fade
     doFade(0)();
   }
+
+  let soundMuted = $state(false);
 </script>
 
 <svelte:body class:noScrollBar={true} />
@@ -445,7 +470,7 @@
 <audio id="audio-player-1" loop></audio>
 <audio id="audio-player-2" loop></audio>
 
-<div class="volumeBox">
+<!-- <div class="volumeBox">
   <div>
     <input
       type="range"
@@ -459,6 +484,68 @@
     />
     92%
   </div>
+</div> -->
+<div id="volumeToggle" class="fixed top-0 right-0 z-10 px-6 py-5">
+  <!-- svelte-ignore event_directive_deprecated -->
+  <button
+    class="px-1 z-[150]"
+    on:click|stopPropagation={() => {
+      soundMuted ? resumePlayback() : pausePlayback();
+      soundMuted = !soundMuted;
+    }}
+    type="button"
+  >
+    {#if soundMuted}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path
+          d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"
+        >
+        </path>
+        <path
+          d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"
+        >
+        </path>
+        <path
+          d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"
+        >
+        </path>
+        <path d="M3 3l18 18"></path>
+      </svg>
+    {:else}
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        stroke-width="2"
+        stroke="currentColor"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path d="M15 8a5 5 0 0 1 0 8"></path>
+        <path d="M17.7 5a9 9 0 0 1 0 14"></path>
+        <path
+          d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"
+        >
+        </path>
+      </svg>
+    {/if}
+  </button>
 </div>
 
 <style lang="scss">

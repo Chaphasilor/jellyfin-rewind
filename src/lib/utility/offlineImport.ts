@@ -106,7 +106,9 @@ function parseFinampOfflinePlaybackData(contentLines: string[]) {
           UserId: parsedLine[`user_id`],
           // musicBrainzId: parsedLine[`track_mbid`],
           ClientName: parsedLine[`client`] ?? `Finamp`,
-          DeviceName: parsedLine[`device`] ?? `Unknown Device`,
+          DeviceName: (parsedLine[`device`].name
+            ? parsedLine[`device`].name
+            : parsedLine[`device`]) ?? `Unknown Device`,
           PlaybackMethod: `OfflinePlay`,
           PlayDuration: 0,
           //TODO add device information to exported offline plays file

@@ -3,12 +3,13 @@ import { formatDateToSql } from "./utility/format.ts";
 import type {
   FullRewindReport,
   LightRewindReport,
+  PlaybackReportingSetupCheckResult,
   ProcessingResults,
 } from "./types.ts";
 
 export const year = 2025;
 export const start = new Date(year, 0, 1);
-export const end = new Date(year, 11, 31);
+export const end = new Date(year + 1, 0, 1);
 export const startSql = formatDateToSql(start);
 export const endSql = formatDateToSql(end);
 
@@ -21,3 +22,6 @@ export const lightRewindReport = writable<LightRewindReport>();
 export const oldReport = writable<FullRewindReport>();
 
 export const isAccuracyDisclaimerOpen = writable(false);
+export const playbackReportingInspectionResult = writable<
+  PlaybackReportingSetupCheckResult
+>();

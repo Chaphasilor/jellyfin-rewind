@@ -340,10 +340,15 @@ export async function processingResultToRewindReport(
     [id, value]: [string, { data: Genre; counters: PlaybackCounter }],
   ): OldGenre => {
     const genre = value.data;
+
+    const genreTracks = result.tracksCache.entries.filter((
+      [, trackValue],
+    ) => trackValue.data.genres.find((genreId) => genreId === genre.id));
+
     return {
       id: id,
       name: genre.name,
-      //TODO tracks:
+      tracks: genreTracks.length,
       playCount: {
         playbackReport: value.counters.playbackReporting.fullPlays +
           value.counters.playbackReporting.partialSkips,
@@ -352,14 +357,28 @@ export async function processingResultToRewindReport(
         average: value.counters.average.fullPlays +
           value.counters.average.partialSkips,
       },
-      //TODO uniqueTracks:
+      uniqueTracks: genreTracks.length,
       uniquePlayedTracks: {
-        //TODO playbackReport: 0,
-        //TODO jellyfin: 0,
-        //TODO average: 0,
+        jellyfin: result.tracksCache.entries.filter((
+          [, trackValue],
+        ) => (trackValue.data.genres.find((genreId) => genreId === genre.id) &&
+          trackValue.counters.jellyfin.fullPlays > 0)
+        ).length,
+        playbackReport: result.tracksCache.entries.filter((
+          [, trackValue],
+        ) => (trackValue.data.genres.find((genreId) => genreId === genre.id) &&
+          trackValue.counters.playbackReporting.fullPlays > 0)
+        ).length,
+        average: result.tracksCache.entries.filter((
+          [, trackValue],
+        ) => (trackValue.data.genres.find((genreId) => genreId === genre.id) &&
+          trackValue.counters.average.fullPlays > 0)
+        ).length,
       },
-      //TODO plays:
-      //TODO lastPlayed:
+      //TODO
+      plays: [],
+      //TODO
+      lastPlayed: null,
       totalPlayDuration: {
         playbackReport: value.counters.playbackReporting.listenDuration,
         jellyfin: value.counters.jellyfin.listenDuration,
@@ -416,6 +435,8 @@ export async function processingResultToRewindReport(
         if (forgottenFavoriteTracks.length === numberOfTracksToReturn) break;
       }
     }
+
+    console.log(`forgottenFavoriteTracks:`, forgottenFavoriteTracks);
 
     return forgottenFavoriteTracks;
   }

@@ -64,7 +64,7 @@
 
 <div class="p-4">
   <h2
-    class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-800 dark:text-gray-100"
+    class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-100"
   >
     That's the end<br />of this year's
   </h2>
@@ -79,7 +79,7 @@
   </div>
 
   <div
-    class="flex flex-col gap-3 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-8 w-5/6 mx-auto"
+    class="flex flex-col gap-3 text-lg font-medium leading-6 text-gray-400 mt-8 w-5/6 mx-auto"
   >
     <p class="">
       Thank you so much for checking it out, I hope you had fun and saw some
@@ -138,16 +138,16 @@
       :)
     </p>
     <p>
-      Thanks for using Jellyfin Rewind. See you next year<br>
+      Thanks for using Jellyfin Rewind. See you next year!<br>
       <span class="italic right-0 bottom-0">
-        - Chaphasilor
+        - Chaphasilor, Floschy, 1hitsong, and all the contributors
       </span>
     </p>
   </div>
 
   <!-- svelte-ignore event_directive_deprecated -->
   <button
-    class="px-4 py-2 rounded-xl text-base leading-6 border-2 border-[#00A4DC] hover:bg-[#0085B2] text-gray-800 dark:text-gray-200 hover:text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
+    class="px-4 py-2 rounded-xl text-base leading-6 border-2 border-[#00A4DC] hover:bg-[#0085B2] text-gray-200 hover:text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
     on:click|stopPropagation={() => {
       closeModalOpen = true;
     }}

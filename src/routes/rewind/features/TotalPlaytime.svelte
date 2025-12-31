@@ -163,42 +163,43 @@
 
 <div class="relative h-screen text-center">
   <h2 class="text-2xl font-medium mt-5">
-    Your Total Playtime<br />of {
-      $lightRewindReport.jellyfinRewindReport
-        ?.year
-    }<span
-      class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
-      title="Learn about data accuracy"
-      role="button"
-      tabindex="0"
-      on:keydown|stopPropagation={() => {
-        isAccuracyDisclaimerOpen.set(true);
-      }}
-      on:click|stopPropagation={() => {
-        isAccuracyDisclaimerOpen.set(true);
-      }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-5 h-5 icon icon-tabler icon-tabler-asterisk"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+    Your Total Playtime{#if informationSource !== "playbackReport"}
+      <!-- svelte-ignore event_directive_deprecated -->
+      <button
+        class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
+        title="Learn about data accuracy"
+        role="button"
+        tabindex="0"
+        on:keydown|stopPropagation={() => {
+          isAccuracyDisclaimerOpen.set(true);
+        }}
+        on:click|stopPropagation={() => {
+          console.log(`click:`);
+          isAccuracyDisclaimerOpen.set(true);
+        }}
       >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M12 12l8 -4.5"></path>
-        <path d="M12 12v9"></path>
-        <path d="M12 12l-8 -4.5"></path>
-        <path d="M12 12l8 4.5"></path>
-        <path d="M12 3v9"></path>
-        <path d="M12 12l-8 4.5"></path>
-      </svg>
-    </span>:
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="w-5 h-5 icon icon-tabler icon-tabler-asterisk"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-width="2"
+          stroke="currentColor"
+          fill="none"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+          <path d="M12 12l8 -4.5"></path>
+          <path d="M12 12v9"></path>
+          <path d="M12 12l-8 -4.5"></path>
+          <path d="M12 12l8 4.5"></path>
+          <path d="M12 3v9"></path>
+          <path d="M12 12l-8 4.5"></path>
+        </svg>
+      </button>
+    {/if}<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
   </h2>
 
   <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl">

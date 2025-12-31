@@ -2,6 +2,7 @@ import {
   downloadingProgress,
   generatingProgress,
   processingProgress,
+  year,
 } from "$lib/globals.ts";
 import jellyfin from "$lib/jellyfin/index.ts";
 import {
@@ -375,6 +376,13 @@ export function increaseCachesForPlaybackReportingTrack(
     ...delta,
     listens: undefined, // avoid double counting
   });
+  // update last played based on playback reporting if needed
+  if (!track.lastPlayed || (track.lastPlayed < listen.dateCreated)) {
+    track.lastPlayed = listen.dateCreated;
+    console.log(`track:`, track);
+    tracksCache.updateData(track.id, () => track);
+    console.log(`tracksCache.get(track.id):`, tracksCache.get(track.id));
+  }
   tracksCache.count(track.id, source, delta);
   track.albumId ? albumsCache.count(track.albumId, source, delta) : null;
   (new Set<string>([...track.artists, ...track.albumArtists])).forEach(
@@ -400,16 +408,24 @@ function generateCountsDelta(
   listen: Listen | null,
   item: JellyfinTrack | JellyfinAlbum | JellyfinArtist | JellyfinGenre,
 ): Partial<PlaybackCounter["counters"][CounterSources]> {
-  const jellyfinPlayCount = item?.UserData?.PlayCount ?? 0;
-  return listen !== null
-    ? {
+  if (listen !== null) {
+    return {
       fullPlays: listen.isFullPlay ? 1 : 0,
       partialSkips: listen.isPartialSkip ? 1 : 0,
       fullSkips: listen.isSkip ? 1 : 0,
       listenDuration: listen.playDuration,
       listens: new Set([listen.rowId!]),
-    }
-    : {
+    };
+  } else {
+    // only consider items for Jellyfin which were recorded as played in the target year
+    // this will make the data a bit more correct, by excluding items that haven't been played at all in the target year
+    // if it was played this year => all plays from all time included
+    // but if it wasn't played this year (only before that) => 0 plays counted
+    const jellyfinPlayCount = (item?.UserData?.LastPlayedDate &&
+        new Date(item?.UserData?.LastPlayedDate).getFullYear() !== year)
+      ? item?.UserData?.PlayCount ?? 0
+      : 0;
+    return {
       // Jellyfin only counts listens and cannot recognize skips
       fullPlays: jellyfinPlayCount,
       partialSkips: 0,
@@ -420,6 +436,7 @@ function generateCountsDelta(
         : 0, // we can't calculate listen duration for non-tracks, since their play count and runtime are not related
       listens: new Set<string>(),
     };
+  }
 }
 
 export function updateCountersForPlaybackReportingTrack(

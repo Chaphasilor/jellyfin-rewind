@@ -353,10 +353,32 @@ export enum PlaybackReportingIssueAction {
   ENABLE_PLUGIN,
   RESTART_SERVER,
   UPDATE_PLUGIN,
-  SET_RETENTION_FOREVER,
-  SET_RETENTION_TWO_YEARS,
+  RETENTION_SHORT,
   USER_IGNORED,
 }
+
+export type PlaybackReportingSetupCheckResult = {
+  checked: boolean;
+  issue: PlaybackReportingIssueAction;
+  setup?: {
+    installed: boolean;
+    restartRequired: boolean;
+    disabled: boolean;
+    id?: string;
+    version?: number;
+    settings?: {
+      raw: any;
+      retentionInterval: number;
+      MaxDataAge?: string;
+    };
+    ignoredUsers?: Array<{
+      id: string;
+      name: string;
+    }>;
+  };
+  offlineImportAvailable?: boolean;
+  checkAttempts: number;
+};
 
 // old Rewind report format
 
@@ -767,7 +789,7 @@ export interface OldArtist {
 export interface OldGenre {
   name: string;
   id: string;
-  tracks: OldTrack[];
+  tracks: number;
   playCount: OldPlayCount;
   uniqueTracks: number;
   uniquePlayedTracks: {
@@ -776,6 +798,6 @@ export interface OldGenre {
     average: number;
   };
   plays: OldPlay[];
-  lastPlayed: string;
+  lastPlayed: Date | string | null;
   totalPlayDuration: OldTotalPlayDuration;
 }

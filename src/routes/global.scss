@@ -1,8 +1,7 @@
 @use "sass:color";
 
-* {
+body {
   font-family: "Quicksand";
-  font-weight: 400;
 }
 
 h1,
@@ -12,8 +11,6 @@ h4,
 h5 {
   font-family: "Quicksand";
   font-weight: 700;
-  padding: 0;
-  margin: 0;
 }
 
 html {
@@ -21,19 +18,23 @@ html {
 } /* 16px */
 
 h1 {
-  font-size: 2.489rem; /* 39.84px */
+  font-size: 2rem;
+  /* 39.84px */
 }
 
 h2 {
-  font-size: 2.074rem; /* 33.12px */
+  font-size: 1.85rem;
+  /* 33.12px */
 }
 
 h3 {
-  font-size: 1.728rem; /* 27.68px */
+  font-size: 1.5rem;
+  /* 27.68px */
 }
 
 h4 {
-  font-size: 1.44rem; /* 23.04px */
+  font-size: 1.3rem;
+  /* 23.04px */
 }
 
 h5 {
@@ -42,11 +43,6 @@ h5 {
 
 small {
   font-size: 0.833rem; /* 13.28px */
-}
-
-p {
-  margin: 0;
-  padding: 0;
 }
 
 $text: rgb(217, 233, 246);
@@ -116,7 +112,7 @@ b {
 .info {
   background-color: rgba(255, 255, 0, 0.2);
   padding: 1rem;
-  padding-bottom: 1.5rem;
+  padding-bottom: 1rem;
   border-radius: 1rem;
   border-width: 1px;
   border-color: rgba(255, 255, 0, 0.5);
@@ -146,33 +142,36 @@ code {
   padding: 0.5rem;
 }
 
-button {
-  padding: 1rem;
-  background-color: color.adjust($background, $lightness: 20%);
-  color: $text;
-  border: none;
-  outline: none;
-  border-radius: 1rem;
+// button {
+//   padding: 1rem;
+//   background-color: color.adjust($background, $lightness: 20%);
+//   color: $text;
+//   box-sizing: border-box;
+//   border: none;
+//   outline: none;
+//   border-radius: 1rem;
 
-  font-weight: 900;
+//   font-weight: 900;
 
-  transition: 100ms ease-out;
+//   transition: 100ms ease-out;
 
-  &:active:not(:disabled),
-  &:focus:not(:disabled) {
-    transform: scale(0.95);
-    background-color: color.adjust($background, $lightness: 5%);
-    box-shadow: 0 0 7px rgba(0, 0, 0, 0.3) inset;
-  }
-  &:hover {
-    transform: scale(1.05);
-    background-color: color.adjust($background, $lightness: 15%);
-  }
-  &:disabled {
-    filter: brightness(0.8);
-    opacity: 0.8;
-  }
-}
+//   &:active:not(:disabled) {
+//     transform: scale(0.95);
+//     background-color: color.adjust($background, $lightness: 5%);
+//     box-shadow: 0 0 7px rgba(0, 0, 0, 0.3) inset;
+//   }
+//     &:focus:not(:disabled) {
+//       box-shadow: 0 0 0 2px $primary;
+//     }
+//   &:hover {
+//     transform: scale(1.05);
+//     background-color: color.adjust($background, $lightness: 15%);
+//   }
+//   &:disabled {
+//     filter: brightness(0.8);
+//     opacity: 0.8;
+//   }
+// }
 
 input {
   padding: 0.6rem;

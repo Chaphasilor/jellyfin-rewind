@@ -72,7 +72,7 @@
       (album.id)
     }
       <li
-        class="relative z-[10] flex flex-row items-center dark:bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl"
+        class="relative z-[10] flex flex-row items-center bg-gray-800 gap-4 overflow-hidden px-4 py-2 rounded-xl"
       >
         <div
           class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"
@@ -85,7 +85,7 @@
           </div>
         </div>
         <div
-          class="flex flex-col gap-1 justify-center bg-white/30 dark:bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md"
+          class="flex flex-col gap-1 justify-center bg-black/30 overflow-hidden px-2 py-1 h-[10vh] w-full rounded-md"
         >
           <div class="flex flex-col gap-0.25 items-start">
             <div
@@ -97,14 +97,14 @@
               >{album.name}</span>
             </div>
             <span
-              class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
+              class="text-sm ml-2 max-h-[2em] w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
             >{formatArtists(album.artists.map((x) => x.name))}</span>
           </div>
           <div
-            class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
+            class="flex flex-row justify-start font-medium text-gray-300 gap-0.5 items-center text-xs"
           >
             <div>
-              <span class="font-semibold text-black dark:text-white">{
+              <span class="font-semibold text-white">{
                 showAsNumber(album.playCount[informationSource])
               }</span>
               streams
@@ -122,7 +122,7 @@
               <circle cx="12" cy="12" r="4"></circle>
             </svg>
             <div>
-              <span class="font-semibold text-black dark:text-white">{
+              <span class="font-semibold text-white">{
                 showAsNumber(
                   album.totalPlayDuration[informationSource]
                     .toFixed(0),

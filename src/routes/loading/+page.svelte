@@ -10,6 +10,7 @@
   } from "$lib/globals";
   import processing from "$lib/jellyfin/queries/local/processing";
   import { processingResultToRewindReport } from "$lib/utility/convert";
+  import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
 
   processing().then(async (result) => {
     if (result.success) {
@@ -21,16 +22,28 @@
         lightRewindReport.set(conversionResult.data);
         console.log(`$lightRewindReport:`, $lightRewindReport);
       }
-      goto("/rewind");
+      goto("/launch");
     } else {
       console.error("Failed to process", result.reason);
+      // TODO make this error screenshottable, on the error page
       goto("/welcome");
     }
   });
 </script>
 
-<Loading {...$downloadingProgress} title="Downloading Data" />
+<div
+  class="p-6 text-center flex flex-col justify-center items-center w-full h-screen gap-16"
+>
+  <JellyfinRewindLogo />
 
-<Loading {...$processingProgress} title="Cleaning up Data" />
+  <div>
+    <Loading {...$downloadingProgress} title="Fetching..." />
 
-<Loading {...$generatingProgress} title="Generating Rewind, just for you!" />
+    <Loading {...$processingProgress} title="Processing Data..." />
+
+    <Loading
+      {...$generatingProgress}
+      title="Generating Your Rewind Report..."
+    />
+  </div>
+</div>

@@ -17,11 +17,9 @@
   <Header />
 
   <div
-    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-4 w-full mx-auto text-balance text-center"
+    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-400 mt-4 w-full mx-auto text-balance text-center"
   >
-    <p class="">
-      Are you using Finamp's beta version to listen to music?
-    </p>
+    <p class="">Are you using Finamp's beta version to listen to music?</p>
     <p class="">
       Finamp keeps track of your playback history even when you're not connected
       to your server, and you can now import that history!
@@ -31,24 +29,61 @@
       database, but can then used to generate a more accurate Rewind report for
       you in the following steps.
     </p>
-    <p class="text-orange-500">Make sure to only import this once!</p>
   </div>
-
+  <!-- 
   <button
-    class="px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-4 flex flex-row gap-4 items-center mx-auto hover:text-white"
+    class="px-2 py-1 rounded-lg text-sm border-2 border-gray-400 hover:bg-gray-300 font-medium text-gray-200 mt-4 flex flex-row gap-4 items-center mx-auto hover:text-white"
     on:click={() => (finampOfflineExportDialogOpen = true)}
   >
     <span>How can I import my offline plays?</span>
-  </button>
+  </button> -->
 
-  <div class="w-full flex flex-col items-center text-center mt-12">
+  <div class="w-full flex flex-col gap-4 items-center text-center mt-8">
+    <a
+      class="px-3 py-3 rounded-lg text-md border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-2 flex flex-row gap-2 items-center mx-auto hover:text-white"
+      href="finamp://internal/playbackhistory"
+    >
+      <img class="size-8" src="/media/finamp_cropped.svg" alt="Finamp Logo" />
+      <span>Open Finamp's Playback History</span>
+    </a>
+    <div class="flex flex-col gap-0.5">
+      <span>Export & save Offline Plays</span><span
+        class="flex flex-row gap-1.5"
+      >by clicking the <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="icon icon-tabler icons-tabler-outline icon-tabler-share"
+        >
+          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+          <path
+            d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"
+          />
+          <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+          <path
+            d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0"
+          />
+          <path d="M8.7 10.7l6.6 -3.4" />
+          <path d="M8.7 13.3l6.6 3.4" />
+        </svg>icon, then</span>
+    </div>
+
     <label
       for="import-file"
-      class="
-        ${() =>
-        `px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${importingOfflinePlayback ? `saturation-50` : ``}`}
-      "
-    >Import Offline Playback History</label>
+      class={`px-4 py-3 rounded-xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-col gap-1 items-center mx-auto ${
+        importingOfflinePlayback ? `saturation-50` : ``
+      }`}
+    >
+      <span>Import Offline Playback History</span>
+      <span class="font-bold text-[1.1rem] text-orange-800"
+      >Only import once per Finamp install!</span>
+    </label>
     <!-- svelte-ignore event_directive_deprecated -->
     <input
       type="file"
@@ -83,7 +118,7 @@
           // import plays to server
           await uploadOfflinePlaybackBatched(offlinePlayback);
 
-          goto("loading");
+          goto("/loading");
         } catch (err) {
           console.error(
             `Error while importing offline playback data:`,
@@ -97,23 +132,21 @@
     />
 
     {#if importingOfflinePlayback}
-      <p
-        class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300"
-      >
+      <p class="mt-8 px-10 text-xl text-balance font-semibold text-gray-300">
         Importing, please wait a few seconds...
       </p>
     {:else}
-      <p
-        class="mt-4 px-10 text-balance font-semibold text-gray-600 dark:text-gray-300"
-      >
-        Already imported your offline plays or don't have any?
-      </p>
-      <button
-        class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
-        on:click={() => goto("loading")}
-      >
-        <span>Continue without importing</span>
-      </button>
+      <div>
+        <!-- <p class="mt-4 px-10 text-balance font-semibold text-gray-300">
+          Already imported your offline plays or don't have any?
+        </p> -->
+        <button
+          class="px-2 py-1 rounded-lg mt-4 text-sm border-gray-400 hover:bg-gray-300 border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          on:click={() => goto("/loading")}
+        >
+          <span>Continue without importing</span>
+        </button>
+      </div>
     {/if}
   </div>
 
@@ -123,12 +156,19 @@
 <Modal open={finampOfflineExportDialogOpen}>
   <h1>Important Offline Listens from Finamp Beta</h1>
   <p>Its really easy!</p>
+  <!-- TODO add deep link -->
   <ol type="1">
+    <li>
+      Click <a href="finamp://internal/playbackhistory"
+      >this link to open Finamp on this device</a>, or follow steps 1-3
+    </li>
     <li>Open Finamp</li>
     <li>Expand Sidebar</li>
     <li>Click on "Playback History"</li>
     <li>Save History via the share button on the top right</li>
     <li>Import it here!</li>
   </ol>
-  <button on:click={() => finampOfflineExportDialogOpen = false}>Okay!</button>
+  <button on:click={() => (finampOfflineExportDialogOpen = false)}>
+    Okay!
+  </button>
 </Modal>

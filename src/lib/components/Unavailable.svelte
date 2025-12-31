@@ -1,9 +1,9 @@
 <script>
   import { writable } from "svelte/store";
   import Modal from "./Modal.svelte";
-  let modalOpen = writable(false);
+  let modalOpen = $state(false);
   export function closeModal() {
-    $modalOpen = false;
+    modalOpen = false;
   }
 </script>
 
@@ -17,7 +17,7 @@
   </span>
   <button
     on:click|stopPropagation={() => {
-      $modalOpen = true;
+      modalOpen = true;
     }}
     class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900"
   >
@@ -45,7 +45,7 @@
   </button>
 </div>
 
-<Modal open={$modalOpen}>
+<Modal open={modalOpen}>
   <h1>Listening Habits Unavailable</h1>
   <p>
     Your Listening Habits compared to last year are unavailable because you
@@ -59,5 +59,5 @@
     In case you dont have that report, dont worry. You can store this recap for
     next year!
   </p>
-  <button on:click={$modalOpen = false}>Okay!</button>
+  <button on:click={() => (modalOpen = false)}>Okay!</button>
 </Modal>

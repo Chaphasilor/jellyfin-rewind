@@ -31,7 +31,7 @@
   </div>
 
   <h2
-    class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-800 dark:text-gray-200"
+    class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-200"
   >
     Welcome to<br />Jellyfin Rewind {
       $lightRewindReport.jellyfinRewindReport?.year
@@ -39,7 +39,7 @@
   </h2>
 
   <div
-    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center"
+    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-400 mt-10 w-full mx-auto text-balance text-center"
   >
     <p class="">
       This is your personal overview over your listening habits of the past
@@ -70,7 +70,7 @@
   <div>
     <!-- svelte-ignore event_directive_deprecated -->
     <button
-      class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-600 dark:text-gray-300 mt-4 flex flex-row gap-4 items-center mx-auto"
+      class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-300 mt-4 flex flex-row gap-4 items-center mx-auto"
       on:click|stopPropagation={() => isAccuracyDisclaimerOpen.set(true)}
     >
       Accuracy Disclaimer

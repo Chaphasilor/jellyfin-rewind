@@ -54,6 +54,14 @@ export default class Cache<D> {
     this.data[key].counters.applyDelta(source, delta);
   }
 
+  updateData(
+    key: string,
+    updater: (data: D) => D,
+  ) {
+    if (!this.hasKey(key)) return;
+    this.data[key].data = updater(this.data[key].data);
+  }
+
   find(fn: (data: D) => boolean) {
     const key = Object.keys(this.data).find((key) => fn(this.data[key].data));
 

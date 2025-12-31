@@ -12,7 +12,7 @@
   <Header />
 
   <div
-    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-10 w-full mx-auto text-balance text-center"
+    class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-400 mt-10 w-full mx-auto text-balance text-center"
   >
     <p class="">
       You can now import last year's Jellyfin Rewind report, if you have one.
@@ -50,7 +50,7 @@
             //@ts-ignore
             oldReport.set(await importRewindReport(e.target.files[0]));
             console.log(`$oldReport:`, $oldReport);
-            goto("loading");
+            goto("/loading");
             // const featureDelta = await getFeatureDelta(oldReport, state.rewindReport)
             // console.log(`featureDelta:`, featureDelta)
           } catch (err) {
@@ -64,20 +64,20 @@
 
       {#if importingLastYearsReport}
         <p
-          class="mt-8 px-10 text-xl text-balance font-semibold text-gray-600 dark:text-gray-300"
+          class="mt-8 px-10 text-xl text-balance font-semibold text-gray-300"
         >
           Importing, please wait a few seconds...
         </p>
       {:else}
         <button
-          class="fwd px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          class="fwd px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
           on:click={() => goto("/loading")}
         >
           <span>Continue without last year's report</span>
         </button>
 
         <button
-          class="up px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          class="up px-2 py-1 rounded-lg text-sm border-2 border-gray-400 hover:bg-gray-300 font-medium text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
           on:click={() => goto("/importOfflinePlayback")}
         >
           <span>Using Finamp's beta? Import offline playback now!</span>

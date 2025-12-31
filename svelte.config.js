@@ -14,6 +14,7 @@ const config = {
     adapter: adapter({
       precompress: true,
       strict: true,
+      pages: "dist",
     }),
   },
 };

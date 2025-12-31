@@ -62,7 +62,7 @@
 
 <div class="h-full p-4 flex flex-col justify-around">
   <h2
-    class="text-2xl mt-8 font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center font-semibold text-gray-800 dark:text-gray-200"
+    class="text-2xl mt-8 font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center font-semibold text-gray-200"
   >
     <span>{$lightRewindReport.jellyfinRewindReport?.user?.name}'s</span>
     <div class="w-full flex flex-col items-center">
@@ -74,10 +74,10 @@
   </h2>
 
   <div
-    class="grid grid-cols-2 place-items-stretch gap-1 w-full mt-6 pb-20 text-gray-800 dark:text-gray-100"
+    class="grid grid-cols-2 place-items-stretch gap-1 w-full mt-6 pb-20 text-gray-100"
   >
     <div
-      class="overflow-hidden border-2 border-black/5 dark:border-white/5 text-center p-1 flex flex-col justify-center items-center rounded-md col-span-2"
+      class="overflow-hidden border-2 border-white/5 text-center p-1 flex flex-col justify-center items-center rounded-md col-span-2"
     >
       <!-- duration -->
       <div class="text-lg">
@@ -92,7 +92,7 @@
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
     >
       <!-- top track -->
       <h4 class="text-xs">Top Track</h4>
@@ -116,7 +116,7 @@
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
     >
       <!-- top artist -->
       <h4 class="text-xs">Top Artist</h4>
@@ -134,7 +134,7 @@
     </div>
     {#if extraFeatures().totalMusicDays}
       <div
-        class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 text-center rounded-md grid place-content-center"
+        class="overflow-hidden border-2 border-white/5 p-1 text-center rounded-md grid place-content-center"
       >
         <!-- days listened to music -->
         <div class="text-xl text-balance">
@@ -150,7 +150,7 @@
       </div>
     {/if}
     <div
-      class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md"
+      class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md"
     >
       <!-- stats 1 - unique items -->
       <div>
@@ -180,7 +180,7 @@
     </div>
     {#if extraFeatures().mostSuccessivePlays}
       <div
-        class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+        class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
       >
         <!-- most successive plays -->
         <h4 class="text-xs">Most Successive Streams</h4>
@@ -203,7 +203,7 @@
       </div>
     {/if}
     <div
-      class="overflow-hidden border-2 border-black/5 dark:border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
+      class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
     >
       <!-- stats 1 - unique items -->
       <div class="text-balance">
@@ -236,7 +236,7 @@
     </div>
     {#if extraFeatures().listeningActivityDifference}
       <div
-        class="overflow-hidden border-2 border-black/5 dark:border-white/5 p-1 rounded-md col-span-2"
+        class="overflow-hidden border-2 border-white/5 p-1 rounded-md col-span-2"
       >
         <!-- stats 2 - listening activity difference (if positive) -->
         {#if         ($lightRewindReport.jellyfinRewindReport?.featureDelta

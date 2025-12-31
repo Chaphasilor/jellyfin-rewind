@@ -52,10 +52,10 @@
   <h2 class="text-2xl font-medium mt-5">Your Top Genres<br />of the year</h2>
   <ol
     id="top-genres-main-feature"
-    class="flex flex-col gap-2 p-6 dark:text-black"
+    class="flex flex-col gap-2 p-6 text-black"
   >
     {#each       $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]
-        ?.slice(0, 5) as
+        ?.slice(0, 8) as
       genre,
       index
       (genre.id)
@@ -73,7 +73,7 @@
             <span class="font-semibold basext-xl">{index + 1}.</span>
             <div class="flex flex-col gap-0.5 items-start">
               <span
-                class="font-quicksand-bold text-lg uppercase tracking-widest"
+                class="font-quicksand-bold text-lg uppercase tracking-widest w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
               >{genre.name}</span>
 
               <div
@@ -101,7 +101,10 @@
                 </svg>
                 <div>
                   <span class="font-semibold text-black">{
-                    showAsNumber(genre.uniqueTracks)
+                    showAsNumber(
+                      genre
+                        .uniquePlayedTracks[informationSource],
+                    )
                   }</span>
                   tracks
                 </div>
@@ -144,7 +147,7 @@
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-48"
 >
   {#each     $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]?.slice(
-      5,
+      8,
       20,
     ) as
     genre,
@@ -157,7 +160,7 @@
           <div
             class="flex flex-row w-full justify-start whitespace-nowrap overflow-hidden items-center"
           >
-            <span class="font-semibold mr-2">{index + 1 + 5}.</span>
+            <span class="font-semibold mr-2">{index + 1 + 8}.</span>
             <span
               class="font-semibold leading-tight text-ellipsis overflow-hidden"
             >{genre.name}</span>

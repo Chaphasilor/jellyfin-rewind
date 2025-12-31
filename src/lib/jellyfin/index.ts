@@ -1,4 +1,4 @@
-import { endSql, startSql, year } from "$lib/globals.ts";
+import { endSql as endExclusiveSql, startSql, year } from "$lib/globals.ts";
 import type {
   JellyfinResponse_SystemInfoPublic,
   JellyfinResponse_UsersAuthenticateByName,
@@ -16,12 +16,14 @@ class Jellyfin {
   header?: string;
 
   constructor() {
-    // this.load();
+    // restore session if possible
+    this.load();
   }
 
   async connectToURL(url: string): Promise<Result<undefined>> {
     const url_ = stringToUrl(url);
     if (!url_.success) return url_; // invalid URL
+    console.log(`url:`, url);
 
     this.baseurl = url_.data!.origin;
 
@@ -310,7 +312,7 @@ class Jellyfin {
     // always limit to Date, User and Audio
     modifiers.conditions.push(
       `DateCreated >= '${startSql}'`,
-      `DateCreated <= '${endSql}'`,
+      `DateCreated < '${endExclusiveSql}'`,
       `UserId = '${this.user?.id}'`,
       `ItemType='Audio'`,
       // `PlayDuration > 0`, actually, we want to be able to tell how many tracks were completely skipped, including within one second

@@ -1,5 +1,6 @@
 <script lang="ts">
   import processing from "$lib/jellyfin/queries/local/processing";
+  import JellyfinRewindLogo from "./JellyfinRewindLogo.svelte";
 
   export let title: string;
   export let detail: string = "";
@@ -9,28 +10,36 @@
   processing();
 </script>
 
-{#if max != 0 && cur == max}
-  <h5>{title}</h5>
-{/if}
-{#if max != 0 && cur != max}
-  <div class="progress">
-    <h4>{title}</h4>
-    <p>{cur} / {max}</p>
-    {#if detail != ""}
-      <p>{detail}</p>
+<div>
+  <div>
+    {#if max != 0 && cur == max}
+      <h5>{title}</h5>
     {/if}
-    <div class="barbg">
-      <div class="percent">
-        {Math.round(cur / max * 100)}%
+    {#if max != 0 && cur != max}
+      <div class="progress">
+        <h4>{title}</h4>
+        <p class="mt-4 font-mono">{cur} / {max}</p>
+        <!-- <p class="h-12">
+          {#if detail != ""}
+            {detail}
+          {/if}
+        </p> -->
+        <div class="barbg">
+          <div class="percent">
+            {Math.round((cur / max) * 100)}%
+          </div>
+          <div
+            class="barfg"
+            style={`width: ${
+              (cur / max) * 100
+            }%; transition: width 0.3s ease;`}
+          >
+          </div>
+        </div>
       </div>
-      <div
-        class="barfg"
-        style={`width: ${cur / max * 100}%; transition: width 0.3s ease;`}
-      >
-      </div>
-    </div>
+    {/if}
   </div>
-{/if}
+</div>
 
 <style>
   h5 {

@@ -1,7 +1,10 @@
 import { decode as decodeBlurhash } from "blurhash";
 import jellyfin from "../jellyfin/index.ts";
 import { checkIfOfflinePlaybackImportAvailable } from "./offlineImport.ts";
-import { PlaybackReportingIssueAction } from "../types.ts";
+import {
+  PlaybackReportingIssueAction,
+  type PlaybackReportingSetupCheckResult,
+} from "../types.ts";
 
 export function loadImage(
   elements: any[],
@@ -198,7 +201,9 @@ export function loadTracksForGroup(
     });
 }
 
-export async function checkIfPlaybackReportingInstalled() {
+export async function checkIfPlaybackReportingInstalled(): Promise<
+  PlaybackReportingSetupCheckResult["setup"]
+> {
   const pluginsResponse = await fetch(
     `${jellyfin.baseurl}/Plugins`,
     {
@@ -312,10 +317,13 @@ export async function installPlaybackReportingPlugin() {
 
 // requires administrator account
 export async function enablePlaybackReportingPlugin(
-  setup: { id: any; version: any },
+  setup: PlaybackReportingSetupCheckResult["setup"],
 ) {
+  // TODO change these fallback values to the ones for Jellyfin 10.11
   const response = await fetch(
-    `${jellyfin.baseurl}/Plugins/${setup.id}/${setup.version}/Enable`,
+    `${jellyfin.baseurl}/Plugins/${
+      setup?.id ?? `5c53438191a343cb907a35aa02eb9d2c`
+    }/${setup?.version ?? 16}/Enable`,
     {
       method: `POST`,
       headers: {
@@ -406,17 +414,9 @@ export function blurhashToDataURI(blurhash: string) {
 }
 
 function inspectPlaybackReportingSetup(
-  playbackReportingSetup: {
-    installed: boolean;
-    version?: string;
-    id?: string;
-    restartRequired: boolean;
-    disabled: boolean;
-    settings?: { raw: any; retentionInterval: number };
-    ignoredUsers?: { id: string }[];
-  },
+  playbackReportingSetup: PlaybackReportingSetupCheckResult["setup"],
 ): PlaybackReportingIssueAction {
-  if (!playbackReportingSetup.installed) {
+  if (!playbackReportingSetup?.installed) {
     return PlaybackReportingIssueAction.INSTALL_PLUGIN;
   } else if (playbackReportingSetup.restartRequired) {
     return PlaybackReportingIssueAction.RESTART_SERVER;
@@ -424,14 +424,14 @@ function inspectPlaybackReportingSetup(
     return PlaybackReportingIssueAction.ENABLE_PLUGIN;
   } else if (
     playbackReportingSetup.version &&
-    parseInt(playbackReportingSetup.version) < 16
+    (playbackReportingSetup?.version ?? 0) < 16
   ) {
     return PlaybackReportingIssueAction.UPDATE_PLUGIN;
   } else if (
     Number(playbackReportingSetup.settings?.retentionInterval) !== -1 &&
     Number(playbackReportingSetup.settings?.retentionInterval) < 24
   ) {
-    return PlaybackReportingIssueAction.SET_RETENTION_FOREVER;
+    return PlaybackReportingIssueAction.RETENTION_SHORT;
   } else if (
     playbackReportingSetup.ignoredUsers?.some((user: { id: string }) =>
       user.id === jellyfin.user?.id
@@ -445,19 +445,13 @@ function inspectPlaybackReportingSetup(
   // return inspection;
 }
 
-type PlaybackReportingSetupCheckResult = {
-  checked: boolean;
-  issue: PlaybackReportingIssueAction;
-  offlineImportAvailable?: boolean;
-  checkAttempts: number;
-};
-
 export async function checkPlaybackReportingSetup(
   previousResult?: PlaybackReportingSetupCheckResult,
 ) {
-  const result: PlaybackReportingSetupCheckResult = {
+  let result: PlaybackReportingSetupCheckResult = {
     checked: false,
     issue: PlaybackReportingIssueAction.CONFIGURED_CORRECTLY,
+    setup: undefined,
     checkAttempts: previousResult?.checkAttempts ?? 0,
   };
   if (jellyfin.user?.isAdmin) {
@@ -473,6 +467,7 @@ export async function checkPlaybackReportingSetup(
 
     try {
       const playbackReportingSetup = await checkIfPlaybackReportingInstalled();
+      result.setup = playbackReportingSetup;
       console.log(`playbackReportingSetup:`, playbackReportingSetup);
 
       const playbackReportingIssue = inspectPlaybackReportingSetup(
@@ -489,12 +484,15 @@ export async function checkPlaybackReportingSetup(
         `Failed to check the playback reporting setup, continuing without it: ${err?.toString()}`,
       );
       result.checkAttempts++;
-      if (result.checkAttempts > 3) {
+      if (result.checkAttempts > 5) {
         return result;
       } else {
-        setTimeout(() => {
-          checkPlaybackReportingSetup(result);
-        }, 5000);
+        result = await new Promise((resolve) => {
+          setTimeout(
+            async () => resolve(await checkPlaybackReportingSetup(result)),
+            5000,
+          );
+        });
       }
     }
   } else {
