@@ -371,14 +371,12 @@ async function connect(url) {
       <button class="self-center text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white" @click="${() => state.connectionHelpDialogOpen = true}">Help me!?</button>
     </div>
     `
-
-    // try anyway, in case of CORS issues but correct URL
+  } finally {
     if (state.selectedAction === `openPluginsPage`) {
       window.open(`${state.auth.config.baseUrl}/web/index.html#!/addplugin.html?name=Playback%20Reporting&guid=5c53438191a343cb907a35aa02eb9d2c`, `_blank`)
     } else if (state.selectedAction === `openPlaybackReportingSettings`) {
       window.open(`${state.auth.config.baseUrl}/web/index.html#!/configurationpage?name=playback_report_settings`, `_blank`)
     }
-
   }
 }
 
