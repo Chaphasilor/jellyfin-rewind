@@ -6,8 +6,9 @@ import type {
   ProcessingResults,
 } from "./types.ts";
 
-export const start = new Date(2025, 0, 1);
-export const end = new Date(2025, 11, 31);
+export const year = 2025
+export const start = new Date(year, 0, 1);
+export const end = new Date(year, 11, 31);
 export const startSql = formatDateToSql(start);
 export const endSql = formatDateToSql(end);
 

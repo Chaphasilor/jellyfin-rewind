@@ -1,4 +1,4 @@
-import { endSql, startSql } from "$lib/globals.ts";
+import { endSql, startSql, year } from "$lib/globals.ts";
 import type {
   JellyfinResponse_SystemInfoPublic,
   JellyfinResponse_UsersAuthenticateByName,
@@ -161,7 +161,7 @@ class Jellyfin {
   get deviceProfile() {
     return {
       clientName: `Jellyfin Rewind`,
-      clientVersion: `0.2025.0`, //TODO: update version dynamically
+      clientVersion: `0.${year}.0`,
       deviceName: `Chrome`,
       deviceId: `90a83627-401a-4f19-bf93-be8ccf521b27`,
     };
