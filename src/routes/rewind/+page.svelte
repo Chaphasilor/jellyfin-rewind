@@ -43,9 +43,7 @@
         if (
           !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing
         ) {
-          if (
-            $lightRewindReport.jellyfinRewindReport.playbackReportComplete
-          ) {
+          if ($lightRewindReport.jellyfinRewindReport.playbackReportComplete) {
             return `playbackReport`;
           } else {
             return `average`;
@@ -91,11 +89,11 @@
       totalMusicDays:
         $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
         !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
-      mostSuccessivePlays: !!$lightRewindReport.jellyfinRewindReport
-        .generalStats
-        .mostSuccessivePlays,
-      listeningActivityDifference: !!$lightRewindReport.jellyfinRewindReport
-        .featureDelta,
+      mostSuccessivePlays:
+        !!$lightRewindReport.jellyfinRewindReport.generalStats
+          .mostSuccessivePlays,
+      listeningActivityDifference:
+        !!$lightRewindReport.jellyfinRewindReport.featureDelta,
     };
   });
 
@@ -143,8 +141,8 @@
       component: TopGenres,
     },
     {
-      skip: !$lightRewindReport.jellyfinRewindReport.tracks
-        ?.leastSkipped?.length,
+      skip: !$lightRewindReport.jellyfinRewindReport.tracks?.leastSkipped
+        ?.length,
       component: LeastSkipped,
     },
     {
@@ -164,6 +162,50 @@
 
   let lastScrollTime = 0;
   const DEBOUNCE_DELAY = 0;
+
+  // Touch gesture handling
+  let touchStartY = 0;
+  let touchStartX = 0;
+  let touchStartTime = 0;
+  const SWIPE_THRESHOLD = 50; // minimum distance for a swipe
+  const SWIPE_MAX_TIME = 500; // maximum time for a swipe gesture
+  const SWIPE_MAX_HORIZONTAL_DRIFT = 100; // maximum horizontal movement allowed
+
+  function handleTouchStart(event: TouchEvent) {
+    touchStartY = event.touches[0].clientY;
+    touchStartX = event.touches[0].clientX;
+    touchStartTime = Date.now();
+  }
+
+  function handleTouchMove(event: TouchEvent) {
+    // Prevent default scrolling behavior during swipe
+    event.preventDefault();
+  }
+
+  function handleTouchEnd(event: TouchEvent) {
+    const touchEndY = event.changedTouches[0].clientY;
+    const touchEndX = event.changedTouches[0].clientX;
+    const touchEndTime = Date.now();
+
+    const deltaY = touchStartY - touchEndY;
+    const deltaX = Math.abs(touchStartX - touchEndX);
+    const deltaTime = touchEndTime - touchStartTime;
+
+    // Check if it's a valid swipe gesture (vertical, within time limit, minimal horizontal drift)
+    if (
+      deltaTime < SWIPE_MAX_TIME &&
+      Math.abs(deltaY) > SWIPE_THRESHOLD &&
+      deltaX < SWIPE_MAX_HORIZONTAL_DRIFT
+    ) {
+      if (deltaY > 0) {
+        // Swiped up - go to next feature
+        nextFeature();
+      } else {
+        // Swiped down - go to previous feature
+        prevFeature();
+      }
+    }
+  }
 
   function handleClick(event: MouseEvent) {
     if (event.clientY < window.innerHeight / 3) {
@@ -188,9 +230,7 @@
   let featureInstances: Record<number, FeatureEvents> = {};
 
   function scrollToActive() {
-    const element = document.getElementById(
-      `feature-${currentFeatureIndex}`,
-    );
+    const element = document.getElementById(`feature-${currentFeatureIndex}`);
     element?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
@@ -235,12 +275,10 @@
 
   // fade between two tracks over 1000ms
   async function fadeToNextTrack(trackInfo: { id: any }) {
-    const player1: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-1`,
-    );
-    const player2: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-2`,
-    );
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -309,12 +347,10 @@
 
   // fade both tracks out over 1000ms
   function pausePlayback() {
-    const player1: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-1`,
-    );
-    const player2: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-2`,
-    );
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -353,10 +389,7 @@
           player2.pause();
           //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
         } else {
-          setTimeout(
-            doFade(stepIndex + 1),
-            fadeDuration / fadeSteps.length,
-          );
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -373,12 +406,10 @@
 
   // uses the tag data to determine the previously active player and resumes playback by fading it in
   function resumePlayback() {
-    const player1: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-1`,
-    );
-    const player2: HTMLAudioElement | null = document.querySelector(
-      `#audio-player-2`,
-    );
+    const player1: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-1`);
+    const player2: HTMLAudioElement | null =
+      document.querySelector(`#audio-player-2`);
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -407,10 +438,7 @@
         activePlayer.volume = fadeSteps[stepIndex];
 
         if (stepIndex !== fadeSteps.length - 1) {
-          setTimeout(
-            doFade(stepIndex + 1),
-            fadeDuration / fadeSteps.length,
-          );
+          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -429,6 +457,9 @@
 <svelte:document
   on:click={handleClick}
   on:wheel={handleWheel}
+  on:touchstart={handleTouchStart}
+  on:touchmove|passive={handleTouchMove}
+  on:touchend={handleTouchEnd}
   on:scroll|preventDefault
 />
 <svelte:window

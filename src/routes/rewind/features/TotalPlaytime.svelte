@@ -252,7 +252,7 @@
     </div>
   </div>
 
-  <div class="absolute w-full bottom-15">
+  <div class="absolute w-full bottom-25">
     <div class="w-full flex flex-row justify-center">
       <canvas
         id="playtime-by-month-chart"

@@ -69,7 +69,7 @@
   <h2
     class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-100"
   >
-    That's the end<br />of this year's
+    That was
   </h2>
 
   <div class="mt-4 w-full flex flex-col items-center">
@@ -125,23 +125,16 @@
       more insights next time around!
     </p>
     <p class="">
-      Oh and I'd love to hear your feedback on <a
+      We'd love to hear your feedback on <a
         class="text-[#00A4DC] hover:text-[#0085B2]"
         href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
         target="_blank"
         on:click|stopPropagation={() => {}}
-      >GitHub</a>
-      or
-      <a
-        class="text-[#00A4DC] hover:text-[#0085B2]"
-        href="https://reddit.com/u/Chaphasilor"
-        target="_blank"
-        on:click|stopPropagation={() => {}}
-      >Reddit</a>!<br />Feel free to let me know your suggestions or report bugs
+      >GitHub</a>!<br />Feel free to leave suggestions or report bugs
       :)
     </p>
     <p>
-      Thanks for checking out Jellyfin Rewind.<br />See you next year!<br>
+      See you next year!<br>
       <span class="italic right-0 bottom-0">
         - Chaphasilor, Floschy, 1hitsong, and all other contributors
       </span>
