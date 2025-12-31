@@ -12,6 +12,8 @@
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
 
+  let error: string | undefined = $state(undefined);
+
   processing().then(async (result) => {
     if (result.success) {
       processingResult.set(result.data);
@@ -25,8 +27,7 @@
       goto("/launch");
     } else {
       console.error("Failed to process", result.reason);
-      // TODO make this error screenshottable, on the error page
-      goto("/welcome");
+      error = result.reason
     }
   });
 </script>
@@ -46,4 +47,16 @@
       title="Generating Your Rewind Report..."
     />
   </div>
+
+  {#if error}
+    <div class="warning mb-4">
+      <div
+        class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-100 w-5/6 mx-auto"
+      >
+        <p class="">An error occurred!</p>
+        <p class="font-mono mx-auto">{error.toString()}</p>
+        <!-- svelte-ignore event_directive_deprecated -->
+      </div>
+    </div>
+  {/if}
 </div>
