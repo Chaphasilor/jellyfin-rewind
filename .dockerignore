@@ -1,4 +1,5 @@
 node_modules
-./build
+./dist
 .env
 .git
+.DS_Store

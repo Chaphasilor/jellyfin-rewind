@@ -1,0 +1,47 @@
+http://192.168.31.40:8096/user_usage_stats/submit_custom_query?stamp=1665757270586
+{"CustomQueryString":"SELECT count(*) from (SELECT ROWID, count(*) from PlaybackActivity where ItemType=\"Audio\" group by ItemId)","ReplaceUseIrd":false}
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+LIMIT 30
+			
+
+SELECT ROWID, count(*) from PlaybackActivity where ItemType="Audio" group by ItemId
+
+
+SELECT count(*) from (SELECT ROWID, count(*) from PlaybackActivity where ItemType="Audio" group by ItemId)
+
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio" and ItemName like "% - %-%"
+
+http://192.168.31.40:8096/Users/13c597ac83f74af9a2d26235a1c23524/Items?SortBy=Album%2CSortName&SortOrder=Ascending&IncludeItemTypes=Audio&Recursive=true&Fields=AudioInfo%2CParentId&EnableImageTypes=Primary&ids=4673eb1597b5208f999a9a479223302b,c44f444851325ae5ca0acdb3ca5405f2,d437c474d322dc7d261ed810061cd91a
+
+
+SELECT ROWID, SUM(PlayDuration), * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+GROUP BY ItemId
+LIMIT 30
+
+SELECT ROWID, SUM(PlayDuration) AS TotalDuration, ItemId, ItemName
+  FROM PlaybackActivity
+  WHERE ItemType="Audio"
+    AND UserId="13c597ac83f74af9a2d26235a1c23524"
+  GROUP BY ItemId
+
+SELECT ROWID, * 
+FROM PlaybackActivity
+WHERE ItemType="Audio"
+  AND UserId="13c597ac83f74af9a2d26235a1c23524"
+  AND datetime(DateCreated) >= datetime('2022-01-01') AND datetime(DateCreated) <= datetime('2022-12-31 23:59:59.9999999')
+ORDER BY DateCreated ASC
+LIMIT 30
+
+INSERT INTO PlaybackActivity
+  (DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration)
+  VALUES
+    ( '2024-12-29 17:55:07.0000000', 'c0ffee', '22ed98039ef8db9016f64bba02b36ad5', 'Audio', 'Crankdat, Ace Aura - The Feeling (The Feeling)', 'OfflinePlay', 'Finamp', 'Unknown', 420),
+    ( '2024-12-29 17:55:12.0000000', 'c0ffee', 'e5262768cd8d18bf6c25dff4a97f2fda', 'Audio', 'Fabian Mazur - Buckwild (The FifthGuys & Coffeeshop Remix) (Buckwild (The FifthGuys & Coffeeshop Remix))', 'OfflinePlay', 'Finamp', 'Unknown', 420)

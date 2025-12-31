@@ -28,3 +28,4 @@ dist/
 # Project-specific
 reddit-post.md
 dist-self-host/
+.svelte-kit/

@@ -1,184 +1,63 @@
-# Development
+![Jellyfin Rewind Banner](Jellyfin%20Rewind%20Banner.png)
 
-## Requirements
+# Jellyfin Rewind
 
-The [Deno](https://deno.com/) runtime, others might/should work but I build it
-with Deno and havent tried others. Sooo yeah
+## Welcome to Jellyfin Rewind 2024!
 
-## Setup
+> [!IMPORTANT]  
+> Jellyfin Rewind 2025 **will launch on December 31st 2025** (2025-12-31)!
+> If you want to be notified when it's time to review your listening habits of this year, **subscribe to release updates** by `watch`ing this repository.
+> See you then! - Chaphasilor
 
-Install the required modules by doing `deno install --allow-scripts`
+### How to use
 
-## Run
+Because Jellyfin Rewind is web-based and (for now at least) not available as a plugin, it might be a bit tricky to get your browser to communicate with your Jellyfin server. The problem is that browsers won't allow "insecure" requests (HTTP) from a "secure" website (HTTP**S**), or requests from a non-private context (website not within your network) to a private context (Jellyfin server accessed over a local IP address within your network).  
+So make sure you're not using a local IP address (starts with `192.168.`) or mDNS hostname (something like `jellyfin.local`). If you use something like Tailscale as your VPN, you could use your server's Tailscale IP address.
 
-Run the dev server by doing `deno task dev`, this will also fix all problems
-that might be detected by the VSC Svelte Extension because some code generation
-stuff.
+If you're unsure what your Jellyfin server is using, but your Jellyfin server is accessible over the internet, simply use the first link (http)!  
+If that doesn't work, or your server **is NOT** accessible over the internet, you could self-host the Jellyfin Rewind website on your local network, for example on the same server that is running Jellyfin. For that, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the provided Docker image. The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.
 
-You can now click the link and see the wonderful Dev UI which is currently just
-a button and three values, everything actually useful happens in the console
-currently
+### Links
 
-## Format
+**Local Network / Self-Hosting**
 
-just run `deno task format`
+If your Jellyfin server is only accessible on your local network, you will need to self-host Jellyfin Rewind so that it's also accessible on your local network. Otherwise your browser will block the connection.  
+To do this, check out the [GitHub releases page](https://github.com/Chaphasilor/jellyfin-rewind/releases) and either download the zip-archive or use the [provided Docker image here](https://hub.docker.com/r/chaphasilor/jellyfin-rewind/tags). The zip-archive will need to be extracted into a folder that is served by a web server, like Apache or Nginx. The Docker image will need a to have port 80 exposed instead.
 
-## File System
+**HTTP** (works for both http and https Jellyfin servers, as long as they are accessible over the internet):
 
-```
-/src <------------------ Codebase
-  /lib <---------------- Usually Server side code, this project doesn't allow server code so here are all important things for the Frontend
-    /jellyfin
-      /queries <-------- Gathering the data to later do funny math with to make nice statistics
-        /api <---------- SQL Queries to the Playback Report plugin
-        /local <-------- Place to do local processing
-      index.ts <-------- The jellyfin interface/api thing
-    /utility <--------- A collection of generally useful functions and classes
-    globals.ts <-------- Globally used values
-    types.ts <---------- All existing types in one place
-  /routes <------------- The place where the frontend exists
-    /welcome <---------- The landing page
-    /login
-    +layout.svelte <---- The layout of the whole site, will be useful later
-    +layout.ts <-------- This is required to disable SSR (Server Side Rendering) to prevent the server from receiving sensitive data
-    +page.svelte <------ The Homepage (currently placeholder)
-    global.scss <------- The stylesheet
-/static <--------------- Place for assets like pngs or svgs, in other words the "public" folder
-.env <------------------ Login data for your jellyfin to make automated testing work
-```
+*Make sure your browser shows "insecure" / no lock at the top after opening the link, otherwise connecting to your HTTP-only Jellyfin server might not work!*
 
-## Code and Logs
+<http://jellyfin-rewind-http.chaphasilor.xyz>
 
-When a functions returns the universal `Result<T>` type it should do so via the
-`logAndReturn(id: string, result:T)` functions, this way its easy to see where
-something might have gone wrong but this function can take any datatype as
-input, not just Result. The Goal is for any failed Result to be send to the UI
-by moving up the callstack, this should make error management easier.
+**HTTPS** (**only use this if your Jellyfin server has an https connection and is accessible over the internet**, this is the best experience):
 
-Here an example:
+<https://jellyfin-rewind.netlify.app>
 
-```ts
-function game(): Result<boolean> {
-  const number = Math.random();
-  if (number < 0.5) {
-    return logAndReturn("game", {
-      success: false,
-      reason: "Number was too small",
-    });
-  }
+### Download your Rewind report!
 
-  return logAndReturn("game", { success: true, data: number }); // data is optional
-}
-```
+**Please, please, please download your Rewind report at the end!**
 
-The output of this might be
+Jellyfin's statistics aren't very exhaustive, and any additional data could help offer you more insights during next year's Rewind! Especially if you don't have the *Playback Reporting* plugin installed, this year's Rewind report might come in very handy, so keep it safe!
 
-```
-[game] success: 0.859684783
-```
+If something doesn't work and you can't download the data, I'll be happy to help you resolve the issue.
 
-Where `[game]` is gray and `success:` green
+### How does it work?
 
-Or It might log
+Glad you asked!  
+Essentially, Jellyfin Rewind loads most of the information about your music from your Jellyfin server, processes it on your device, aggregates some nice statistics, and then shows the result to you!
 
-```
-[game] failed: Number was too small
-```
+Your data never leaves your device; it's very similar to using the Jellyfin app on your phone.
 
-Where `[game]` is gray and `failed:` red
+Sadly the build in statistics of Jellyfin are pretty lackluster as of now, even with the *Playback Reporting* plugin, so that *a lot* of data has to be processed on your device. That's why it takes a few seconds to generate your Rewind report.
 
-If the input isnt a Result object the function will print the following
+For next year, I might release a separate plugin that can use your Jellyfin server in order to crunch the data. This would also solve some of the connection problems that might happen this year. If you're interested in helping me with the plugin, please be sure to reach out!
 
-```
-[game] returned: true
-```
+### Can I help out somehow?
 
-Where `[game]` is gray and `returned:` pink/light-red and the returned value
-will be a normal console.log() like print where you can interact with the object
-n stuff
+If you know something about web development, are a designer of some sorts, or have experience (or are curious about) developing Jellyfin plugins, I'd love to hear from you! There's so much I want to implement for next year's Jellyfin Rewind, and I need your help to bring all these ideas to life!
 
-## Tests
+I had many more features planned for this year, but simply didn't have the time. I originally planned to launch back in November, and that obviously didn't work out :)
 
-Here an example:
-
-```ts
-let v = await game(); // returns Result object;
-if (!test("Random Game", v)) return;
-console.log("All tests completed");
-```
-
-The output could be
-
-```
-{Random Game} success
-```
-
-Where `{Random Game}` is yellow and `success` is green
-
-Or
-
-```
-{Random Game} failed: Number was too small
-```
-
-Where `{Random Game}` is yellow and `failed: Number was too small` is darkred
-
-## Frontend
-
-The frontend is just Svelte, if you never worked with it the most important
-things are these:
-
-#### 0. Hot reloading
-
-Just works out of the box not problem as long as you dont use intervals
-
-#### 1. reactive states
-
-As you can see in the current `+page.svelte` there are variables prefixed by `$`
-which means these variables are stores. When those stores get updated the ui
-will automagicly update/rerender!
-
-#### 2. Typescript
-
-You can use typescript script blocks and import stuff from all other `.ts`
-files!
-
-#### 3. Components
-
-Files like `ProgressBar.svelte` can be imported from anywhere, these contain
-stuff like a normal `+page.svelte` but additionally have properties like
-`progress`. This example file could look like
-
-```svelte
-<script lang="ts">
-    export let progress: number
-</script>
-
-<div style="width: {progress}%">
-```
-
-And be Used like
-
-```svelte
-<script lang="ts">
-  import Progress from "./ProgressBar.svelte";
-  let progress = 0;
-</script>
-
-<Progress {progress} />
-<br />
-<button
-  onclick={() => {
-    progress += 0.1;
-  }}
-/>
-```
-
-And you guessed it, clicking the button will lengthen the div!
-
-## Current State
-
-Currently the login flow works (welcome > login > rewind)
-
-Though the rewind itself is highly temporary and currently only servers the
-purpose to debug the rewinding logic
+Thanks to everyone who uses Jellyfin Rewind, I sincerely hope you enjoyed it as much as I did!  
+See you next year!!!
