@@ -4,11 +4,12 @@
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import { formatArtists, showAsNumber } from "$lib/utility/format";
   import {
     loadImage,
     loadTracksForGroup,
   } from "$lib/utility/jellyfin-helper";
+    import { artistCache } from "$lib/jellyfin/queries/local/processing/values";
 
   const {
     informationSource,
@@ -97,12 +98,8 @@
             </div>
             <span
               class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
-            >by {
-                album.artists?.reduce(
-                  (acc, cur, index) =>
-                    index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                  ``,
-                ) || `Unknown Artist`
+            >{
+                formatArtists(album.artists.map(x => x.name))
               }</span>
           </div>
           <div
@@ -173,12 +170,8 @@
             >{album.name}</span>
           </div>
           <div class="ml-6 max-h-[2rem] text-xs">
-            by <span class="font-semibold">{
-              album.artists?.reduce(
-                (acc, cur, index) =>
-                  index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                ``,
-              ) || `Unknown Artist`
+            <span class="font-semibold">{
+                formatArtists(album.artists?.map(x => x.name))
             }</span>
           </div>
         </div>

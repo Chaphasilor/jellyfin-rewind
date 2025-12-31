@@ -43,6 +43,8 @@
   }
 
   async function authenticate() {
+    await pingServer()
+    if (error != undefined) return;
     const auth = await jellyfin.userLogin(userName, userPassword);
     loginValid = auth.success;
     if (auth.success) error = undefined;
@@ -147,7 +149,7 @@
 
 <button
   disabled={!serverValid || !loginValid || !userName || !userPassword}
-  on:click={() => proceed}
+  on:click={() => proceed()}
 >
   Continue To Rewind
 </button>

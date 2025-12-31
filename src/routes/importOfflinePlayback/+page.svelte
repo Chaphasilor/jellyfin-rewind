@@ -6,6 +6,7 @@
   import Jellyfin from "$lib/jellyfin/index";
   import { importOfflinePlayback } from "$lib/utility/offlineImport";
   import { uploadOfflinePlaybackBatched } from "$lib/jellyfin/queries/api/playbackReporting";
+    import Modal from "$lib/components/Modal.svelte";
 
   let importingOfflinePlayback = $state(false);
   let finampOfflineExportDialogOpen = $state(false);
@@ -19,7 +20,7 @@
     class="flex flex-col gap-4 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mt-4 w-full mx-auto text-balance text-center"
   >
     <p class="">
-      We noticed you've been using Finamp's beta version to listen to music.
+      Are you using Finamp's beta version to listen to music?
     </p>
     <p class="">
       Finamp keeps track of your playback history even when you're not connected
@@ -82,7 +83,7 @@
           // import plays to server
           await uploadOfflinePlaybackBatched(offlinePlayback);
 
-          goto("importLastYearsReport");
+          goto("loading");
         } catch (err) {
           console.error(
             `Error while importing offline playback data:`,
@@ -109,7 +110,7 @@
       </p>
       <button
         class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-2 flex flex-row gap-4 items-center mx-auto hover:text-white"
-        on:click={() => goto("importLastYearsReport")}
+        on:click={() => goto("loading")}
       >
         <span>Continue without importing</span>
       </button>
@@ -118,3 +119,17 @@
 
   <!--TODO ${() => buttonLogOut} -->
 </div>
+
+
+<Modal open={finampOfflineExportDialogOpen}>
+    <h1>Important Offline Listens from Finamp Beta</h1>
+    <p>Its really easy!</p>
+    <ol type="1">
+        <li>Open Finamp</li>
+        <li>Expand Sidebar</li>
+        <li>Click on "Playback History"</li>
+        <li>Save History via the share button on the top right</li>
+        <li>Import it here!</li>
+    </ol>
+    <button on:click={() => finampOfflineExportDialogOpen = false}>Okay!</button>
+</Modal>

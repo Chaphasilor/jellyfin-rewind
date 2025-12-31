@@ -58,11 +58,13 @@ $accent: rgb(241, 181, 57);
 ////
 
 b {
-  background: linear-gradient(25deg, $accent, $secondary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  font-style: italic;
-  padding-right: 0.2rem; // prevent text overflow
+  // background: linear-gradient(25deg, $accent, $primary);
+  // -webkit-background-clip: text;
+  // -webkit-text-fill-color: transparent;
+  // font-style: italic;
+  // padding-right: 0.2rem; // prevent text overflow
+    color: $primary;
+    font-weight: 800;
 }
 
 // body {
@@ -230,25 +232,28 @@ input {
     background-color: $background;
     .percent {
       position: absolute;
+      width: 100%;
+      text-align: center;
+      font-weight: 700;
       top: 0;
       right: 0;
       left: 0;
       z-index: 1;
-      text-shadow: 0 0 2px black;
+      color: $accent;
     }
     .barfg {
       position: absolute;
       top: 0;
       left: 0;
       height: 100%;
-      background-image: linear-gradient(30deg, $accent, $secondary);
+      
+      background-image: linear-gradient(30deg, $primary, $secondary);
     }
   }
 }
 
 .noScrollBar {
-  overflow-y: scroll;
-  max-height: 100%;
+    overflow-y: hidden;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 

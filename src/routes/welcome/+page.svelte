@@ -30,6 +30,15 @@
   <p class="b">and set "Keep data for" to at least 1 year</p>
 </div>
 
+<div class="info">
+  <h3>One Last Thing</h3>
+  This year we've rewritten the whole Rewind into another Web-Framework. <br>
+  In true Rewind fashion we manged to barely finish in time, so there might be more bugs than usual.<br>
+  Sorry about that in advance!<br>
+  For the best Experience we also recommend checking out your Rewind on a PC or Laptop.
+  <br />
+</div>
+
 <button on:click={() => goto("/login")}>Proceed to Login</button>
 
 <style>

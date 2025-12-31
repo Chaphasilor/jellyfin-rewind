@@ -19,12 +19,16 @@
     <meta property="og:locale" content="en_US" />
 </svelte:head>
 
+
 <main class:noScrollBar={page.url.pathname == "/rewind"}>
   <PageTransition path={page.url.href}>
     <slot />
   </PageTransition>
 
-  <Modal open={isAccuracyDisclaimerOpen}>
-    Test
-  </Modal>
 </main>
+<Modal open={$isAccuracyDisclaimerOpen}>
+  <h1>Accuracy Disclaimer</h1>
+  <p>Some of the Data shown in this Rewind might not be 100% correct</p>
+  <p>To Improve Stability some of the data will be ignored or modified</p>
+  <button on:click={$isAccuracyDisclaimerOpen=false}>Understood!</button>
+</Modal>

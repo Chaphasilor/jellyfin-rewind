@@ -27,9 +27,8 @@
     {#if !$oldReport}
       <label
         for="import-file"
-        class={`px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto ${
-          importingLastYearsReport ? `saturation-50` : ``
-        }`}
+        class="down px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+        class:saturate-50={importingLastYearsReport}
       >Import Last Year's Report</label>
       <!-- svelte-ignore event_directive_deprecated -->
       <input
@@ -71,23 +70,23 @@
         </p>
       {:else}
         <button
-          class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
-          on:click={() => goto("loading")}
+          class="fwd px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-700 dark:text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          on:click={() => goto("/loading")}
         >
           <span>Continue without last year's report</span>
         </button>
 
         <button
-          class="px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
-          on:click={() => goto("importOfflinePlayback")}
+          class="up px-2 py-1 rounded-lg text-sm border-gray-500 border-2 hover:bg-gray-600 dark:border-gray-400 dark:hover:bg-gray-300 font-medium text-gray-700 dark:text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          on:click={() => goto("/importOfflinePlayback")}
         >
           <span>Using Finamp's beta? Import offline playback now!</span>
         </button>
       {/if}
     {:else}
       <button
-        class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-        on:click={() => goto("loading")}
+        class="fwd px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+        on:click={() => goto("/loading")}
       >
         <span>Generate Rewind Report!</span>
       </button>
@@ -96,3 +95,16 @@
 
   <!--TODO ${() => buttonLogOut} -->
 </div>
+
+
+<style>
+    button.up {
+        cursor: n-resize;
+    }
+    label.down {
+        cursor: s-resize;
+    }
+    button.fwd {
+        cursor: e-resize;
+    }
+</style>

@@ -11,6 +11,7 @@ import {
   type Result,
 } from "$lib/types.ts";
 import { logAndReturn } from "$lib/utility/logging.ts";
+import { run } from "svelte/legacy";
 import allListens from "../../api/playbackReporting.ts";
 import {
   compactTrack,
@@ -66,7 +67,7 @@ async function nextProcessing(detail: string) {
 }
 
 const execute = async (): Promise<Result<ProcessingResults>> => {
-  reset();
+  await reset();
   downloadingProgress.set({
     cur: 1,
     max: 1,
@@ -235,7 +236,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     generatingProgress.update((state) => ({
       ...state,
       cur: i + 1,
-      detail: rawListen.ItemId,
+      detail: `${rawListen.ItemName}`,
     }));
 
     const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
@@ -283,11 +284,18 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   });
 };
 
-let running: Promise<Result<ProcessingResults>> | undefined = undefined;
+export let running: Promise<Result<ProcessingResults>> | undefined = undefined;
 function preventDoubleExecution() {
   console.log("Called!", running);
   if (!running) running = execute();
   return running;
 }
+export async function killCurrentTask() {
+    if (running) {
+        await running
+        running = undefined
+    }
+}
+
 
 export default preventDoubleExecution;

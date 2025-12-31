@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import { formatArtists, showAsNumber } from "$lib/utility/format";
   import {
     loadImage,
     loadTracksForGroup,
@@ -67,14 +67,11 @@
           }
         </div>
         <div class="ml-4 mt-8 max-h-[3.5em]">
-          by {
-            $lightRewindReport.jellyfinRewindReport.albums?.[
+          {
+            formatArtists(
+                $lightRewindReport.jellyfinRewindReport.albums?.[
               rankingMetric
-            ]?.[0]?.artists.reduce(
-              (acc, cur, index) =>
-                index > 0 ? `${acc} & ${cur.name}` : cur.name,
-              ``,
-            )
+            ]?.[0]?.artists?.map(x => x.name))
           }
         </div>
       </div>

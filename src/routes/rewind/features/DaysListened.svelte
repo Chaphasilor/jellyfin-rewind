@@ -70,9 +70,7 @@
           <span class="font-semibold text-sm text-center"
           >What did you do on the {
               (
-                365 -
-                $lightRewindReport.jellyfinRewindReport.generalStats
-                  .totalMusicDays
+                365 - musicDays.current
               ).toFixed(0)
             } missing days?!</span>
         </div>
@@ -90,8 +88,7 @@
       <div>
         <span class="font-semibold text-xl"
         >On those {
-            $lightRewindReport.jellyfinRewindReport.generalStats
-              .totalMusicDays
+            musicDays.current.toFixed(0)
           }
           days,<br />you listened to
           <span class="text-3xl text-sky-500 font-quicksand">{

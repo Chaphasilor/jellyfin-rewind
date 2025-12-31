@@ -24,6 +24,7 @@ import {
 } from "$lib/types.ts";
 import { getDayOfYear } from "$lib/utility/other.ts";
 import { logAndReturn } from "../../../../utility/logging.ts";
+import { killCurrentTask } from "./index.ts";
 import {
   albumsCache,
   artistCache,
@@ -175,7 +176,7 @@ export async function getMusicLibrary(): Promise<Result<any[]>> {
   if (!allLibraries.success) {
     return logAndReturn("processing", {
       success: false,
-      reason: !allLibraries.reason ? allLibraries.reason : "No libraries found",
+      reason: allLibraries.reason ?? "No libraries found",
     });
   }
   const musicLibraries = allLibraries.data.Items.filter((lib) =>
@@ -487,4 +488,6 @@ export function reset() {
   downloadingProgress.set({ cur: 0, max: 0, detail: "" });
   processingProgress.set({ cur: 0, max: 0, detail: "" });
   generatingProgress.set({ cur: 0, max: 0, detail: "" });
+
+  return killCurrentTask()
 }

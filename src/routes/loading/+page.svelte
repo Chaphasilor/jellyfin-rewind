@@ -21,13 +21,16 @@
         lightRewindReport.set(conversionResult.data);
         console.log(`$lightRewindReport:`, $lightRewindReport);
       }
-      goto("/launch");
+      goto("/rewind");
+    } else {
+        console.error("Failed to process", result.reason)
+        goto("/welcome")
     }
   });
 </script>
 
 <Loading {...$downloadingProgress} title="Downloading Data" />
 
-<Loading {...$processingProgress} title="Processing Data" />
+<Loading {...$processingProgress} title="Cleaning up Data" />
 
-<Loading {...$generatingProgress} title="Generating Rewind" />
+<Loading {...$generatingProgress} title="Generating Rewind, just for you!" />

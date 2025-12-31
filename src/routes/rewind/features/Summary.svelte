@@ -4,7 +4,7 @@
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import { formatArtists, showAsNumber } from "$lib/utility/format";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import { loadImage } from "$lib/utility/jellyfin-helper";
 
@@ -106,14 +106,10 @@
             ?.[rankingMetric]?.[0]
             ?.name
         }</span>
-        <span class="">by {
-            $lightRewindReport.jellyfinRewindReport.tracks?.[
+        <span class="">{
+            formatArtists($lightRewindReport.jellyfinRewindReport.tracks?.[
               rankingMetric
-            ]?.[0]?.artistsBaseInfo?.reduce(
-              (acc, cur, index) =>
-                index > 0 ? `${acc} & ${cur.name}` : cur.name,
-              ``,
-            )
+            ]?.[0]?.artistsBaseInfo?.map(x => x.name))
           }</span>
       </div>
     </div>
@@ -195,12 +191,10 @@
             $lightRewindReport.jellyfinRewindReport.generalStats
               .mostSuccessivePlays?.name
           }</span>
-          <span class="">by {
-              $lightRewindReport.jellyfinRewindReport.generalStats
-                .mostSuccessivePlays?.artists?.reduce(
-                  (acc, cur, index) =>
-                    index > 0 ? `${acc} & ${cur.name}` : cur.name,
-                  ``,
+          <span class="">{
+                formatArtists(
+                    $lightRewindReport.jellyfinRewindReport.generalStats
+                    .mostSuccessivePlays?.artists?.map(x => x.name)
                 )
             }</span>
         </div>
