@@ -1,7 +1,7 @@
 @use "sass:color";
 
-body {
-  font-family: "Blinker";
+* {
+  font-family: "Quicksand";
   font-weight: 400;
 }
 
@@ -10,7 +10,7 @@ h2,
 h3,
 h4,
 h5 {
-  font-family: "Mallanna";
+  font-family: "Quicksand";
   font-weight: 700;
   padding: 0;
   margin: 0;
@@ -62,7 +62,6 @@ b {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-style: italic;
-  font-family: "Quicksand", serif;
   padding-right: 0.2rem; // prevent text overflow
 }
 
@@ -153,7 +152,6 @@ button {
   outline: none;
   border-radius: 1rem;
 
-  font-family: "Blinker";
   font-weight: 900;
 
   transition: 100ms ease-out;
@@ -182,13 +180,11 @@ input {
   outline: none;
   border-radius: 0.6rem;
 
-  font-family: "Blinker";
   font-weight: 900;
 
   transition: 100ms ease-out;
 
   &::placeholder {
-    font-family: "Blinker";
     font-weight: 900;
   }
   &:hover {
