@@ -291,11 +291,10 @@ function preventDoubleExecution() {
   return running;
 }
 export async function killCurrentTask() {
-    if (running) {
-        await running
-        running = undefined
-    }
+  if (running) {
+    await running;
+    running = undefined;
+  }
 }
-
 
 export default preventDoubleExecution;

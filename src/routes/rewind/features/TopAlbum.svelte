@@ -69,9 +69,10 @@
         <div class="ml-4 mt-8 max-h-[3.5em]">
           {
             formatArtists(
-                $lightRewindReport.jellyfinRewindReport.albums?.[
-              rankingMetric
-            ]?.[0]?.artists?.map(x => x.name))
+              $lightRewindReport.jellyfinRewindReport.albums?.[
+                rankingMetric
+              ]?.[0]?.artists?.map((x) => x.name),
+            )
           }
         </div>
       </div>

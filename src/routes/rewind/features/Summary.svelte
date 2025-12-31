@@ -107,10 +107,12 @@
             ?.name
         }</span>
         <span class="">{
-            formatArtists($lightRewindReport.jellyfinRewindReport.tracks?.[
+          formatArtists(
+            $lightRewindReport.jellyfinRewindReport.tracks?.[
               rankingMetric
-            ]?.[0]?.artistsBaseInfo?.map(x => x.name))
-          }</span>
+            ]?.[0]?.artistsBaseInfo?.map((x) => x.name),
+          )
+        }</span>
       </div>
     </div>
     <div
@@ -192,11 +194,11 @@
               .mostSuccessivePlays?.name
           }</span>
           <span class="">{
-                formatArtists(
-                    $lightRewindReport.jellyfinRewindReport.generalStats
-                    .mostSuccessivePlays?.artists?.map(x => x.name)
-                )
-            }</span>
+            formatArtists(
+              $lightRewindReport.jellyfinRewindReport.generalStats
+                .mostSuccessivePlays?.artists?.map((x) => x.name),
+            )
+          }</span>
         </div>
       </div>
     {/if}

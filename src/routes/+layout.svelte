@@ -9,26 +9,33 @@
 </script>
 
 <svelte:head>
-    <title>{year} Jellyfin Rewind</title>
-    <meta property="og:site_name" content="Jellyfin Rewind" />
-    <meta property="og:title" content="Jellyfin Rewind - Review Your Music of {year}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://jellyfin-rewind.chaphasilor.xyz/" />
-    <meta property="og:image" content="https://jellyfin-rewind.chaphasilor.xyz/media/banner-dark.png" />
-    <meta property="og:description" content="Review Your Music of {year}. A 'Spotify Wrapped'-like app made for people who use Jellyfin for listening to music!" />
-    <meta property="og:locale" content="en_US" />
+  <title>{year} Jellyfin Rewind</title>
+  <meta property="og:site_name" content="Jellyfin Rewind" />
+  <meta
+    property="og:title"
+    content="Jellyfin Rewind - Review Your Music of {year}"
+  />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://jellyfin-rewind.chaphasilor.xyz/" />
+  <meta
+    property="og:image"
+    content="https://jellyfin-rewind.chaphasilor.xyz/media/banner-dark.png"
+  />
+  <meta
+    property="og:description"
+    content="Review Your Music of {year}. A 'Spotify Wrapped'-like app made for people who use Jellyfin for listening to music!"
+  />
+  <meta property="og:locale" content="en_US" />
 </svelte:head>
-
 
 <main class:noScrollBar={page.url.pathname == "/rewind"}>
   <PageTransition path={page.url.href}>
     <slot />
   </PageTransition>
-
 </main>
 <Modal open={$isAccuracyDisclaimerOpen}>
   <h1>Accuracy Disclaimer</h1>
   <p>Some of the Data shown in this Rewind might not be 100% correct</p>
   <p>To Improve Stability some of the data will be ignored or modified</p>
-  <button on:click={$isAccuracyDisclaimerOpen=false}>Understood!</button>
+  <button on:click={$isAccuracyDisclaimerOpen = false}>Understood!</button>
 </Modal>

@@ -99,7 +99,11 @@
               </div>
               <span
                 class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
-              >{formatArtists(track.artistsBaseInfo.map(x => x.name))}</span>
+              >{
+                formatArtists(
+                  track.artistsBaseInfo.map((x) => x.name),
+                )
+              }</span>
             </div>
             <div
               class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
@@ -191,9 +195,10 @@
               >{track.name}</span>
             </div>
             <div class="ml-6 max-h-[2rem] text-xs">
-              
               <span class="font-semibold text-ellipsis overflow-hidden">{
-                formatArtists(track.artistsBaseInfo.map(x => x.name))
+                formatArtists(
+                  track.artistsBaseInfo.map((x) => x.name),
+                )
               }</span>
             </div>
           </div>

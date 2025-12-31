@@ -26,8 +26,8 @@ export function showAsNumber(number: number | string | undefined) {
 }
 
 export function formatArtists(artists: string[] | undefined) {
-    if (!artists || artists.length == 0) return "by Unknown Artist"
-    const str = "by " + artists.join(" & ")
-    if (str.length < 90) return str
-    return str.slice(0, 87) + "..."
+  if (!artists || artists.length == 0) return "by Unknown Artist";
+  const str = "by " + artists.join(" & ");
+  if (str.length < 90) return str;
+  return str.slice(0, 87) + "...";
 }

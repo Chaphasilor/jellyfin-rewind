@@ -489,5 +489,5 @@ export function reset() {
   processingProgress.set({ cur: 0, max: 0, detail: "" });
   generatingProgress.set({ cur: 0, max: 0, detail: "" });
 
-  return killCurrentTask()
+  return killCurrentTask();
 }

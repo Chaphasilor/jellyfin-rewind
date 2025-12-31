@@ -87,9 +87,7 @@
     <div class="mt-24 w-full px-10 flex flex-col items-center gap-3">
       <div>
         <span class="font-semibold text-xl"
-        >On those {
-            musicDays.current.toFixed(0)
-          }
+        >On those {musicDays.current.toFixed(0)}
           days,<br />you listened to
           <span class="text-3xl text-sky-500 font-quicksand">{
             showAsNumber(

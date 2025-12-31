@@ -6,58 +6,58 @@
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
-    import Modal from "$lib/components/Modal.svelte";
-    import { writable } from "svelte/store";
-    import { goto } from "$app/navigation";
-    import { log } from "$lib/utility/logging";
-    import { reset } from "$lib/jellyfin/queries/local/processing/functions";
-    import jellyfin from "$lib/jellyfin";
+  import Modal from "$lib/components/Modal.svelte";
+  import { writable } from "svelte/store";
+  import { goto } from "$app/navigation";
+  import { log } from "$lib/utility/logging";
+  import { reset } from "$lib/jellyfin/queries/local/processing/functions";
+  import jellyfin from "$lib/jellyfin";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
   let rewindReportDownloaded = $state(false);
 
-    function download() {
+  function download() {
+    const filename = `Jellyfin_Rewind_${year}_Report.json`;
+    const data = new Blob([JSON.stringify(
+      $lightRewindReport.jellyfinRewindReport,
+    )], {
+      type: "text/json",
+    });
 
-        const filename = `Jellyfin_Rewind_${year}_Report.json`
-        const data = new Blob([JSON.stringify(
-            $lightRewindReport.jellyfinRewindReport
-        )], {
-            type: "text/json"
-        })
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = window.URL.createObjectURL(data);
+    link.dataset.downloadurl = ["text/json", link.download, link.href].join(
+      ":",
+    );
+    const evt = new MouseEvent("click", {
+      view: window,
+      bubbles: true,
+      cancelable: true,
+    });
 
-        const link = document.createElement("a");
-        link.download = filename;
-        link.href = window.URL.createObjectURL(data);
-        link.dataset.downloadurl = ["text/json", link.download, link.href].join(":");
-        const evt = new MouseEvent("click", {
-            view: window,
-            bubbles: true,
-            cancelable: true,
-        });
+    link.dispatchEvent(evt);
+    link.remove();
 
-        link.dispatchEvent(evt);
-        link.remove()
-
-        rewindReportDownloaded = true
-
+    rewindReportDownloaded = true;
+  }
+  function close(logout: boolean = false) {
+    if (logout) {
+      jellyfin.terminateSession();
     }
-    function close(logout: boolean = false) {
-        if (logout) {
-            jellyfin.terminateSession()
-        }
-        reset().then(() => {
-            goto("/welcome")
-        })
-    }
+    reset().then(() => {
+      goto("/welcome");
+    });
+  }
 
   export function onEnter() {
   }
   export function onExit() {
   }
 
-  let closeModalOpen = $state(false)
+  let closeModalOpen = $state(false);
 
   onMount(() => {});
 </script>
@@ -91,7 +91,7 @@
   <button
     class="px-6 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-3 flex flex-row gap-4 items-center mx-auto"
     on:click|stopPropagation={() => {
-      download()
+      download();
     }}
   >
     <span class="leading-7">Download Your<br />Rewind Report</span>
@@ -141,7 +141,7 @@
       Thanks for using Jellyfin Rewind. See you next year<br>
       <span class="italic right-0 bottom-0">
         - Chaphasilor
-        </span>
+      </span>
     </p>
   </div>
 
@@ -149,7 +149,7 @@
   <button
     class="px-4 py-2 rounded-xl text-base leading-6 border-2 border-[#00A4DC] hover:bg-[#0085B2] text-gray-800 dark:text-gray-200 hover:text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
     on:click|stopPropagation={() => {
-        closeModalOpen = true;
+      closeModalOpen = true;
     }}
   >
     <span>Close Jellyfin Rewind</span>
@@ -172,25 +172,31 @@
   </button>
 </div>
 
-
 <Modal open={closeModalOpen}>
-    <h1>Thanks for checking out the {year} rewind!</h1>
-    {#if !rewindReportDownloaded}
-        <p>You havent yet downloaded the rewind, so you can compare {year} to {year+1}</p>
-        <p>Do you want to close the rewind without saving?</p>
-        <button on:click|stopPropagation={() => download()}>Stop! I want to the Download Report!</button>
-    {:else}
-        <p>Make sure you have placed the rewind json in the right place.</p>
-        <p>If you want you can also download it again</p>
-        <button on:click|stopPropagation={() => download()}>I want to be sure!</button>
-    {/if}
-    <br>
-    <br>
-    <br>
-    <button on:click={() => closeModalOpen=false}>Dont Close</button>
-    <br>
-    <br>
-    <button on:click={() => close()}>Close</button>
-    <button on:click={() => close(true)}>Close & Logout</button>
-
+  <h1>Thanks for checking out the {year} rewind!</h1>
+  {#if !rewindReportDownloaded}
+    <p>
+      You havent yet downloaded the rewind, so you can compare {year} to {
+        year + 1
+      }
+    </p>
+    <p>Do you want to close the rewind without saving?</p>
+    <button on:click|stopPropagation={() => download()}>
+      Stop! I want to the Download Report!
+    </button>
+  {:else}
+    <p>Make sure you have placed the rewind json in the right place.</p>
+    <p>If you want you can also download it again</p>
+    <button on:click|stopPropagation={() => download()}>
+      I want to be sure!
+    </button>
+  {/if}
+  <br>
+  <br>
+  <br>
+  <button on:click={() => closeModalOpen = false}>Dont Close</button>
+  <br>
+  <br>
+  <button on:click={() => close()}>Close</button>
+  <button on:click={() => close(true)}>Close & Logout</button>
 </Modal>

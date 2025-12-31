@@ -9,7 +9,7 @@
     loadImage,
     loadTracksForGroup,
   } from "$lib/utility/jellyfin-helper";
-    import { artistCache } from "$lib/jellyfin/queries/local/processing/values";
+  import { artistCache } from "$lib/jellyfin/queries/local/processing/values";
 
   const {
     informationSource,
@@ -98,9 +98,7 @@
             </div>
             <span
               class="text-sm ml-2 max-h-[2rem] text-ellipsis overflow-hidden"
-            >{
-                formatArtists(album.artists.map(x => x.name))
-              }</span>
+            >{formatArtists(album.artists.map((x) => x.name))}</span>
           </div>
           <div
             class="flex flex-row justify-start font-medium text-gray-800 dark:text-gray-300 gap-0.5 items-center text-xs"
@@ -171,7 +169,7 @@
           </div>
           <div class="ml-6 max-h-[2rem] text-xs">
             <span class="font-semibold">{
-                formatArtists(album.artists?.map(x => x.name))
+              formatArtists(album.artists?.map((x) => x.name))
             }</span>
           </div>
         </div>

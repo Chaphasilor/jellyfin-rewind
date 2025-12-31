@@ -4,7 +4,7 @@
   import type { FeatureEvents, FeatureProps } from "$lib/types";
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import { logAndReturn } from "$lib/utility/logging";
-  import { onMount, type Component } from "svelte";
+  import { type Component, onMount } from "svelte";
   import Monthly from "./features/Monthly.svelte";
   import TotalPlaytime from "./features/TotalPlaytime.svelte";
   import TopTrack from "./features/TopTrack.svelte";
@@ -29,8 +29,8 @@
   import type { Features } from "tailwindcss";
   import type { Point } from "chart.js";
 
-  onMount(() => document.documentElement.requestFullscreen())
-  
+  onMount(() => document.documentElement.requestFullscreen());
+
   if (!$lightRewindReport?.jellyfinRewindReport) {
     goto("/login");
   }
@@ -398,19 +398,18 @@
   }
 </script>
 
-<svelte:body class:noScrollBar={true}  />
+<svelte:body class:noScrollBar={true} />
 <svelte:document
   on:click={handleClick}
   on:wheel={handleWheel}
   on:scroll|preventDefault
 />
 <svelte:window
-    on:resize={scrollToActive}
-    on:focus={scrollToActive}
-    on:blur={scrollToActive}
-    on:scroll={scrollToActive}
+  on:resize={scrollToActive}
+  on:focus={scrollToActive}
+  on:blur={scrollToActive}
+  on:scroll={scrollToActive}
 />
-
 
 {#snippet renderFeature(
   index: number,
@@ -447,48 +446,54 @@
 <audio id="audio-player-2" loop></audio>
 
 <div class="volumeBox">
-    <div>
-        <input type="range" min="0" max="100" on:click|stopPropagation on:change|stopPropagation|preventDefault={(e) => {
-            const value = Number(e.currentTarget.value)
-            console.log({newVolume: value}) // TODO: Change volume
-        }} />
-        92%
-    </div>
+  <div>
+    <input
+      type="range"
+      min="0"
+      max="100"
+      on:click|stopPropagation
+      on:change|stopPropagation|preventDefault={(e) => {
+        const value = Number(e.currentTarget.value);
+        console.log({ newVolume: value }); // TODO: Change volume
+      }}
+    />
+    92%
+  </div>
 </div>
 
 <style lang="scss">
-    .volumeBox {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        translate: 0 25%;
-        opacity: 0.5;
-        transition: 250ms ease-out;
-        &:hover {
-            translate: 0 -10%;
-            opacity: 1;
-        }
-        div {
-            background-color: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(60px);
-            padding-right: 1.7rem;
-            padding-left: 1.7rem;
-            padding-top: 0.8rem;
-            padding-bottom: 0.5rem;
-            border-top-left-radius: 1.5rem;
-            border-top-right-radius: 1.5rem;
-            border-bottom-left-radius: 0.5rem;
-            border-bottom-right-radius: 0.5rem;
-            display: flex;
-            align-items: center;
-            column-gap: 1rem;
-            input {
-                $accent: rgb(241, 181, 57);
-                accent-color: $accent;
-                padding: 0;
-            }
-        }
+  .volumeBox {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    translate: 0 25%;
+    opacity: 0.5;
+    transition: 250ms ease-out;
+    &:hover {
+      translate: 0 -10%;
+      opacity: 1;
     }
+    div {
+      background-color: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(60px);
+      padding-right: 1.7rem;
+      padding-left: 1.7rem;
+      padding-top: 0.8rem;
+      padding-bottom: 0.5rem;
+      border-top-left-radius: 1.5rem;
+      border-top-right-radius: 1.5rem;
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      column-gap: 1rem;
+      input {
+        $accent: rgb(241, 181, 57);
+        accent-color: $accent;
+        padding: 0;
+      }
+    }
+  }
 </style>

@@ -96,15 +96,14 @@
   <!--TODO ${() => buttonLogOut} -->
 </div>
 
-
 <style>
-    button.up {
-        cursor: n-resize;
-    }
-    label.down {
-        cursor: s-resize;
-    }
-    button.fwd {
-        cursor: e-resize;
-    }
+  button.up {
+    cursor: n-resize;
+  }
+  label.down {
+    cursor: s-resize;
+  }
+  button.fwd {
+    cursor: e-resize;
+  }
 </style>

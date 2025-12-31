@@ -43,7 +43,7 @@
   }
 
   async function authenticate() {
-    await pingServer()
+    await pingServer();
     if (error != undefined) return;
     const auth = await jellyfin.userLogin(userName, userPassword);
     loginValid = auth.success;

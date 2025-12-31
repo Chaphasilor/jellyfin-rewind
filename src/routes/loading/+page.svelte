@@ -23,8 +23,8 @@
       }
       goto("/rewind");
     } else {
-        console.error("Failed to process", result.reason)
-        goto("/welcome")
+      console.error("Failed to process", result.reason);
+      goto("/welcome");
     }
   });
 </script>

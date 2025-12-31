@@ -46,9 +46,18 @@
 </div>
 
 <Modal open={$modalOpen}>
-    <h1>Listening Habits Unavailable</h1>
-    <p>Your Listening Habits compared to last year are unavailable because you didnt provide your last year report.</p>
-    <p>If you want, you can <a href="/welcome">go back to the start</a> and import last years report.</p>
-    <p>In case you dont have that report, dont worry. You can store this recap for next year!</p>
-    <button on:click={$modalOpen = false}>Okay!</button>
+  <h1>Listening Habits Unavailable</h1>
+  <p>
+    Your Listening Habits compared to last year are unavailable because you
+    didnt provide your last year report.
+  </p>
+  <p>
+    If you want, you can <a href="/welcome">go back to the start</a> and import
+    last years report.
+  </p>
+  <p>
+    In case you dont have that report, dont worry. You can store this recap for
+    next year!
+  </p>
+  <button on:click={$modalOpen = false}>Okay!</button>
 </Modal>

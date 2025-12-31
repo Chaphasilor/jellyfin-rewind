@@ -6,7 +6,7 @@
   import Jellyfin from "$lib/jellyfin/index";
   import { importOfflinePlayback } from "$lib/utility/offlineImport";
   import { uploadOfflinePlaybackBatched } from "$lib/jellyfin/queries/api/playbackReporting";
-    import Modal from "$lib/components/Modal.svelte";
+  import Modal from "$lib/components/Modal.svelte";
 
   let importingOfflinePlayback = $state(false);
   let finampOfflineExportDialogOpen = $state(false);
@@ -120,16 +120,15 @@
   <!--TODO ${() => buttonLogOut} -->
 </div>
 
-
 <Modal open={finampOfflineExportDialogOpen}>
-    <h1>Important Offline Listens from Finamp Beta</h1>
-    <p>Its really easy!</p>
-    <ol type="1">
-        <li>Open Finamp</li>
-        <li>Expand Sidebar</li>
-        <li>Click on "Playback History"</li>
-        <li>Save History via the share button on the top right</li>
-        <li>Import it here!</li>
-    </ol>
-    <button on:click={() => finampOfflineExportDialogOpen = false}>Okay!</button>
+  <h1>Important Offline Listens from Finamp Beta</h1>
+  <p>Its really easy!</p>
+  <ol type="1">
+    <li>Open Finamp</li>
+    <li>Expand Sidebar</li>
+    <li>Click on "Playback History"</li>
+    <li>Save History via the share button on the top right</li>
+    <li>Import it here!</li>
+  </ol>
+  <button on:click={() => finampOfflineExportDialogOpen = false}>Okay!</button>
 </Modal>
