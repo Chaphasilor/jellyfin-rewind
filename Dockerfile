@@ -17,5 +17,5 @@ RUN deno task build
 # host
 FROM nginx:alpine
 # this image is used to serve the static files, without any nodejs dependency
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 # nginx defaults to port 80
