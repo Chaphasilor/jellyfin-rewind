@@ -14,10 +14,11 @@ import {
   type Result,
   type Track,
 } from "../types.ts";
-import { end, oldReport } from "$lib/globals.ts";
+import { end, oldReport, year } from "$lib/globals.ts";
 import Jellyfin from "$lib/jellyfin/index.ts";
 import { getFeatureDelta } from "./oldReportDelta.ts";
 import { logAndReturn } from "./logging.ts";
+import { version } from "$app/environment";
 
 export async function processingResultToRewindReport(
   result: ProcessingResults,
@@ -107,7 +108,6 @@ export async function processingResultToRewindReport(
       id: track.id,
       name: track.name,
       artistsBaseInfo: track.artists.map((artistId) => {
-        //TODO store the whole baseItem in the cache?
         const artist = result.artistCache.get(artistId)!;
         return {
           id: artistId,
@@ -200,6 +200,11 @@ export async function processingResultToRewindReport(
           a.date.getTime() - b.date.getTime()
         );
 
+    //TODO for just the count, ChildCount would be more efficient, but whatever
+    const albumTracks = result.tracksCache.entries.filter((
+      [, trackValue],
+    ) => trackValue.data.albumId === album.id);
+
     return {
       id: album.id,
       name: album.name,
@@ -214,7 +219,7 @@ export async function processingResultToRewindReport(
         id: album.albumArtists[0],
         name: result.artistCache.get(album.albumArtists[0])?.name!,
       },
-      //TODO tracks:
+      tracks: albumTracks.length,
       year: album.year!,
       image: {
         parentItemId: id,
@@ -375,9 +380,9 @@ export async function processingResultToRewindReport(
           trackValue.counters.average.fullPlays > 0)
         ).length,
       },
-      //TODO
+      //TODO add this for genres
       plays: [],
-      //TODO
+      //TODO add this for genres
       lastPlayed: null,
       totalPlayDuration: {
         playbackReport: value.counters.playbackReporting.listenDuration,
@@ -425,9 +430,10 @@ export async function processingResultToRewindReport(
     // Loop through sorted track list and get top tracks that are older than age threshold
     for (let i = 0; i < playedSongs.length; i++) {
       if (
+        playedSongs[i][1].data.lastPlayed &&
         (today.getTime() -
-              (playedSongs[i][1].data.lastPlayed?.getTime?.() ?? 0)) /
-            millisecondsPerDay > minimumLastPlayAge
+                (playedSongs[i][1].data.lastPlayed!.getTime?.())) /
+              millisecondsPerDay > minimumLastPlayAge
       ) {
         forgottenFavoriteTracks.push(playedSongs[i]);
 
@@ -459,8 +465,8 @@ export async function processingResultToRewindReport(
 
   const newReport: LightRewindReport = {
     jellyfinRewindReport: {
-      //TODO commit:
-      year: end.getFullYear(),
+      commit: version,
+      year: year,
       timestamp: new Date().toISOString(),
       user: userInfo,
       server: { ...serverInfo!, PublicAddress: Jellyfin.baseurl! },
@@ -617,7 +623,8 @@ export async function processingResultToRewindReport(
             }>,
           ),
         },
-        //TODO mostSuccessivePlays:
+        //TODO add this, and account for it missing in old reports
+        mostSuccessivePlays: undefined,
         totalMusicDays: result.dayOfYear.len,
         //!!! this is correct, the old Report didn't sort the durations before calculating the median
         minutesPerDay: {
@@ -671,6 +678,9 @@ export async function processingResultToRewindReport(
         leastSkipped: result.tracksCache.sorted(
           CounterSources.PLAYBACK_REPORTING,
           ["partialSkips", "fullSkips"],
+        ).filter(([id, value]) =>
+          (value.counters.playbackReporting.fullPlays +
+            value.counters.playbackReporting.partialSkips) >= 5
         )
           .slice(0, 10).map(
             cacheTrackToOldTrack,

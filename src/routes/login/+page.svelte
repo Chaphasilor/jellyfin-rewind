@@ -1,7 +1,8 @@
 <script lang="ts">
   import { dev } from "$app/environment";
   import { goto } from "$app/navigation";
-  import Error from "$lib/components/Error.svelte";
+  import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
+  import Modal from "$lib/components/Modal.svelte";
   import {
     lightRewindReport,
     playbackReportingInspectionResult,
@@ -16,6 +17,7 @@
   let serverUrl: string = "";
   let userName: string = "";
   let userPassword: string = "";
+  let connectionHelpOpen = $state(false);
 
   async function proceed() {
     playbackReportingInspectionResult.set(
@@ -108,115 +110,210 @@
   }
 </script>
 
-<h1>Login</h1>
-<p>
-  And here we go! As stated before all communication will only involve your
-  browser and your jellyfin server. The Username/Password fields will unlock
-  once the Server URL is identified as an jellyfin server.
-</p>
-<form class="form px-3" on:submit={tryLogIn}>
-  <label class="relative flex flex-col" for="serverUrl">
-    <small>Server URL</small>
-    <input
-      name="serverUrl"
-      type="url"
-      placeholder="https://demo.jellyfin.org"
-      bind:value={serverUrl}
-      on:keyup={handleServerInput}
-    />
-    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
-      {#if serverValid}
-        <svg
-          class="text-green-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M5 12l5 5l10 -10"
-          />
-        </svg>
-      {:else if serverUrl && serverUrl.length > 3 && !connectingToServer}
-        <svg
-          class="text-red-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-          <path
-            d="M18 6l-12 12"
-          />
-          <path d="M6 6l12 12" />
-        </svg>
-      {/if}
-    </span>
-  </label>
+<div class="max-w-xl mx-auto p-6 text-center flex flex-col items-center gap-2">
+  <JellyfinRewindLogo />
 
-  <label for="username" class="relative flex flex-col">
-    <small>Username</small>
-    <input name="username" bind:value={userName} on:keyup={handleLoginInput} />
-  </label>
-
-  <label for="password" class="relative flex flex-col">
-    <small>Password</small>
-    <input
-      name="password"
-      type="password"
-      bind:value={userPassword}
-      on:keyup={handleLoginInput}
-    />
-  </label>
-</form>
-<br />
-
-{#if !serverValid || !loginValid || !userName || !userPassword}
-  <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-    on:click={tryLogIn}
+  <h1 class="mt-8 text-3xl font-semibold">Login</h1>
+  <div
+    class="mt-6 flex flex-col gap-6 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mb-4 max-w-lg w-full mx-auto text-balance text-center px-2"
   >
-    <span>{loggingIn ? `Logging in...` : `Log In`}</span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      fill="none"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path
-        d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"
+    <p class="">
+      Type in the web address (URL) of your Jellyfin server in the field below.
+    </p>
+    <p class="text-sm">
+      If you don't know the URL, you can open your Jellyfin app, open the
+      menu/sidebar and click on "Select Server". It should display your server's
+      URL and you can easily copy it!
+    </p>
+  </div>
+  <form class="form px-3" on:submit={tryLogIn}>
+    <label class="relative flex flex-col" for="serverUrl">
+      <small>Server URL</small>
+      <input
+        name="serverUrl"
+        type="url"
+        placeholder="https://demo.jellyfin.org"
+        bind:value={serverUrl}
+        on:keyup={handleServerInput}
+      />
+      <span class="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
+        {#if serverValid}
+          <svg
+            class="text-green-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M5 12l5 5l10 -10" />
+          </svg>
+        {:else if           serverUrl && serverUrl.length > 3 && !connectingToServer}
+          <svg
+            class="text-red-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M18 6l-12 12" />
+            <path d="M6 6l12 12" />
+          </svg>
+        {/if}
+      </span>
+    </label>
+
+    <label for="username" class="relative flex flex-col">
+      <small>Username</small>
+      <input
+        name="username"
+        bind:value={userName}
+        on:keyup={handleLoginInput}
+      />
+    </label>
+
+    <label for="password" class="relative flex flex-col">
+      <small>Password</small>
+      <input
+        name="password"
+        type="password"
+        bind:value={userPassword}
+        on:keyup={handleLoginInput}
+        on:keydown={(e) => {
+          if (e.key === "Enter") {
+            tryLogIn();
+          }
+        }}
+      />
+    </label>
+  </form>
+
+  {#if error}
+    <div class="warning mb-4">
+      <div
+        class="flex flex-col items-start gap-1 text-base font-medium leading-6 text-red-100 w-5/6 mx-auto"
       >
-      </path>
-    </svg>
-  </button>
-{:else}
-  <button
-    class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-    on:click={() => proceed()}
-  >
-    Continue To Rewind
-  </button>
-{/if}
+        <p class="">There was an error while connecting to the server.</p>
+        <p class="font-mono mx-auto">{error.toString()}</p>
+        <!-- svelte-ignore event_directive_deprecated -->
+        <button
+          class="self-center mt-2 text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white"
+          on:click={() => (connectionHelpOpen = true)}
+        >
+          Help me!?
+        </button>
+      </div>
+    </div>
+  {/if}
 
-<Error {error} />
+  {#if !serverValid || !loginValid || !userName || !userPassword}
+    <button
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+      on:click={tryLogIn}
+    >
+      <span>{loggingIn ? `Logging in...` : `Log In`}</span>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+        <path
+          d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"
+        >
+        </path>
+      </svg>
+    </button>
+  {:else}
+    <button
+      class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
+      on:click={() => proceed()}
+    >
+      Continue To Rewind
+    </button>
+  {/if}
+
+  <Modal bind:open={connectionHelpOpen}>
+    <div
+      class="relative w-full flex flex-row justify-center items-center px-2 pt-4 pb-2"
+    >
+      <h3 class="text-center text-lg font-quicksand font-medium text-[#00A4DC]">
+        How to Connect?
+      </h3>
+      <!-- svelte-ignore event_directive_deprecated -->
+    </div>
+    <div class="w-full h-full overflow-x-auto p-4">
+      <div class="flex flex-col items-start gap-2">
+        <p>
+          Because Jellyfin Rewind is web-based and (for now at least) not
+          available as a plugin, it might be a bit tricky to get your browser to
+          communicate with your Jellyfin server. The problem is that browsers
+          won't allow "insecure" requests (HTTP) from a "secure" website
+          (HTTP<span
+            class="font-semibold"
+          >S</span>), or requests from a non-private context (website not within
+          your network) to a private context (Jellyfin server accessed over a
+          local IP address within your network).
+        </p>
+        {#if window.location.protocol === `https:`}
+          <p>
+            Make sure that your Jellyfin server is accessible via <b>HTTPS</b>.
+            If your server is only available via regular HTTP, try going to
+            <a
+              class="text-[#00A4DC]"
+              href="http://jellyfin-rewind-http.chaphasilor.xyz"
+            >http://jellyfin-rewind-http.chaphasilor.xyz</a>
+          </p>
+        {/if}
+        <p>
+          So make sure you're not using a local IP address (starts with <span
+            class="font-mono"
+          >192.168.</span>) or mDNS hostname (something like
+          <span class="font-mono">jellyfin.local</span>). If you use something
+          like Tailscale as your VPN, you could use your server's Tailscale IP
+          address.
+        </p>
+        <p>
+          Therefore, <span class="font-semibold"
+          >if you're unsure what your Jellyfin server is using, but your
+            Jellyfin server is accessible over the internet, simply use the
+            first link</span> (http)!
+        </p>
+        <p>
+          If your server <span class="font-semibold">is NOT</span>
+          accessible over the internet, you could self-host the Jellyfin Rewind
+          website on your local network, for example on the same server that is
+          running Jellyfin. For that, check out the
+          <a
+            class="text-[#00A4DC]"
+            href="https://github.com/Chaphasilor/jellyfin-rewind/releases"
+            target="_blank"
+          >GitHub releases page</a> and either download the zip-archive or use
+          the provided Docker image. The zip-archive will need to be extracted
+          into a folder that is served by a web server, like Apache or Nginx.
+          The Docker image will need a to have port 80 exposed instead.
+        </p>
+      </div>
+    </div>
+  </Modal>
+</div>
 
 <style lang="scss">
   .form {
@@ -230,8 +327,5 @@
     input {
       margin-bottom: 1rem;
     }
-  }
-  p {
-    margin: 2rem;
   }
 </style>

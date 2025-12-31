@@ -4,47 +4,6 @@ body {
   font-family: "Quicksand";
 }
 
-h1,
-h2,
-h3,
-h4,
-h5 {
-  font-family: "Quicksand";
-  font-weight: 700;
-}
-
-html {
-  font-size: 100%;
-} /* 16px */
-
-h1 {
-  font-size: 2rem;
-  /* 39.84px */
-}
-
-h2 {
-  font-size: 1.85rem;
-  /* 33.12px */
-}
-
-h3 {
-  font-size: 1.5rem;
-  /* 27.68px */
-}
-
-h4 {
-  font-size: 1.3rem;
-  /* 23.04px */
-}
-
-h5 {
-  font-size: 1.2rem; /* 19.2px */
-}
-
-small {
-  font-size: 0.833rem; /* 13.28px */
-}
-
 $text: rgb(217, 233, 246);
 $background: rgb(3, 11, 19);
 $primary: rgb(133, 181, 227);

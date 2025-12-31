@@ -1,5 +1,6 @@
 <script>
   import { goto } from "$app/navigation";
+  import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import { playbackReportingInspectionResult, year } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import { PlaybackReportingIssueAction } from "$lib/types";
@@ -14,12 +15,18 @@
   });
 </script>
 
-<div class="p-6 text-center">
-  <h1 class="mb-8">Welcome</h1>
+<div class="max-w-xl mx-auto p-6 text-center flex flex-col items-center gap-8">
+  <JellyfinRewindLogo />
+
+  <div class="flex flex-col items-center gap-2">
+    <h1 class="text-4xl font-semibold">Welcome!</h1>
+    <h2 class="text-2xl font-medium">
+      to Jellyfin Rewind <span class="font-bold text-[#00A4DC]">{year}</span>!
+    </h2>
+  </div>
   <p class="mb-8">
-    to Jellyfin Rewind {year}! Just follow the guide to log into your server,
-    but don't worry all the communication stays between your server and your
-    browser.<br />
+    Just follow the guide to log into your server, but don't worry all the
+    communication stays between your server and your browser.<br />
     <br />
     If you are paranoid (as you generally should be), feel free to monitor the
     network traffic in the devtools or even checkout the code which is linked
@@ -95,22 +102,3 @@
     </button>
   {/if}
 </div>
-
-<style>
-  .a {
-    margin-bottom: 0.8rem;
-  }
-  .b {
-    margin-top: 0.8rem;
-  }
-  .info,
-  .warning {
-    margin: 2rem;
-  }
-  .warning {
-    margin-top: 3rem;
-  }
-  button {
-    cursor: e-resize;
-  }
-</style>

@@ -153,7 +153,6 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   }
   logAndReturn("libraryData", libraryData);
 
-  //TODO update downloadingProgress in getMusicLibrary
   downloadingProgress.set({
     cur: 2,
     max: 2,

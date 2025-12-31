@@ -8,10 +8,22 @@
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import { loadImage } from "$lib/utility/jellyfin-helper";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {
+    informationSource,
+    rankingMetric,
+    extraFeatures,
+    fadeToNextTrack,
+  }: FeatureProps = $props();
+
+  function playTopTrack() {
+    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric]?.[0];
+    console.log(`topTrackByDuration:`, topTrackByDuration);
+    fadeToNextTrack(topTrackByDuration);
+  }
 
   export function onEnter() {
+    playTopTrack();
   }
   export function onExit() {
   }

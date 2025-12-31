@@ -17,7 +17,7 @@
   // plays a random track from the 5 forgotten favorites
   function playTopForgotten() {
     const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport
-      .tracks?.forgottenFavoriteTracks[informationSource];
+      .tracks?.forgottenFavoriteTracks[informationSource].slice(0, 5);
     const randomTrackId = Math.floor(
       Math.random() * forgottenFavoriteTracks.length,
     );
@@ -58,7 +58,9 @@
 </script>
 
 <div class="text-center">
-  <h2 class="text-2xl font-medium mt-5">Remember These Forgotten Favorites?</h2>
+  <h2 class="text-xl font-medium mt-5 px-2">
+    Remember These Forgotten Favorites?
+  </h2>
   <h3 class="px-6">
     Here are {
       $lightRewindReport.jellyfinRewindReport.tracks

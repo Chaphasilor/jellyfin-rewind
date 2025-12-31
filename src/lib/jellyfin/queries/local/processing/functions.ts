@@ -213,7 +213,6 @@ export async function getAlbumsForLibrary(libraryId: string) {
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=MusicAlbum`);
   query.push(`recursive=true`);
-  //TODO match against old queries
   query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
   const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;

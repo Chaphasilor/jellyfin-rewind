@@ -460,7 +460,7 @@ export type FullRewindReport = {
           };
         };
       };
-      mostSuccessivePlays: {
+      mostSuccessivePlays?: {
         track: OldTrack;
         name: string;
         artists: OldBaseInfo[];
@@ -589,7 +589,7 @@ export type LightRewindReport = {
           };
         };
       };
-      mostSuccessivePlays: {
+      mostSuccessivePlays?: {
         track: OldTrack;
         name: string;
         artists: OldBaseInfo[];
@@ -753,7 +753,7 @@ export interface OldAlbum {
   id: string;
   artists: OldBaseInfo[]; // not deduped
   albumArtist: OldAlbumArtistBaseInfo;
-  tracks: OldTrack[];
+  tracks: number;
   year: number | string; // ISO string
   image: OldImage;
   playCount: OldPlayCount;

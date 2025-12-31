@@ -9,7 +9,7 @@
   import Modal from "$lib/components/Modal.svelte";
 
   let importingOfflinePlayback = $state(false);
-  let finampOfflineExportDialogOpen = $state(false);
+  // let finampOfflineExportDialogOpen = $state(false);
   let offlinePlayback;
 </script>
 
@@ -118,7 +118,7 @@
           // import plays to server
           await uploadOfflinePlaybackBatched(offlinePlayback);
 
-          goto("/loading");
+          goto("/importingLastYearsReport");
         } catch (err) {
           console.error(
             `Error while importing offline playback data:`,
@@ -142,21 +142,18 @@
         </p> -->
         <button
           class="px-2 py-1 rounded-lg mt-4 text-sm border-gray-400 hover:bg-gray-300 border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
-          on:click={() => goto("/loading")}
+          on:click={() => goto("/importLastYearsReport")}
         >
           <span>Continue without importing</span>
         </button>
       </div>
     {/if}
   </div>
-
-  <!--TODO ${() => buttonLogOut} -->
 </div>
-
+<!-- 
 <Modal open={finampOfflineExportDialogOpen}>
   <h1>Important Offline Listens from Finamp Beta</h1>
   <p>Its really easy!</p>
-  <!-- TODO add deep link -->
   <ol type="1">
     <li>
       Click <a href="finamp://internal/playbackhistory"
@@ -171,4 +168,4 @@
   <button on:click={() => (finampOfflineExportDialogOpen = false)}>
     Okay!
   </button>
-</Modal>
+</Modal> -->

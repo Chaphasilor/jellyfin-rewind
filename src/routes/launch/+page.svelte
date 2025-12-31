@@ -25,7 +25,7 @@
   </div>
 
   <div class="info mt-8 text-start flex flex-col gap-2">
-    <h4>One Last Thing</h4>
+    <h4 class="text-xl font-semibold">Before You Launch...</h4>
     <p>
       This year we've completely re-made Jellyfin Rewind from scratch, to make
       it more maintainable for the future.

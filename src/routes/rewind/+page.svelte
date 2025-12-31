@@ -143,6 +143,8 @@
       component: TopGenres,
     },
     {
+      skip: !$lightRewindReport.jellyfinRewindReport.tracks
+        ?.leastSkipped?.length,
       component: LeastSkipped,
     },
     {
@@ -152,9 +154,9 @@
     {
       component: Summary,
     },
-    {
-      component: Monthly,
-    },
+    // {
+    //   component: Monthly,
+    // },
     {
       component: Outro,
     },

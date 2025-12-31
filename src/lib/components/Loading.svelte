@@ -13,11 +13,11 @@
 <div>
   <div>
     {#if max != 0 && cur == max}
-      <h5>{title}</h5>
+      <h5 class="text-lg font-semibold opacity-75">{title}</h5>
     {/if}
     {#if max != 0 && cur != max}
       <div class="progress">
-        <h4>{title}</h4>
+        <h4 class="text-2xl font-bold">{title}</h4>
         <p class="mt-4 font-mono">{cur} / {max}</p>
         <!-- <p class="h-12">
           {#if detail != ""}
@@ -40,10 +40,3 @@
     {/if}
   </div>
 </div>
-
-<style>
-  h5 {
-    font-style: italic;
-    opacity: 0.8;
-  }
-</style>

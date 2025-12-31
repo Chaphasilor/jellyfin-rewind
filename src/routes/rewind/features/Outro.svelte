@@ -19,7 +19,10 @@
   let rewindReportDownloaded = $state(false);
 
   function download() {
-    const filename = `Jellyfin_Rewind_${year}_Report.json`;
+    const filename =
+      `jellyfin-rewind-report-${$lightRewindReport.jellyfinRewindReport.year}_for-${
+        jellyfin.user?.name ?? ``
+      }_${new Date().toISOString().slice(0, 10)}.json`;
     const data = new Blob([JSON.stringify(
       $lightRewindReport.jellyfinRewindReport,
     )], {
@@ -138,15 +141,15 @@
       :)
     </p>
     <p>
-      Thanks for using Jellyfin Rewind. See you next year!<br>
+      Thanks for checking out Jellyfin Rewind.<br />See you next year!<br>
       <span class="italic right-0 bottom-0">
-        - Chaphasilor, Floschy, 1hitsong, and all the contributors
+        - Chaphasilor, Floschy, 1hitsong, and all other contributors
       </span>
     </p>
   </div>
 
   <!-- svelte-ignore event_directive_deprecated -->
-  <button
+  <!-- <button
     class="px-4 py-2 rounded-xl text-base leading-6 border-2 border-[#00A4DC] hover:bg-[#0085B2] text-gray-200 hover:text-white font-semibold mt-12 flex flex-row gap-2 items-center mx-auto"
     on:click|stopPropagation={() => {
       closeModalOpen = true;
@@ -169,7 +172,7 @@
       <line x1="18" y1="6" x2="6" y2="18"></line>
       <line x1="6" y1="6" x2="18" y2="18"></line>
     </svg>
-  </button>
+  </button> -->
 </div>
 
 <Modal open={closeModalOpen}>
