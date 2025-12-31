@@ -1,4 +1,4 @@
-![Jellyfin Rewind Banner](Jellyfin%20Rewind%20Banner.png)
+![Jellyfin Rewind Banner](static/media/banner-dark.png)
 
 # Jellyfin Rewind
 
