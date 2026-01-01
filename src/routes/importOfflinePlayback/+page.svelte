@@ -118,7 +118,7 @@
           // import plays to server
           await uploadOfflinePlaybackBatched(offlinePlayback);
 
-          goto("/importingLastYearsReport");
+          goto("/importLastYearsReport");
         } catch (err) {
           console.error(
             `Error while importing offline playback data:`,
