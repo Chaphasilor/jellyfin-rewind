@@ -33,6 +33,12 @@
     content="Review Your Music of {year}. A 'Spotify Wrapped'-like app made for people who use Jellyfin for listening to music!"
   />
   <meta property="og:locale" content="en_US" />
+
+  <!-- The favicon gets a random query parameter so the old svelte icon which is cached by browsers cant be reused and must be refetched-->
+  <link
+    rel="icon"
+    href="/favicon.png?n={Date.now()}"
+  />
 </svelte:head>
 
 <div class="max-w-2xl mx-auto">
