@@ -152,20 +152,20 @@
       <p
         class="flex flex-col gap-4 text-lg font-medium leading-6 text-orange-400 mt-12 w-full mx-auto text-balance text-center"
       >
-        Importing offline playback is only available for administrator accounts.
-        Please log out, then log in with an administrator account to import
-        playback data.
+        Importing offline playback is only available when logged in with
+        administrator access. Please log in with an admin account in addition to
+        your current account to import playback data.
       </p>
       <!-- svelte-ignore event_directive_deprecated -->
       <button
         class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-6 flex flex-row gap-3 items-center mx-auto text-red-500 hover:text-white"
         on:click={async () => {
           // await jellyfin.terminateSession();
-          goto("/login");
+          goto("/adminLogin");
           //TODO await deleteRewind()
         }}
       >
-        <span>Log out</span>
+        <span>Log In As Admin</span>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout"

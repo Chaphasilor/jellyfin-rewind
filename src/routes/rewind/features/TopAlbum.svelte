@@ -58,7 +58,7 @@
       class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]"
     />
     <div class="px-4 py-4 overflow-hidden whitespace-wrap">
-      <div class="-rotate-6 mt-10 text-4xl font-semibold">
+      <div class="-rotate-6 mt-10 text-3xl font-semibold">
         <div class="-ml-4">
           {
             $rewindReport.jellyfinRewindReport.albums

@@ -104,7 +104,7 @@
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-start items-center"
     >
       <!-- top track -->
       <h4 class="text-xs">Top Track</h4>
@@ -130,7 +130,7 @@
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-start items-center"
     >
       <!-- top artist -->
       <h4 class="text-xs">Top Artist</h4>
@@ -220,33 +220,33 @@
       class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
     >
       <!-- stats 1 - unique items -->
-      <div class="text-balance">
-        Library Duration: <span
-          class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-        >{
-          showAsNumber(
-            (
-              $rewindReport.jellyfinRewindReport?.libraryStats
-                ?.totalRuntime /
-              60.0 /
-              60.0 /
-              24.0
-            ).toFixed(1),
-          )
-        }</span> days
-      </div>
-      <div class="text-balance">
-        Average track length: <span
-          class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-        >{
-          showAsNumber(
+      Library Duration: <span
+        class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
+      >{
+        showAsNumber(
+          (
             $rewindReport.jellyfinRewindReport?.libraryStats
-              ?.trackLength?.mean.toFixed(
-                0,
-              ),
-          )
-        }</span> seconds
-      </div>
+              ?.totalRuntime /
+            60.0 /
+            60.0 /
+            24.0
+          ).toFixed(1),
+        )
+      }</span> days
+    </div>
+    <div
+      class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
+    >
+      Average track length: <span
+        class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
+      >{
+        showAsNumber(
+          ($rewindReport.jellyfinRewindReport?.libraryStats
+            ?.trackLength?.mean / 60).toFixed(
+              2,
+            ),
+        )
+      }</span> minutes
     </div>
     {#if extraFeatures().listeningActivityDifference}
       <div

@@ -13,7 +13,7 @@
 </script>
 
 <div
-  class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12 bg-[#121212AB]"
+  class="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center gap-12 bg-[#121212]/50 backdrop-blur-xs"
 >
   <span class="text-4xl text-[#00A4DC] tracking-wider font-semibold -rotate-15">
     Unavailable

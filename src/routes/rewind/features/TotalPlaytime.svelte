@@ -208,7 +208,7 @@
     {/if}<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
 
-  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl">
+  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-3xl">
     <span class="font-quicksand-bold">{
       showAsNumber(
         $rewindReport.jellyfinRewindReport.generalStats
@@ -258,7 +258,7 @@
     </div>
   </div>
 
-  <div class="absolute w-full bottom-25">
+  <div class="absolute w-full bottom-25 py-4">
     <div class="w-full flex flex-row justify-center">
       <canvas
         id="playtime-by-month-chart"

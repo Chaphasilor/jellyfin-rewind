@@ -13,7 +13,7 @@ export function uploadOfflinePlaybackQuery(offlinePlays: ListenQueryRow[]) {
       `( '${
         play.DateCreated.toISOString().slice(0, 19).replace(`T`, ` `)
       }.0000000', '${
-        play.UserId ?? jellyfin.user?.id
+        play.UserId ?? jellyfin.userId
       }', '${play.ItemId}', 'Audio', '${
         play.ItemName.replaceAll?.(`'`, `''`)
       })', 'OfflinePlay', '${play.ClientName?.replaceAll?.(`'`, `''`)}', '${

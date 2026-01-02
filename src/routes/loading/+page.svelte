@@ -18,7 +18,7 @@
 
   onMount(() => {
     console.log(`loading jellyfin:`, jellyfin);
-    if (!jellyfin.baseurl || !jellyfin.user || !jellyfin.user?.id) {
+    if (!jellyfin.baseurl || !jellyfin.user || !jellyfin.userId) {
       goto("/welcome");
       return;
     }

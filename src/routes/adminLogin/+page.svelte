@@ -16,8 +16,8 @@
   import { onMount } from "svelte";
 
   let serverUrl: string = $state("");
-  let userName: string = $state("");
-  let userPassword: string = $state("");
+  let adminUserName: string = $state("");
+  let adminUserPassword: string = $state("");
   let connectionHelpOpen = $state(false);
 
   async function proceed() {
@@ -44,16 +44,12 @@
   if (dev) {
     import("$env/static/public").then(async (i) => {
       serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
-      userName = i.PUBLIC_JELLYFIN_USERNAME;
-      userPassword = i.PUBLIC_JELLYFIN_PASSWORD;
-      if (!serverUrl || !userName || !userPassword) return;
+      adminUserName = i.PUBLIC_JELLYFIN_ADMIN_USERNAME;
+      adminUserPassword = i.PUBLIC_JELLYFIN_ADMIN_PASSWORD;
+      if (!serverUrl || !adminUserName || !adminUserPassword) return;
       await pingServer();
       await authenticate();
-      if (jellyfin.user?.isAdmin) {
-        proceed();
-      } else {
-        goto("/adminLogin");
-      }
+      proceed();
     });
   }
 
@@ -80,7 +76,10 @@
     loggingIn = true;
     await pingServer();
     if (error != undefined) return;
-    const auth = await jellyfin.userLogin(userName, userPassword);
+    const auth = await jellyfin.adminUserLogin(
+      adminUserName,
+      adminUserPassword,
+    );
     loginValid = auth.success;
     loggingIn = false;
     if (auth.success) {
@@ -101,7 +100,7 @@
   }
 
   function handleLoginInput() {
-    if (!userName || !userPassword) return;
+    if (!adminUserName || !adminUserPassword) return;
     lastKeyPress = Date.now();
     connectingToServer = true;
     // setTimeout(async () => {
@@ -114,11 +113,7 @@
 
   function tryLogIn() {
     authenticate().then(() => {
-      if (jellyfin.user?.isAdmin) {
-        proceed();
-      } else {
-        goto("/adminLogin");
-      }
+      proceed();
     });
   }
 
@@ -134,82 +129,40 @@
 <div class="max-w-xl mx-auto p-6 text-center flex flex-col items-center gap-2">
   <JellyfinRewindLogo />
 
-  <h1 class="mt-8 text-3xl font-semibold">Login</h1>
+  <h1 class="mt-8 text-3xl font-semibold">Admin Login</h1>
   <div
     class="mt-6 flex flex-col gap-6 text-lg font-medium leading-6 text-gray-500 dark:text-gray-400 mb-4 max-w-lg w-full mx-auto text-balance text-center px-2"
   >
     <p class="">
-      Type in the web address (URL) of your Jellyfin server in the field below.
+      You didn't log in with an administrator account. Using a <b
+        class="font-quicksand-bold"
+      >non</b>-admin account is indeed the recommended way for listening to
+      music on Jellyfin, <b class="font-quicksand-bold">but</b> without
+      administrator access, Jellyfin Rewind can't read data from the Playback
+      Reporting plugin.
     </p>
     <p class="text-sm">
-      If you don't know the URL, you can open your Jellyfin app, open the
-      menu/sidebar and click on "Select Server". It should display your server's
-      URL and you can easily copy it!
+      You can skip this step if you're not comfortable logging in with an admin
+      account or don't have the credentials, but keep in mind that this will
+      reduce the quality and accuracy of your Jellyfin Rewind Report!
     </p>
   </div>
   <form class="form px-3" on:submit={tryLogIn}>
-    <label class="relative flex flex-col" for="serverUrl">
-      <small>Server URL</small>
-      <input
-        name="serverUrl"
-        type="url"
-        placeholder="https://demo.jellyfin.org"
-        bind:value={serverUrl}
-        on:keyup={handleServerInput}
-      />
-      <span class="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
-        {#if serverValid}
-          <svg
-            class="text-green-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M5 12l5 5l10 -10" />
-          </svg>
-        {:else if           serverUrl && serverUrl.length > 3 && !connectingToServer}
-          <svg
-            class="text-red-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M18 6l-12 12" />
-            <path d="M6 6l12 12" />
-          </svg>
-        {/if}
-      </span>
-    </label>
-
     <label for="username" class="relative flex flex-col">
-      <small>Username</small>
+      <small>Admin Username</small>
       <input
         name="username"
-        bind:value={userName}
+        bind:value={adminUserName}
         on:keyup={handleLoginInput}
       />
     </label>
 
     <label for="password" class="relative flex flex-col">
-      <small>Password</small>
+      <small>Admin Password</small>
       <input
         name="password"
         type="password"
-        bind:value={userPassword}
+        bind:value={adminUserPassword}
         on:keyup={handleLoginInput}
         on:keydown={(e) => {
           if (e.key === "Enter") {
@@ -238,7 +191,7 @@
     </div>
   {/if}
 
-  {#if !serverValid || !loginValid || !userName || !userPassword}
+  {#if !serverValid || !loginValid || !adminUserName || !adminUserPassword}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
       on:click={tryLogIn}
@@ -270,6 +223,13 @@
       Continue To Rewind
     </button>
   {/if}
+
+  <button
+    class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
+    on:click={() => proceed()}
+  >
+    <span>Continue without administrator access<br />(not recommended)</span>
+  </button>
 
   <Modal bind:open={connectionHelpOpen}>
     <div

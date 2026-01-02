@@ -78,10 +78,15 @@
         </button>
 
         <button
-          class="px-2 py-1 rounded-lg text-sm border-2 border-gray-400 hover:bg-gray-300 font-medium text-gray-200 mt-20 flex flex-row gap-4 items-center mx-auto hover:text-white"
+          class="pl-2 pr-4 py-1 rounded-lg text-sm border-2 border-gray-400 hover:bg-gray-300 font-medium text-gray-200 mt-20 flex flex-row gap-2 items-center mx-auto hover:text-white"
           on:click={() => goto("/importOfflinePlayback")}
         >
-          <span>Using Finamp's beta? Import offline playback now!</span>
+          <img
+            class="size-6"
+            src="/media/finamp_cropped.svg"
+            alt="Finamp Logo"
+          />
+          <span>Using Finamp's beta?<br />Import offline playback now!</span>
         </button>
       {/if}
     {:else}
