@@ -35,7 +35,7 @@
       href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
       target="_blank"
       on:click|stopPropagation={() => {}}
-    >code on GitHub</a> !
+    >code on GitHub</a>!
   </p>
 
   {#if loggedIn}
