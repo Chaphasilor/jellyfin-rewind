@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -16,7 +16,7 @@
 
   // plays a random track from the 5 forgotten favorites
   function playTopForgotten() {
-    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport
+    const forgottenFavoriteTracks = $rewindReport.jellyfinRewindReport
       .tracks?.forgottenFavoriteTracks[informationSource].slice(0, 5);
     const randomTrackId = Math.floor(
       Math.random() * forgottenFavoriteTracks.length,
@@ -38,7 +38,7 @@
   }
 
   onMount(() => {
-    const forgottenFavoriteTracks = $lightRewindReport.jellyfinRewindReport
+    const forgottenFavoriteTracks = $rewindReport.jellyfinRewindReport
       .tracks?.forgottenFavoriteTracks[informationSource];
 
     forgottenFavoriteTracks.forEach((track, index) => {
@@ -63,7 +63,7 @@
   </h2>
   <h3 class="px-6">
     Here are {
-      $lightRewindReport.jellyfinRewindReport.tracks
+      $rewindReport.jellyfinRewindReport.tracks
         ?.forgottenFavoriteTracks[informationSource].length
     } tracks you loved earlier this year, but it's been a while since you last
     played them.
@@ -71,7 +71,7 @@
   <h3 class="px-6"><em>What changed?</em></h3>
 
   <ol id="top-forgotten-main-feature" class="flex flex-col gap-2 p-6">
-    {#each       $lightRewindReport.jellyfinRewindReport.tracks
+    {#each       $rewindReport.jellyfinRewindReport.tracks
         ?.forgottenFavoriteTracks[informationSource].slice(0, 5) as
       track,
       index
@@ -157,7 +157,7 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.tracks
+  {#each     $rewindReport.jellyfinRewindReport.tracks
       ?.forgottenFavoriteTracks[informationSource].slice(5, 10) as
     track,
     index

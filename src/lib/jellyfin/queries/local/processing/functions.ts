@@ -168,8 +168,9 @@ export function increaseTimesForTrack(
 }
 
 export async function getMusicLibrary(): Promise<Result<any[]>> {
+  console.log(`music libs jellyfin:`, jellyfin);
   const allLibraries = await jellyfin.getData(
-    `UserViews?userId=${jellyfin.user?.id}`,
+    `UserViews?userId=${jellyfin.userId}`,
   ) as Result<{
     Items: any[];
   }>;
@@ -204,7 +205,7 @@ export async function getTracksForLibrary(libraryId: string) {
   query.push(`recursive=true`);
   query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
-  const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
+  const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
 }
 
@@ -215,14 +216,14 @@ export async function getAlbumsForLibrary(libraryId: string) {
   query.push(`recursive=true`);
   query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
-  const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
+  const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinAlbum[] }>;
 }
 
 export async function getArtistsForLibrary(libraryId: string) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
-  query.push(`userId=${jellyfin.user?.id}`);
+  query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=BasicSyncInfo,Genres`);
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);
   query.push(`recursive=true`);
@@ -234,7 +235,7 @@ export async function getArtistsForLibrary(libraryId: string) {
 export async function getAlbumArtistsForLibrary(libraryId: string) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
-  query.push(`userId=${jellyfin.user?.id}`);
+  query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=BasicSyncInfo,Genres`);
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);
   query.push(`recursive=true`);
@@ -246,7 +247,7 @@ export async function getAlbumArtistsForLibrary(libraryId: string) {
 export async function getGenresForLibrary(libraryId: string) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
-  query.push(`userId=${jellyfin.user?.id}`);
+  query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=ItemCounts`);
   query.push(`recursive=true`);
   query.push(`enableImageTypes=Primary`);
@@ -301,7 +302,7 @@ export async function loadItemInfo(
   if (itemIds.length > 0) {
     query.push(`ids=${[...new Set(itemIds)].join(",")}`);
   }
-  const route = `Users/${jellyfin.user?.id}/Items?${query.join(`&`)}`;
+  const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
 }
 
@@ -378,9 +379,7 @@ export function increaseCachesForPlaybackReportingTrack(
   // update last played based on playback reporting if needed
   if (!track.lastPlayed || (track.lastPlayed < listen.dateCreated)) {
     track.lastPlayed = listen.dateCreated;
-    console.log(`track:`, track);
     tracksCache.updateData(track.id, () => track);
-    console.log(`tracksCache.get(track.id):`, tracksCache.get(track.id));
   }
   tracksCache.count(track.id, source, delta);
   track.albumId ? albumsCache.count(track.albumId, source, delta) : null;
@@ -396,11 +395,24 @@ export function increaseCachesForPlaybackReportingTrack(
 
 export function increaseCachesForJellyfinTrack(
   track: JellyfinTrack,
+  processedTrack: Track,
   delta: PlaybackCounterDelta,
 ) {
   const source = CounterSources.JELLYFIN;
   // we can't set any of the listen-related caches, since vanilla Jellyfin doesn't provide that data
   tracksCache.count(track.Id, source, delta);
+  processedTrack.albumId
+    ? albumsCache.count(processedTrack.albumId, source, delta)
+    : null;
+  (new Set<string>([...processedTrack.artists, ...processedTrack.albumArtists]))
+    .forEach(
+      (artist) => {
+        artistCache.count(artist, source, delta);
+      },
+    );
+  processedTrack.genres.forEach((genre) => {
+    genresCache.count(genre, source, delta);
+  });
 }
 
 function generateCountsDelta(
@@ -421,7 +433,7 @@ function generateCountsDelta(
     // if it was played this year => all plays from all time included
     // but if it wasn't played this year (only before that) => 0 plays counted
     const jellyfinPlayCount = (item?.UserData?.LastPlayedDate &&
-        new Date(item?.UserData?.LastPlayedDate).getFullYear() !== year)
+        new Date(item?.UserData?.LastPlayedDate).getFullYear() < year)
       ? item?.UserData?.PlayCount ?? 0
       : 0;
     return {
@@ -454,10 +466,11 @@ export function updateCountersForPlaybackReportingTrack(
 
 export function updateCountersForJellyfinTrack(
   track: JellyfinTrack,
+  processedTrack: Track,
 ) {
   const delta = generateCountsDelta(null, track);
   generalCounter.v.applyDelta(CounterSources.JELLYFIN, delta);
-  increaseCachesForJellyfinTrack(track, delta);
+  increaseCachesForJellyfinTrack(track, processedTrack, delta);
   increaseTimesForTrack(CounterSources.JELLYFIN, null, delta);
 }
 

@@ -137,7 +137,7 @@ export async function loadAudio(
   }
 
   const params = {
-    "UserId": jellyfin.user?.id,
+    "UserId": jellyfin.userId,
     "DeviceId": jellyfin.deviceProfile.deviceId,
     "api_key": jellyfin.token,
     "Container":
@@ -167,19 +167,19 @@ export function loadTracksForGroup(
   switch (groupType) {
     case `artist`:
       url =
-        `${jellyfin.baseurl}/Users/${jellyfin.user?.id}/Items?ArtistIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
+        `${jellyfin.baseurl}/Users/${jellyfin.userId}/Items?ArtistIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
       break;
     case `album`:
       url =
-        `${jellyfin.baseurl}/Users/${jellyfin.user?.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
+        `${jellyfin.baseurl}/Users/${jellyfin.userId}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
       break;
     case `genre`:
       url =
-        `${jellyfin.baseurl}/Users/${jellyfin.user?.id}/Items?GenreIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
+        `${jellyfin.baseurl}/Users/${jellyfin.userId}/Items?GenreIds=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
       break;
     case `playlist`:
       url =
-        `${jellyfin.baseurl}/Users/${jellyfin.user?.id}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
+        `${jellyfin.baseurl}/Users/${jellyfin.userId}/Items?ParentId=${groupId}&Filters=IsNotFolder&Recursive=true&SortBy=PlayCount&MediaTypes=Audio&Limit=20&Fields=Chapters&ExcludeLocationTypes=Virtual&EnableTotalRecordCount=false&CollapseBoxSetItems=false`;
       break;
 
     default:
@@ -434,7 +434,7 @@ function inspectPlaybackReportingSetup(
     return PlaybackReportingIssueAction.RETENTION_SHORT;
   } else if (
     playbackReportingSetup.ignoredUsers?.some((user: { id: string }) =>
-      user.id === jellyfin.user?.id
+      user.id === jellyfin.userId
     )
   ) {
     return PlaybackReportingIssueAction.USER_IGNORED;

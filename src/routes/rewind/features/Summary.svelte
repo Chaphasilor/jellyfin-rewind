@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -16,8 +16,8 @@
   }: FeatureProps = $props();
 
   function playTopTrack() {
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
-      .tracks?.[rankingMetric]?.[0];
+    const topTrackByDuration = $rewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric][informationSource]?.[0];
     console.log(`topTrackByDuration:`, topTrackByDuration);
     fadeToNextTrack(topTrackByDuration);
   }
@@ -36,8 +36,8 @@
       `#summary-top-track-image`,
     );
     console.log(`img:`, topTrackPrimaryImage);
-    const topTrack = $lightRewindReport.jellyfinRewindReport.tracks
-      ?.[rankingMetric]?.[0];
+    const topTrack = $rewindReport.jellyfinRewindReport.tracks
+      ?.[rankingMetric][informationSource]?.[0];
     console.log(`topTrack:`, topTrack);
 
     // top artist
@@ -45,8 +45,8 @@
       `#summary-top-artist-image`,
     );
     console.log(`img:`, topArtistPrimaryImage);
-    const topArtist = $lightRewindReport.jellyfinRewindReport.artists
-      ?.[rankingMetric]?.[0];
+    const topArtist = $rewindReport.jellyfinRewindReport.artists
+      ?.[rankingMetric][informationSource]?.[0];
     console.log(`topArtist:`, topArtist);
 
     // most successive plays
@@ -54,7 +54,7 @@
       `#summary-most-successive-streams-track-image`,
     );
     console.log(`img:`, mostSuccessivePlaysTrackPrimaryImage);
-    const mostSuccessivePlaysTrack = $lightRewindReport.jellyfinRewindReport
+    const mostSuccessivePlaysTrack = $rewindReport.jellyfinRewindReport
       .generalStats?.mostSuccessivePlays
       ?.track;
     console.log(`mostSuccessivePlaysTrack:`, mostSuccessivePlaysTrack);
@@ -62,7 +62,7 @@
     // load images
     loadImage([topTrackPrimaryImage], topTrack.image, `track`);
     loadImage([topArtistPrimaryImage], topArtist.images.primary, `artist`);
-    if (extraFeatures().mostSuccessivePlays) {
+    if (extraFeatures().mostSuccessivePlays && mostSuccessivePlaysTrack) {
       loadImage(
         [mostSuccessivePlaysTrackPrimaryImage],
         mostSuccessivePlaysTrack.image,
@@ -76,13 +76,13 @@
   <h2
     class="text-2xl mt-8 font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center font-semibold text-gray-200"
   >
-    <span>{$lightRewindReport.jellyfinRewindReport?.user?.name}'s</span>
+    <span>{$rewindReport.jellyfinRewindReport?.user?.name}'s</span>
     <div class="w-full flex flex-col items-center">
       <JellyfinRewindLogo />
     </div>
     <span>Report <span
         class="text-[#00A4DC] text-2xl font-semibold font-quicksand"
-      >{$lightRewindReport.jellyfinRewindReport?.year}</span></span>
+      >{$rewindReport.jellyfinRewindReport?.year}</span></span>
   </h2>
 
   <div
@@ -95,7 +95,7 @@
       <div class="text-lg">
         <span class="text-[#00A4DC] text-2xl font-semibold font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.generalStats
+            $rewindReport.jellyfinRewindReport.generalStats
               .totalPlaybackDurationMinutes[
                 informationSource
               ].toFixed(0),
@@ -104,7 +104,7 @@
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-start items-center"
     >
       <!-- top track -->
       <h4 class="text-xs">Top Track</h4>
@@ -114,21 +114,23 @@
       />
       <div class="text-balance">
         <span class="text-[#00A4DC] font-semibold font-quicksand">{
-          $lightRewindReport.jellyfinRewindReport.tracks
-            ?.[rankingMetric]?.[0]
+          $rewindReport.jellyfinRewindReport.tracks
+            ?.[rankingMetric][informationSource]?.[0]
             ?.name
         }</span>
         <span class="">{
           formatArtists(
-            $lightRewindReport.jellyfinRewindReport.tracks?.[
+            $rewindReport.jellyfinRewindReport.tracks?.[
               rankingMetric
-            ]?.[0]?.artistsBaseInfo?.map((x) => x.name),
+            ][informationSource]?.[0]?.artistsBaseInfo?.map((x) =>
+              x.name
+            ),
           )
         }</span>
       </div>
     </div>
     <div
-      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-end items-center"
+      class="overflow-hidden border-2 border-white/5 p-1 rounded-md text-center flex flex-col justify-start items-center"
     >
       <!-- top artist -->
       <h4 class="text-xs">Top Artist</h4>
@@ -138,9 +140,9 @@
       />
       <div class="text-balance">
         <span class="text-[#00A4DC] font-semibold font-quicksand">{
-          $lightRewindReport.jellyfinRewindReport.artists?.[
+          $rewindReport.jellyfinRewindReport.artists?.[
             rankingMetric
-          ]?.[0]?.name
+          ][informationSource]?.[0]?.name
         }</span>
       </div>
     </div>
@@ -153,7 +155,7 @@
           Listened on
           <span class="font-semibold text-[#00A4DC] text-3xl font-quicksand">{
             showAsNumber(
-              $lightRewindReport.jellyfinRewindReport.generalStats
+              $rewindReport.jellyfinRewindReport.generalStats
                 .totalMusicDays,
             )
           }</span>
@@ -168,7 +170,7 @@
       <div>
         <span class="font-semibold text-[#00A4DC] font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.generalStats
+            $rewindReport.jellyfinRewindReport.generalStats
               .uniqueTracksPlayed,
           )
         }</span> unique tracks
@@ -176,7 +178,7 @@
       <div>
         <span class="font-semibold text-[#00A4DC] font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.generalStats
+            $rewindReport.jellyfinRewindReport.generalStats
               .uniqueArtistsPlayed,
           )
         }</span> unique artists
@@ -184,7 +186,7 @@
       <div>
         <span class="font-semibold text-[#00A4DC] font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport.generalStats
+            $rewindReport.jellyfinRewindReport.generalStats
               .uniqueAlbumsPlayed,
           )
         }</span> unique albums
@@ -202,12 +204,12 @@
         />
         <div class="text-balance">
           <span class="text-[#00A4DC] font-semibold font-quicksand">{
-            $lightRewindReport.jellyfinRewindReport.generalStats
+            $rewindReport.jellyfinRewindReport.generalStats
               .mostSuccessivePlays?.name
           }</span>
           <span class="">{
             formatArtists(
-              $lightRewindReport.jellyfinRewindReport.generalStats
+              $rewindReport.jellyfinRewindReport.generalStats
                 .mostSuccessivePlays?.artists?.map((x) => x.name),
             )
           }</span>
@@ -218,47 +220,47 @@
       class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
     >
       <!-- stats 1 - unique items -->
-      <div class="text-balance">
-        Library Duration: <span
-          class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-        >{
-          showAsNumber(
-            (
-              $lightRewindReport.jellyfinRewindReport?.libraryStats
-                ?.totalRuntime /
-              60.0 /
-              60.0 /
-              24.0
-            ).toFixed(1),
-          )
-        }</span> days
-      </div>
-      <div class="text-balance">
-        Average track length: <span
-          class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
-        >{
-          showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
-              ?.trackLength?.mean.toFixed(
-                0,
-              ),
-          )
-        }</span> seconds
-      </div>
+      Library Duration: <span
+        class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
+      >{
+        showAsNumber(
+          (
+            $rewindReport.jellyfinRewindReport?.libraryStats
+              ?.totalRuntime /
+            60.0 /
+            60.0 /
+            24.0
+          ).toFixed(1),
+        )
+      }</span> days
+    </div>
+    <div
+      class="overflow-hidden border-2 border-white/5 py-1 px-3 rounded-md text-center flex flex-col items-center justify-around"
+    >
+      Average track length: <span
+        class="font-semibold text-[#00A4DC] text-2xl font-quicksand"
+      >{
+        showAsNumber(
+          ($rewindReport.jellyfinRewindReport?.libraryStats
+            ?.trackLength?.mean / 60).toFixed(
+              2,
+            ),
+        )
+      }</span> minutes
     </div>
     {#if extraFeatures().listeningActivityDifference}
       <div
         class="overflow-hidden border-2 border-white/5 p-1 rounded-md col-span-2"
       >
         <!-- stats 2 - listening activity difference (if positive) -->
-        {#if         ($lightRewindReport.jellyfinRewindReport?.featureDelta
+        {#if         ($rewindReport.jellyfinRewindReport?.featureDelta
           ?.listeningActivityDifference
           ?.totalPlays[informationSource] ?? 0) > 0}
           <div class="text-center mb-2">
             <span class="font-semibold font-quicksand text-[#00A4DC] text-lg">{
               showAsNumber(
                 Math.abs(
-                  $lightRewindReport.jellyfinRewindReport?.featureDelta
+                  $rewindReport.jellyfinRewindReport?.featureDelta
                     ?.listeningActivityDifference?.totalPlays[
                       informationSource
                     ] ?? 0,
@@ -269,7 +271,7 @@
           </div>
         {/if}
         <div class="flex flex-row flex-wrap justify-around gap-4">
-          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+          {#if           ($rewindReport.jellyfinRewindReport?.featureDelta
             ?.listeningActivityDifference?.uniquePlays.tracks ?? 0) >=
             0}
             <div class="text-center">
@@ -278,7 +280,7 @@
               >{
                 showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport
+                    $rewindReport.jellyfinRewindReport
                       ?.featureDelta
                       ?.listeningActivityDifference?.uniquePlays
                       .tracks ?? 0,
@@ -287,7 +289,7 @@
               }</span><br />more tracks
             </div>
           {/if}
-          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+          {#if           ($rewindReport.jellyfinRewindReport?.featureDelta
             ?.listeningActivityDifference?.uniquePlays.artists ??
             0) >= 0}
             <div class="text-center">
@@ -296,7 +298,7 @@
               >{
                 showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport
+                    $rewindReport.jellyfinRewindReport
                       ?.featureDelta
                       ?.listeningActivityDifference?.uniquePlays
                       .artists ?? 0,
@@ -305,7 +307,7 @@
               }</span><br />more artists
             </div>
           {/if}
-          {#if           ($lightRewindReport.jellyfinRewindReport?.featureDelta
+          {#if           ($rewindReport.jellyfinRewindReport?.featureDelta
             ?.listeningActivityDifference?.uniquePlays.albums ?? 0) >=
             0}
             <div class="text-center">
@@ -314,7 +316,7 @@
               >{
                 showAsNumber(
                   Math.abs(
-                    $lightRewindReport.jellyfinRewindReport
+                    $rewindReport.jellyfinRewindReport
                       ?.featureDelta
                       ?.listeningActivityDifference?.uniquePlays
                       .albums ?? 0,

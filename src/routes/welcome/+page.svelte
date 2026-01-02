@@ -11,7 +11,7 @@
 
   onMount(async () => {
     await jellyfin.load();
-    loggedIn = !!jellyfin.baseurl && !!jellyfin.user;
+    loggedIn = !!jellyfin.baseurl && !!jellyfin.user && !!jellyfin.userId;
   });
 </script>
 
@@ -29,20 +29,30 @@
     communication stays between your server and your browser.<br />
     <br />
     If you are paranoid (as you generally should be), feel free to monitor the
-    network traffic in the devtools or even checkout the code which is linked
-    below!
+    network traffic in the devtools or even checkout the
+    <a
+      class="text-[#00A4DC] underline hover:text-[#0085B2]"
+      href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
+      target="_blank"
+      on:click|stopPropagation={() => {}}
+    >code on GitHub</a>!
   </p>
 
   {#if loggedIn}
     <p class="mb-4">
-      You are currently logged in to
-      <strong>{jellyfin.baseurl}</strong> as
-      <strong>{jellyfin.user?.name}</strong>.
+      You are currently logged in to<br />
+      <strong class="font-mono">{jellyfin.baseurl}</strong><br />as<br />
+      <strong>{jellyfin.targetUser?.name ?? jellyfin.user?.name}</strong>.
     </p>
     <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
       on:click={async () => {
+        if (!jellyfin.user?.isAdmin) {
+          goto("/adminLogin");
+          return;
+        }
+
         playbackReportingInspectionResult.set(
           await checkPlaybackReportingSetup(),
         );
@@ -60,7 +70,7 @@
         }
       }}
     >
-      Continue as {jellyfin.user?.name}
+      Continue as {jellyfin.targetUser?.name ?? jellyfin.user?.name}
     </button>
 
     <!-- svelte-ignore event_directive_deprecated -->

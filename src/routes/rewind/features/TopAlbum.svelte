@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -18,8 +18,8 @@
   }: FeatureProps = $props();
 
   async function playTopAlbum() {
-    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport
-      .albums?.[rankingMetric]?.[0];
+    const topAlbumByDuration = $rewindReport.jellyfinRewindReport
+      .albums?.[rankingMetric][informationSource]?.[0];
     console.log(`topAlbumByDuration:`, topAlbumByDuration);
 
     let albumsTracks = await loadTracksForGroup(
@@ -41,8 +41,8 @@
   onMount(() => {
     const topAlbumPrimaryImage = document.querySelector(`#top-album-image`);
     console.log(`img:`, topAlbumPrimaryImage);
-    const topAlbumByDuration = $lightRewindReport.jellyfinRewindReport
-      .albums?.[rankingMetric]?.[0];
+    const topAlbumByDuration = $rewindReport.jellyfinRewindReport
+      .albums?.[rankingMetric][informationSource]?.[0];
     console.log(`topAlbumByDuration:`, topAlbumByDuration);
     loadImage([topAlbumPrimaryImage], topAlbumByDuration.image, `album`);
   });
@@ -50,7 +50,7 @@
 
 <div class="text-center text-white">
   <h2 class="text-2xl mt-5">
-    Your Top Album<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
+    Your Top Album<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
   <div class="flex mt-10 flex-col items-center">
     <img
@@ -58,20 +58,22 @@
       class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]"
     />
     <div class="px-4 py-4 overflow-hidden whitespace-wrap">
-      <div class="-rotate-6 mt-10 text-4xl font-semibold">
+      <div class="-rotate-6 mt-10 text-3xl font-semibold">
         <div class="-ml-4">
           {
-            $lightRewindReport.jellyfinRewindReport.albums
-              ?.[rankingMetric]?.[0]
-              .name
+            $rewindReport.jellyfinRewindReport.albums
+              ?.[rankingMetric][
+                informationSource
+              ]?.[0].name
           }
         </div>
         <div class="ml-4 mt-8 max-h-[3.5em]">
           {
             formatArtists(
-              $lightRewindReport.jellyfinRewindReport.albums?.[
-                rankingMetric
-              ]?.[0]?.artists?.map((x) => x.name),
+              $rewindReport.jellyfinRewindReport.albums
+                ?.[rankingMetric][
+                  informationSource
+                ]?.[0]?.artists?.map((x) => x.name),
             )
           }
         </div>
@@ -84,17 +86,17 @@
     <div>
       Streamed <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.albums
-            ?.[rankingMetric]?.[0]
-            ?.playCount[informationSource],
+          $rewindReport.jellyfinRewindReport.albums?.[rankingMetric][
+            informationSource
+          ]?.[0]?.playCount[informationSource],
         )
       }</span> times.
     </div>
     <div>
       Listened for <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.albums?.[
-            rankingMetric
+          $rewindReport.jellyfinRewindReport.albums?.[rankingMetric][
+            informationSource
           ]?.[0]?.totalPlayDuration[informationSource]?.toFixed(0),
         )
       }</span> minutes.

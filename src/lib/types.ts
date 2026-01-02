@@ -124,21 +124,38 @@ export type Genre = {
   name: string;
 };
 
-export enum CounterSources {
-  PLAYBACK_REPORTING = "playbackReporting",
+export const TrueCounterSources = {
+  PLAYBACK_REPORTING: "playbackReporting",
+  JELLYFIN: "jellyfin",
+};
+export type TrueCounterSources =
+  typeof TrueCounterSources[keyof typeof TrueCounterSources];
+const VirtualCounterSources = {
+  AVERAGE: "average",
+};
+export const CounterSources = {
+  ...TrueCounterSources,
+  ...VirtualCounterSources,
+} as const;
+
+export type CounterSources = typeof CounterSources[keyof typeof CounterSources];
+
+export enum InformationSource {
+  PLAYBACK_REPORTING = "playbackReport",
   JELLYFIN = "jellyfin",
+  AVERAGE = "average",
 }
 
 export class PlaybackCounter {
   counters: {
-    playbackReporting: {
+    [TrueCounterSources.PLAYBACK_REPORTING]: {
       fullPlays: number;
       listenDuration: number;
       partialSkips: number;
       fullSkips: number;
       listens: Set<string>; // references listen IDs
     };
-    jellyfin: {
+    [TrueCounterSources.JELLYFIN]: {
       fullPlays: number;
       listenDuration: number;
       partialSkips: number;
@@ -148,17 +165,17 @@ export class PlaybackCounter {
   };
 
   constructor(
-    init: PlaybackCounter["counters"][CounterSources] = normalCountersInit,
+    init: PlaybackCounter["counters"][TrueCounterSources] = normalCountersInit,
   ) {
     this.counters = {
-      [CounterSources.PLAYBACK_REPORTING]: { ...init },
-      [CounterSources.JELLYFIN]: { ...init },
+      [TrueCounterSources.PLAYBACK_REPORTING]: { ...init },
+      [TrueCounterSources.JELLYFIN]: { ...init },
     };
   }
 
   applyDelta(
-    source: CounterSources,
-    delta: Partial<PlaybackCounter["counters"][CounterSources]>,
+    source: TrueCounterSources,
+    delta: Partial<PlaybackCounter["counters"][TrueCounterSources]>,
   ) {
     if (delta.fullPlays) this.counters[source].fullPlays += delta.fullPlays;
     if (delta.listenDuration) {
@@ -181,7 +198,7 @@ export class PlaybackCounter {
   get jellyfin() {
     return this.counters.jellyfin;
   }
-  get average(): PlaybackCounter["counters"][CounterSources] {
+  get average(): PlaybackCounter["counters"][TrueCounterSources] {
     return {
       fullPlays: Math.floor(
         (this.counters.playbackReporting.fullPlays +
@@ -209,9 +226,9 @@ export const normalCountersInit = {
   partialSkips: 0,
   fullSkips: 0,
   listens: new Set<string>(),
-} as PlaybackCounter["counters"][CounterSources];
+} as PlaybackCounter["counters"][TrueCounterSources];
 export type PlaybackCounterDelta = Partial<
-  PlaybackCounter["counters"][CounterSources]
+  PlaybackCounter["counters"][TrueCounterSources]
 >;
 export type NumericPlaybackCounterKeys = keyof Omit<
   PlaybackCounter["counters"][CounterSources],
@@ -324,7 +341,7 @@ export type CombinedDeviceClientInfo = {
 };
 
 export type FeatureProps = {
-  informationSource: "playbackReport" | "jellyfin" | "average";
+  informationSource: InformationSource;
   rankingMetric: "duration" | "playCount";
   extraFeatures: () => {
     totalPlaytimeGraph: boolean;
@@ -378,6 +395,196 @@ export type PlaybackReportingSetupCheckResult = {
   };
   offlineImportAvailable?: boolean;
   checkAttempts: number;
+};
+
+export type RewindReport = {
+  jellyfinRewindReport: {
+    commit: string;
+    year: number;
+    timestamp: string;
+    user: {
+      id: string;
+      name: string;
+    };
+    server: {
+      LocalAddress: string;
+      ServerName: string;
+      Version: string;
+      ProductName: string;
+      OperatingSystem: string;
+      Id: string;
+      StartupWizardCompleted: boolean;
+      PublicAddress: string;
+    };
+    type: "light";
+    playbackReportAvailable: boolean;
+    playbackReportDataMissing: boolean;
+    generalStats: {
+      totalPlaybackDurationByMonth: {
+        [key: number]: number; // in minutes
+      };
+      totalPlays: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
+      };
+      totalPlaybackDurationMinutes: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
+      };
+      totalPlaybackDurationHours: {
+        playbackReport: number;
+        average: number;
+        jellyfin: number;
+      };
+      uniqueTracksPlayed: number;
+      uniqueAlbumsPlayed: number;
+      uniqueArtistsPlayed: number;
+      playbackMethods: {
+        playCount: {
+          [method: string]: number;
+        };
+        duration: {
+          [method: string]: number;
+        };
+      };
+      locations: {
+        devices: {
+          [device: string]: number;
+        };
+        clients: {
+          [client: string]: number;
+        };
+        combinations: {
+          [combination: string]: {
+            device: string;
+            client: string;
+            playCount: number;
+          };
+        };
+      };
+      mostSuccessivePlays?: {
+        track: OldTrack;
+        name: string;
+        artists: OldBaseInfo[];
+        albumArtist: OldAlbumArtistBaseInfo;
+        image: OldImage;
+        playCount: number;
+        totalDuration: number;
+      };
+      totalMusicDays: number;
+      minutesPerDay: {
+        mean: number;
+        median: number;
+        // min, max?
+      };
+    };
+    featureDelta?: {
+      listeningActivityDifference: {
+        uniquePlays: {
+          tracks: number;
+          albums: number;
+          artists: number;
+        };
+        totalPlays: {
+          average: number;
+          jellyfin: number;
+          playbackReport: number;
+        };
+        totalPlaytime: {
+          average: number;
+          jellyfin: number;
+          playbackReport: number;
+        };
+      };
+      favoriteDifference: number;
+      year: number;
+    };
+    tracks: {
+      duration: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
+      playCount: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
+      leastSkipped: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
+      mostSkipped: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
+      forgottenFavoriteTracks: {
+        jellyfin: OldTrack[];
+        playbackReport: OldTrack[];
+        average: OldTrack[];
+      };
+    };
+    albums: {
+      duration: {
+        jellyfin: OldAlbum[];
+        playbackReport: OldAlbum[];
+        average: OldAlbum[];
+      };
+      playCount: {
+        jellyfin: OldAlbum[];
+        playbackReport: OldAlbum[];
+        average: OldAlbum[];
+      };
+    };
+    artists: {
+      duration: {
+        jellyfin: OldArtist[];
+        playbackReport: OldArtist[];
+        average: OldArtist[];
+      };
+      playCount: {
+        jellyfin: OldArtist[];
+        playbackReport: OldArtist[];
+        average: OldArtist[];
+      };
+    };
+    genres: {
+      duration: {
+        jellyfin: OldGenre[];
+        playbackReport: OldGenre[];
+        average: OldGenre[];
+      };
+      playCount: {
+        jellyfin: OldGenre[];
+        playbackReport: OldGenre[];
+        average: OldGenre[];
+      };
+    };
+    libraryStats: {
+      tracks: {
+        total: number;
+        favorite: number;
+      };
+      albums: {
+        total: number;
+      };
+      artists: {
+        total: number;
+      };
+      trackLength: {
+        mean: number;
+        median: number;
+        min: number;
+        max: number;
+      };
+      totalRuntime: number;
+    };
+    playbackReportComplete: boolean;
+  };
 };
 
 // old Rewind report format
@@ -522,6 +729,10 @@ export type FullRewindReport = {
   };
   rawData: any;
 };
+
+//FIXME the type for some properties like [LightRewindReport.jellyfinRewindReport.tracks] has changed between 2025.0.0 and 2025.0.1
+// the new format contains separate lists per source, like it should be
+//TODO Rewind reports generated and downloaded before 2025.0.1 also need to be importable in 2026.0.0
 export type LightRewindReport = {
   jellyfinRewindReport: {
     commit: string;
@@ -741,7 +952,7 @@ export interface OldTrack {
   skips: OldSkips;
   playCount: OldPlayCount;
   plays: OldPlay[];
-  mostSuccessivePlays: OldMostSuccessivePlays;
+  mostSuccessivePlays?: OldMostSuccessivePlays;
   lastPlayed: string | Date | null;
   totalPlayDuration: OldTotalPlayDuration;
   isFavorite: boolean;

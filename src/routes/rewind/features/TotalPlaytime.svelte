@@ -2,17 +2,22 @@
   import Chart from "chart.js/auto";
   import {
     isAccuracyDisclaimerOpen,
-    lightRewindReport,
+    rewindReport,
+    year,
   } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
+  import { goto } from "$app/navigation";
+  import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
+  // svelte-ignore non_reactive_update
+  let unavailableOverlay: Unavailable;
   let canvas: HTMLCanvasElement;
   let doPollCanvas = $state(false);
 
@@ -73,6 +78,7 @@
               borderWidth: 0,
               borderRadius: 4,
               borderSkipped: `bottom`,
+              //@ts-ignore
               minBarLength: 32,
             },
           },
@@ -97,12 +103,12 @@
     ];
 
     let monthData = Object.keys(
-      $lightRewindReport.jellyfinRewindReport.generalStats
+      $rewindReport.jellyfinRewindReport.generalStats
         .totalPlaybackDurationByMonth,
     ).reduce(
       (acc, month) => {
         acc[months[Number(month)]] =
-          $lightRewindReport.jellyfinRewindReport.generalStats
+          $rewindReport.jellyfinRewindReport.generalStats
             .totalPlaybackDurationByMonth[
               Number(month)
             ];
@@ -199,13 +205,13 @@
           <path d="M12 12l-8 4.5"></path>
         </svg>
       </button>
-    {/if}<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
+    {/if}<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
 
-  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-4xl">
+  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-3xl">
     <span class="font-quicksand-bold">{
       showAsNumber(
-        $lightRewindReport.jellyfinRewindReport.generalStats
+        $rewindReport.jellyfinRewindReport.generalStats
           .totalPlaybackDurationMinutes[
             informationSource
           ].toFixed(0),
@@ -217,7 +223,7 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+          $rewindReport.jellyfinRewindReport.generalStats?.[
             `totalPlays`
           ]?.[informationSource],
         )
@@ -226,7 +232,7 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+          $rewindReport.jellyfinRewindReport.generalStats?.[
             `uniqueTracksPlayed`
           ],
         )
@@ -235,7 +241,7 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+          $rewindReport.jellyfinRewindReport.generalStats?.[
             `uniqueArtistsPlayed`
           ],
         )
@@ -244,7 +250,7 @@
     <div>
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.generalStats?.[
+          $rewindReport.jellyfinRewindReport.generalStats?.[
             `uniqueAlbumsPlayed`
           ],
         )
@@ -252,7 +258,7 @@
     </div>
   </div>
 
-  <div class="absolute w-full bottom-25">
+  <div class="absolute w-full bottom-25 py-4">
     <div class="w-full flex flex-row justify-center">
       <canvas
         id="playtime-by-month-chart"
@@ -263,7 +269,11 @@
       {#if extraFeatures().totalPlaytimeGraph}
         <br />
       {:else}
-        <Unavailable />
+        <Unavailable bind:this={unavailableOverlay}>
+          <UnavailableReasonPlaybackReporting
+            closeModal={() => unavailableOverlay.closeModal()}
+          />
+        </Unavailable>
       {/if}
     </div>
   </div>

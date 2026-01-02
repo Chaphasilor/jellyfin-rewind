@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -19,8 +19,8 @@
 
   // plays a random track from the top 5 artists (excluding the top artist)
   async function playTopArtists() {
-    const topArtists = $lightRewindReport.jellyfinRewindReport.artists
-      ?.[rankingMetric]?.slice(1, 5); // first artist excluded
+    const topArtists = $rewindReport.jellyfinRewindReport.artists
+      ?.[rankingMetric][informationSource]?.slice(1, 5); // first artist excluded
     const randomArtistId = Math.floor(Math.random() * topArtists.length);
     const randomArtist = topArtists[randomArtistId];
     console.log(`randomArtist:`, randomArtist);
@@ -41,9 +41,9 @@
   }
 
   onMount(() => {
-    const topArtists = $lightRewindReport.jellyfinRewindReport.artists?.[
+    const topArtists = $rewindReport.jellyfinRewindReport.artists?.[
       rankingMetric
-    ]?.slice(0, 5);
+    ][informationSource]?.slice(0, 5);
 
     topArtists.forEach((artist, index) => {
       const artistPrimaryImage = document.querySelector(
@@ -65,7 +65,8 @@
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Artists<br />of the year</h2>
   <ol id="top-artists-main-feature" class="flex flex-col gap-2 p-6">
-    {#each       $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
+    {#each       $rewindReport.jellyfinRewindReport.artists
+        ?.[rankingMetric][informationSource]
         ?.slice(0, 5) as
       artist,
       index
@@ -163,7 +164,8 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.artists?.[rankingMetric]
+  {#each     $rewindReport.jellyfinRewindReport.artists
+      ?.[rankingMetric][informationSource]
       ?.slice(5, 20) as
     artist,
     index

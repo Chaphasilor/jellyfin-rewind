@@ -4,6 +4,7 @@ import {
   CounterSources,
   type FullRewindReport,
   type Genre,
+  InformationSource,
   type LightRewindReport,
   type OldAlbum,
   type OldArtist,
@@ -12,19 +13,30 @@ import {
   type PlaybackCounter,
   type ProcessingResults,
   type Result,
+  type RewindReport,
   type Track,
 } from "../types.ts";
-import { end, oldReport, year } from "$lib/globals.ts";
+import {
+  end,
+  oldReport,
+  playbackReportingAvailable,
+  year,
+} from "$lib/globals.ts";
 import Jellyfin from "$lib/jellyfin/index.ts";
 import { getFeatureDelta } from "./oldReportDelta.ts";
 import { logAndReturn } from "./logging.ts";
 import { version } from "$app/environment";
+import { getCurrentWritableValue } from "./other.ts";
 
 export async function processingResultToRewindReport(
   result: ProcessingResults,
-): Promise<Result<LightRewindReport>> {
+): Promise<Result<RewindReport>> {
   const serverInfoResult = await Jellyfin.pingServer();
   const serverInfo = serverInfoResult.success ? serverInfoResult.data : null;
+
+  const $playbackReportingAvailable = await getCurrentWritableValue(
+    playbackReportingAvailable,
+  );
 
   const cacheTrackToOldTrack = (
     [id, value]: [string, { data: Track; counters: PlaybackCounter }],
@@ -39,8 +51,9 @@ export async function processingResultToRewindReport(
         value.counters.average.partialSkips,
     };
 
-    const playsSortedOldestToNewest =
-      (result.tracksCache.getCounters(track.id)?.playbackReporting?.listens
+    const playsSortedOldestToNewest = !$playbackReportingAvailable
+      ? []
+      : (result.tracksCache.getCounters(track.id)?.playbackReporting?.listens
         ?.values?.()?.map((listenId) => result.listensCache.get(listenId))
         ?.filter?.((listen) => !!listen)?.map?.((listen) => ({
           date: listen.dateCreated,
@@ -54,55 +67,57 @@ export async function processingResultToRewindReport(
           a.date.getTime() - b.date.getTime()
         );
 
-    const mostSuccessivePlaysForTrack = [
-      result.listensCache.entries.toSorted(
-        ([, listenA], [, listenB]) =>
-          listenB.data.dateCreated.getTime() -
-          listenA.data.dateCreated.getTime(),
-      ).reduce(
-        (acc, [, listen]) => {
-          const player =
-            `${listen.data.clientName} - ${listen.data.deviceName}`;
-          if (!acc.currentStreaks[player]) {
-            acc.currentStreaks[player] = [];
-          }
-          if (
-            listen.data.itemId === track.id
-          ) {
+    const mostSuccessivePlaysForTrack = !$playbackReportingAvailable
+      ? undefined
+      : [
+        result.listensCache.entries.toSorted(
+          ([, listenA], [, listenB]) =>
+            listenB.data.dateCreated.getTime() -
+            listenA.data.dateCreated.getTime(),
+        ).reduce(
+          (acc, [, listen]) => {
+            const player =
+              `${listen.data.clientName} - ${listen.data.deviceName}`;
+            if (!acc.currentStreaks[player]) {
+              acc.currentStreaks[player] = [];
+            }
             if (
-              acc.lastPlayedTracks[player] === track.id &&
-              // filter out gaps larger than 24h
-              (result.listensCache.get(acc.currentStreaks[player].at(-1))
-                  ?.dateCreated.getTime() ?? 0) >=
-                (listen.data.dateCreated.getTime() - 1000 * 60 * 60 * 24)
+              listen.data.itemId === track.id
             ) {
-              acc.currentStreaks[player].push(listen.data.rowId);
+              if (
+                acc.lastPlayedTracks[player] === track.id &&
+                // filter out gaps larger than 24h
+                (result.listensCache.get(acc.currentStreaks[player].at(-1))
+                    ?.dateCreated.getTime() ?? 0) >=
+                  (listen.data.dateCreated.getTime() - 1000 * 60 * 60 * 24)
+              ) {
+                acc.currentStreaks[player].push(listen.data.rowId!);
+              } else {
+                acc.currentStreaks[player] = [listen.data.rowId!];
+              }
             } else {
-              acc.currentStreaks[player] = [listen.data.rowId];
+              acc.currentStreaks[player] = [];
             }
-          } else {
-            acc.currentStreaks[player] = [];
-          }
-          for (const playerKey in acc.currentStreaks) {
-            if (acc.currentStreaks[playerKey].length > acc.maxStreak.length) {
-              acc.maxStreak = acc.currentStreaks[playerKey];
+            for (const playerKey in acc.currentStreaks) {
+              if (acc.currentStreaks[playerKey].length > acc.maxStreak.length) {
+                acc.maxStreak = acc.currentStreaks[playerKey];
+              }
             }
-          }
-          return acc;
-        },
-        {
-          currentStreaks: {} as Record<string, string[]>,
-          lastPlayedTracks: {} as Record<string, string>,
-          maxStreak: [] as string[],
-        },
-      ),
-    ].map((streakInfo) => ({
-      playCount: streakInfo.maxStreak.length,
-      totalDuration: streakInfo.maxStreak.reduce((sum, listenId) => {
-        const listen = result.listensCache.get(listenId);
-        return sum + (listen ? listen.playDuration : 0);
-      }, 0),
-    }))[0];
+            return acc;
+          },
+          {
+            currentStreaks: {} as Record<string, string[]>,
+            lastPlayedTracks: {} as Record<string, string>,
+            maxStreak: [] as string[],
+          },
+        ),
+      ].map((streakInfo) => ({
+        playCount: streakInfo.maxStreak.length,
+        totalDuration: streakInfo.maxStreak.reduce((sum, listenId) => {
+          const listen = result.listensCache.get(listenId);
+          return sum + (listen ? listen.playDuration : 0);
+        }, 0),
+      }))[0];
 
     return {
       id: track.id,
@@ -185,8 +200,9 @@ export async function processingResultToRewindReport(
   ): OldAlbum => {
     const album = value.data;
 
-    const playsSortedOldestToNewest =
-      (result.albumsCache.getCounters(album.id)?.playbackReporting?.listens
+    const playsSortedOldestToNewest = !$playbackReportingAvailable
+      ? []
+      : (result.albumsCache.getCounters(album.id)?.playbackReporting?.listens
         ?.values?.()?.map((listenId) => result.listensCache.get(listenId))
         ?.filter?.((listen) => !!listen)?.map?.((listen) => ({
           date: listen.dateCreated,
@@ -273,8 +289,9 @@ export async function processingResultToRewindReport(
       average: (jellyfinPlayCount + playbackReportPlayCount) / 2,
     };
 
-    const playsSortedOldestToNewest =
-      (result.artistCache.getCounters(artist.id)?.playbackReporting?.listens
+    const playsSortedOldestToNewest = !$playbackReportingAvailable
+      ? []
+      : (result.artistCache.getCounters(artist.id)?.playbackReporting?.listens
         ?.values?.()?.map((listenId) => result.listensCache.get(listenId))
         ?.filter?.((listen) => !!listen)?.map?.((listen) => ({
           date: listen.dateCreated,
@@ -463,7 +480,7 @@ export async function processingResultToRewindReport(
     0,
   );
 
-  const newReport: LightRewindReport = {
+  const newReport: RewindReport = {
     jellyfinRewindReport: {
       commit: version,
       year: year,
@@ -649,41 +666,88 @@ export async function processingResultToRewindReport(
       },
       //TODO this doesn't differentiate between playback reporting and jellyfin data yet
       tracks: {
-        duration: result.tracksCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          "listenDuration",
-          "DESC",
-        ).slice(0, 10)
-          .map(
-            cacheTrackToOldTrack,
+        duration: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.tracksCache.sorted(
+                source,
+                "listenDuration",
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheTrackToOldTrack,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldTrack[]>,
           ),
-        playCount: result.tracksCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          [
-            "fullPlays",
-            "partialSkips",
-          ],
-          "DESC",
-        ).slice(0, 10).map(
-          cacheTrackToOldTrack,
-        ),
-        mostSkipped: result.tracksCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          ["partialSkips", "fullSkips"],
-          "DESC",
-        )
-          .slice(0, 10).map(
-            cacheTrackToOldTrack,
+        playCount: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.tracksCache.sorted(
+                source,
+                [
+                  "fullPlays",
+                  "partialSkips",
+                ],
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheTrackToOldTrack,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldTrack[]>,
           ),
-        leastSkipped: result.tracksCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          ["partialSkips", "fullSkips"],
-        ).filter(([id, value]) =>
-          (value.counters.playbackReporting.fullPlays +
-            value.counters.playbackReporting.partialSkips) >= 5
-        )
-          .slice(0, 10).map(
-            cacheTrackToOldTrack,
+        mostSkipped: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.tracksCache.sorted(
+                source,
+                ["partialSkips", "fullSkips"],
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheTrackToOldTrack,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldTrack[]>,
+          ),
+        leastSkipped: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.tracksCache.sorted(
+                source,
+                ["partialSkips", "fullSkips"],
+                "ASC",
+              ).slice(0, 10)
+                .map(
+                  cacheTrackToOldTrack,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldTrack[]>,
           ),
         forgottenFavoriteTracks: {
           jellyfin: getForgottenFavoriteTracks("jellyfin").map(
@@ -698,60 +762,133 @@ export async function processingResultToRewindReport(
         },
       },
       albums: {
-        duration: result.albumsCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          "listenDuration",
-          "DESC",
-        ).slice(0, 10)
-          .map(
-            cacheAlbumToOldAlbum,
+        duration: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.albumsCache.sorted(
+                source,
+                "listenDuration",
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheAlbumToOldAlbum,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldAlbum[]>,
           ),
-        playCount: result.albumsCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          [
-            "fullPlays",
-            "partialSkips",
-          ],
-          "DESC",
-        ).slice(
-          0,
-          10,
-        ).map(
-          cacheAlbumToOldAlbum,
-        ),
+        playCount: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.albumsCache.sorted(
+                source,
+                [
+                  "fullPlays",
+                  "partialSkips",
+                ],
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheAlbumToOldAlbum,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldAlbum[]>,
+          ),
       },
       artists: {
-        duration: result.artistCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          "listenDuration",
-          "DESC",
-        ).slice(0, 10)
-          .map(
-            cacheArtistToOldArtist,
+        duration: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.artistCache.sorted(
+                source,
+                "listenDuration",
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheArtistToOldArtist,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldArtist[]>,
           ),
-        playCount: result.artistCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          ["fullPlays", "partialSkips"],
-          "DESC",
-        ).slice(0, 10).map(cacheArtistToOldArtist),
+        playCount: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.artistCache.sorted(
+                source,
+                ["fullPlays", "partialSkips"],
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheArtistToOldArtist,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldArtist[]>,
+          ),
       },
       genres: {
-        duration: result.genresCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          "listenDuration",
-          "DESC",
-        ).slice(0, 10)
-          .map(
-            cacheGenreToOldGenre,
+        duration: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.genresCache.sorted(
+                source,
+                "listenDuration",
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheGenreToOldGenre,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldGenre[]>,
           ),
-        playCount: result.genresCache.sorted(
-          CounterSources.PLAYBACK_REPORTING,
-          ["fullPlays", "partialSkips"],
-          "DESC",
-        ).slice(
-          0,
-          10,
-        ).map(cacheGenreToOldGenre),
+        playCount: (Object.values(InformationSource) as InformationSource[])
+          .reduce(
+            (current, sourceKey) => {
+              const source = sourceKey === "playbackReport"
+                ? CounterSources.PLAYBACK_REPORTING
+                : sourceKey === "jellyfin"
+                ? CounterSources.JELLYFIN
+                : CounterSources.AVERAGE;
+              current[sourceKey] = result.genresCache.sorted(
+                source,
+                ["fullPlays", "partialSkips"],
+                "DESC",
+              ).slice(0, 10)
+                .map(
+                  cacheGenreToOldGenre,
+                );
+              return current;
+            },
+            {} as Record<InformationSource, OldGenre[]>,
+          ),
       },
       libraryStats: {
         tracks: {

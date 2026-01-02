@@ -19,10 +19,10 @@
   >
     <div
       on:click|stopPropagation
-      class="relative w-full max-w-2xl h-full rounded-xl shadow-lg pt-12 p-4 bg-gray-900 text-white overflow-y-auto"
+      class="relative w-full max-w-2xl h-full rounded-xl shadow-lg pt-16 p-4 bg-gray-900 text-white overflow-y-auto"
     >
       <button
-        class="absolute top-4 right-4 text-white"
+        class="fixed top-16 right-12 text-white bg-black/50 p-2 rounded-lg"
         title="Close dialog"
         on:click={() => (open = false)}
       >

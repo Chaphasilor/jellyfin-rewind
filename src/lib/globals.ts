@@ -5,6 +5,7 @@ import type {
   LightRewindReport,
   PlaybackReportingSetupCheckResult,
   ProcessingResults,
+  RewindReport,
 } from "./types.ts";
 
 export const year = 2025;
@@ -17,9 +18,10 @@ export const downloadingProgress = writable({ cur: 0, max: 0, detail: "" });
 export const processingProgress = writable({ cur: 0, max: 0, detail: "" });
 export const generatingProgress = writable({ cur: 0, max: 0, detail: "" });
 
+export const playbackReportingAvailable = writable<boolean>(true);
 export const processingResult = writable<ProcessingResults>();
-export const lightRewindReport = writable<LightRewindReport>();
-export const oldReport = writable<FullRewindReport>();
+export const rewindReport = writable<RewindReport>();
+export const oldReport = writable<FullRewindReport | LightRewindReport>();
 
 export const isAccuracyDisclaimerOpen = writable(false);
 export const playbackReportingInspectionResult = writable<

@@ -1,12 +1,14 @@
 import {
   downloadingProgress,
   generatingProgress,
+  playbackReportingAvailable,
   processingProgress,
 } from "$lib/globals.ts";
 import {
   CounterSources,
   type LibraryData,
   Listen,
+  type ListenQueryRow,
   type ProcessingResults,
   type Result,
 } from "$lib/types.ts";
@@ -158,14 +160,18 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     max: 2,
     detail: "Getting Playback Reporting log",
   });
-  const listens = await allListens();
-  if (!listens.success || listens.data.length == 0) {
-    return logAndReturn("processing", {
-      success: false,
-      reason: !listens.success
-        ? listens.reason
-        : "You didnt Listen to anything",
-    });
+  let listens: ListenQueryRow[] = [];
+
+  try {
+    const listensResult = await allListens();
+    if (!listensResult.success) {
+      throw listensResult.reason;
+    } else {
+      listens = listensResult.data;
+    }
+  } catch (error) {
+    console.error(`Couldn't get listensResult: ${error}`);
+    playbackReportingAvailable.set(false);
   }
   downloadingProgress.set({ cur: 2, max: 2, detail: "" });
 
@@ -181,18 +187,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   });
 
   for (const lib of libraryData) {
-    // Process Tracks
-    for (let i = 0; i < lib.tracks.length; i++) {
-      const track = lib.tracks[i];
-      await nextProcessing(track.Name);
-      if (track.UserData.IsFavorite) favorites.v++;
-      const processedTrack = tracksCache.setAndGetValue(
-        track.Id,
-        () => compactTrack(track),
-      );
-
-      updateCountersForJellyfinTrack(track);
-    }
+    //!!! process tracks last so we can increase the counts for all other item types
 
     // Process Albums
     for (let i = 0; i < lib.albums.length; i++) {
@@ -219,31 +214,50 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       const processedGenre = processGenre(genre);
       updateCountersForGenre(CounterSources.JELLYFIN, genre);
     }
+
+    // Process Tracks
+    for (let i = 0; i < lib.tracks.length; i++) {
+      const track = lib.tracks[i];
+      await nextProcessing(track.Name);
+      if (track.UserData.IsFavorite) favorites.v++;
+      const processedTrack = compactTrack(track);
+      const processedTrackId = tracksCache.setAndGetValue(
+        track.Id,
+        () => processedTrack,
+      );
+
+      updateCountersForJellyfinTrack(track, processedTrack);
+    }
   }
 
-  generatingProgress.set({ cur: 0, max: listens.data.length, detail: "" });
-  for (let i = 0; i < listens.data.length; i++) {
-    const rawListen = listens.data[i];
-    generatingProgress.update((state) => ({
-      ...state,
-      cur: i + 1,
-      detail: `${rawListen.ItemName}`,
-    }));
+  if (listens.length === 0) {
+    playbackReportingAvailable.set(false);
+    console.warn(`No listens to process from Playback Reporting.`);
+  } else {
+    generatingProgress.set({ cur: 0, max: listens.length, detail: "" });
+    for (let i = 0; i < listens.length; i++) {
+      const rawListen = listens[i];
+      generatingProgress.update((state) => ({
+        ...state,
+        cur: i + 1,
+        detail: `${rawListen.ItemName}`,
+      }));
 
-    const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
-      return new Listen(rawListen, tracksCache.get(rawListen.ItemId));
-    });
+      const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
+        return new Listen(rawListen, tracksCache.get(rawListen.ItemId));
+      });
 
-    const track = tracksCache.get(rawListen.ItemId);
-    if (!track) {
-      console.warn(`Track not found for listen:`, rawListen);
-      skipped.v++;
-      continue;
+      const track = tracksCache.get(rawListen.ItemId);
+      if (!track) {
+        console.warn(`Track not found for listen:`, rawListen);
+        skipped.v++;
+        continue;
+      }
+
+      updateCountersForPlaybackReportingTrack(listen, track);
+
+      await waitForUi();
     }
-
-    updateCountersForPlaybackReportingTrack(listen, track);
-
-    await waitForUi();
   }
 
   return logAndReturn("processing", {

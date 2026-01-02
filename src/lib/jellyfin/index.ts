@@ -11,9 +11,15 @@ import { stringToUrl } from "$lib/utility/other.ts";
 
 class Jellyfin {
   token?: string;
+  targetUserToken?: string;
   baseurl?: string;
   user?: User;
+  targetUser?: User;
   header?: string;
+
+  get userId() {
+    return this.targetUser?.id ?? this.user?.id;
+  }
 
   constructor() {
     // restore session if possible
@@ -115,7 +121,8 @@ class Jellyfin {
             return {
               success: false,
               reason:
-                `Server didnt respond with code 200 but instead with ${response.status}: ${response.statusText}`,
+                `Server didn't respond with code 200 but instead with ${response.status}: ${await response
+                  .text()}`,
             };
           }
           return {
@@ -203,6 +210,64 @@ class Jellyfin {
     return logAndReturn("userLogin", { success: true });
   }
 
+  async adminUserLogin(
+    Username: string,
+    Pw: string,
+  ): Promise<Result<undefined>> {
+    // move existing login to target user
+    this.targetUserToken = this.token;
+    this.targetUser = this.user;
+
+    // now login as admin
+    const auth = (await this.fetchData("Users/AuthenticateByName", {
+      Username,
+      Pw,
+    })) as Result<JellyfinResponse_UsersAuthenticateByName>;
+
+    if (!auth.success) {
+      return logAndReturn("userLogin", auth);
+    }
+
+    this.token = auth.data.AccessToken;
+    this.user = {
+      id: auth.data.User.Id,
+      name: auth.data.User.Name,
+      isAdmin: auth.data.User.Policy.IsAdministrator,
+      PrimaryImageTag: auth.data.User.PrimaryImageTag,
+    };
+
+    this.updateHeader();
+    this.saveToLocalStorage();
+
+    return logAndReturn("userLogin", { success: true });
+  }
+
+  async targetUserTokenLogin(token: string): Promise<Result<undefined>> {
+    this.targetUserToken = token;
+    this.updateHeader(this.targetUserToken);
+
+    const auth = (await this.getData(
+      "Users/Me",
+    )) as Result<JellyfinResponse_UsersMe>;
+
+    if (!auth.success) {
+      this.targetUserToken = undefined; // revert token
+      this.updateHeader(); // revert header
+      return logAndReturn("tokenLogin", auth);
+    }
+
+    this.targetUser = {
+      id: auth.data.Id,
+      name: auth.data.Name,
+      isAdmin: auth.data.Policy.IsAdministrator,
+      PrimaryImageTag: auth.data.PrimaryImageTag,
+    };
+
+    this.updateHeader(); // revert header to default token (admin user token)
+    this.saveToLocalStorage();
+
+    return logAndReturn("tokenLogin", { success: true });
+  }
   async tokenLogin(token: string): Promise<Result<undefined>> {
     const tmpToken = this.token;
     this.token = token; // temporary change token
@@ -243,6 +308,7 @@ class Jellyfin {
       JSON.stringify({
         token: this.token,
         url: this.baseurl,
+        targetUserToken: this.targetUserToken,
       }),
     );
     return logAndReturn("save", { success: true });
@@ -256,11 +322,13 @@ class Jellyfin {
         reason: "No session stored",
       });
     }
-    const { token, url } = JSON.parse(storedData);
+    const { token, url, targetUserToken } = JSON.parse(storedData);
     const connection = await this.connectToURL(url);
     if (!connection.success) {
       return logAndReturn("load", connection);
     }
+    await this.tokenLogin(token);
+    await this.targetUserTokenLogin(targetUserToken);
     return logAndReturn("load", await this.tokenLogin(token));
   }
 
@@ -313,7 +381,7 @@ class Jellyfin {
     modifiers.conditions.push(
       `DateCreated >= '${startSql}'`,
       `DateCreated < '${endExclusiveSql}'`,
-      `UserId = '${this.user?.id}'`,
+      `UserId = '${this.userId}'`,
       `ItemType='Audio'`,
       // `PlayDuration > 0`, actually, we want to be able to tell how many tracks were completely skipped, including within one second
     );

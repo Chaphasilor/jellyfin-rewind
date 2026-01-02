@@ -1,4 +1,17 @@
+import { type Writable } from "svelte/store";
 import type { Result } from "$lib/types.ts";
+
+export async function getCurrentWritableValue<T>(
+  writable: Writable<T>,
+): Promise<T | undefined> {
+  return await new Promise<T | undefined>((
+    resolve,
+  ) =>
+    writable.subscribe((value: T) => {
+      resolve(value);
+    })
+  );
+}
 
 export function stringToUrl(url: string): Result<URL> {
   let success = true;

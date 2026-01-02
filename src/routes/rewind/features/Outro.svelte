@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport, year } from "$lib/globals";
+  import { rewindReport, year } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -20,11 +20,11 @@
 
   function download() {
     const filename =
-      `jellyfin-rewind-report-${$lightRewindReport.jellyfinRewindReport.year}_for-${
+      `jellyfin-rewind-report-${$rewindReport.jellyfinRewindReport.year}_for-${
         jellyfin.user?.name ?? ``
       }_${new Date().toISOString().slice(0, 10)}.json`;
     const data = new Blob([JSON.stringify(
-      $lightRewindReport.jellyfinRewindReport,
+      $rewindReport.jellyfinRewindReport,
     )], {
       type: "text/json",
     });
@@ -130,8 +130,7 @@
         href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
         target="_blank"
         on:click|stopPropagation={() => {}}
-      >GitHub</a>!<br />Feel free to leave suggestions or report bugs
-      :)
+      >GitHub</a>!<br />Feel free to leave suggestions or report bugs :)
     </p>
     <p>
       See you next year!<br>

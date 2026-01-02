@@ -87,8 +87,7 @@
       {:else}
         <!-- svelte-ignore a11y_missing_attribute -->
         <a
-          href=""
-          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0"
+          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0 opacity-50 cursor-not-allowed"
         >Open Plugins Page!</a>
         <p class="font-medium mb-6">
           You're not logged in with an administrator account, but you need to be
@@ -117,8 +116,7 @@
         >Open Settings</a>
       {:else}
         <a
-          href=""
-          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0"
+          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0 opacity-50 cursor-not-allowed"
         >Open Settings!</a>
         <p class="font-medium mb-6">
           You're not logged in with an administrator account, but you need to be
