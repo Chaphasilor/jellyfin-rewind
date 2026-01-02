@@ -115,7 +115,8 @@ class Jellyfin {
             return {
               success: false,
               reason:
-                `Server didnt respond with code 200 but instead with ${response.status}: ${response.statusText}`,
+                `Server didn't respond with code 200 but instead with ${response.status}: ${await response
+                  .text()}`,
             };
           }
           return {

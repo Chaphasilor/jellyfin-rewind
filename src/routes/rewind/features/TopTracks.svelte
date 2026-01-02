@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -16,9 +16,9 @@
 
   // plays a random track from the top 5 tracks (excluding the top track)
   function playTopTracks() {
-    const topTracks = $lightRewindReport.jellyfinRewindReport.tracks?.[
+    const topTracks = $rewindReport.jellyfinRewindReport.tracks?.[
       rankingMetric
-    ]?.slice(1, 5); // first track excluded
+    ][informationSource]?.slice(1, 5); // first track excluded
     const randomTrackId = Math.floor(Math.random() * topTracks.length);
     const randomTrack = topTracks[randomTrackId];
     showPlaying(`#top-tracks-visualizer`, randomTrackId + 1, 5);
@@ -36,9 +36,9 @@
   onMount(() => {
     console.log(`topTracksMedia`);
 
-    const topTracks = $lightRewindReport.jellyfinRewindReport.tracks?.[
+    const topTracks = $rewindReport.jellyfinRewindReport.tracks?.[
       rankingMetric
-    ]?.slice(0, 5);
+    ][informationSource]?.slice(0, 5);
 
     topTracks.forEach((track, index) => {
       const trackPrimaryImage = document.querySelector(
@@ -60,7 +60,8 @@
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Tracks<br />of the year</h2>
   <ol id="top-tracks-main-feature" class="flex flex-col gap-2 p-6">
-    {#each       $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]
+    {#each       $rewindReport.jellyfinRewindReport.tracks
+        ?.[rankingMetric][informationSource]
         ?.slice(0, 5) as
       track,
       index
@@ -147,10 +148,11 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.tracks?.[rankingMetric]?.slice(
-      5,
-      20,
-    ) as
+  {#each     $rewindReport.jellyfinRewindReport.tracks
+      ?.[rankingMetric][informationSource]?.slice(
+        5,
+        20,
+      ) as
     track,
     index
     (track.id)

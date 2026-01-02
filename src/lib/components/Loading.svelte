@@ -1,13 +1,8 @@
 <script lang="ts">
-  import processing from "$lib/jellyfin/queries/local/processing";
-  import JellyfinRewindLogo from "./JellyfinRewindLogo.svelte";
-
   export let title: string;
   export let detail: string = "";
   export let max: number;
   export let cur: number;
-
-  processing();
 </script>
 
 <div>

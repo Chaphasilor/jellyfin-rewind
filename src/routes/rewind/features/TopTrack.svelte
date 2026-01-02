@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -19,8 +19,8 @@
   let topTrackPrimaryImage: HTMLImageElement;
 
   function playTopTrack() {
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
-      .tracks?.[rankingMetric]?.[0];
+    const topTrackByDuration = $rewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric][informationSource]?.[0];
     console.log(`topTrackByDuration:`, topTrackByDuration);
     fadeToNextTrack(topTrackByDuration);
   }
@@ -32,8 +32,8 @@
 
   onMount(() => {
     console.log(`img:`, topTrackPrimaryImage);
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
-      .tracks?.[rankingMetric]?.[0];
+    const topTrackByDuration = $rewindReport.jellyfinRewindReport
+      .tracks?.[rankingMetric][informationSource]?.[0];
     console.log(`topTrackByDuration:`, topTrackByDuration);
     loadImage([topTrackPrimaryImage], topTrackByDuration.image, `track`);
   });
@@ -41,7 +41,7 @@
 
 <div class="text-center text-white">
   <h2 class="text-2xl mt-5">
-    Your Top Track<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
+    Your Top Track<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
   <div class="flex mt-10 flex-col">
     <img
@@ -53,9 +53,9 @@
       <div class="-rotate-6 -ml-10 mt-10 text-4xl font-semibold">
         <div class="">
           {
-            $lightRewindReport.jellyfinRewindReport.tracks?.[
+            $rewindReport.jellyfinRewindReport.tracks?.[
               rankingMetric
-            ]?.[0].artistsBaseInfo.reduce(
+            ][informationSource]?.[0].artistsBaseInfo.reduce(
               (acc, cur, index) =>
                 index > 0 ? `${acc} & ${cur.name}` : cur.name,
               ``,
@@ -64,8 +64,8 @@
         </div>
         <div class="mt-8 ml-10">
           {
-            $lightRewindReport.jellyfinRewindReport.tracks
-              ?.[rankingMetric]?.[0]
+            $rewindReport.jellyfinRewindReport.tracks
+              ?.[rankingMetric][informationSource]?.[0]
               ?.name
           }
         </div>
@@ -78,8 +78,8 @@
     <div>
       Streamed <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.tracks
-            ?.[rankingMetric]?.[0]
+          $rewindReport.jellyfinRewindReport.tracks
+            ?.[rankingMetric][informationSource]?.[0]
             ?.playCount[informationSource],
         )
       }</span> times.
@@ -87,9 +87,10 @@
     <div>
       Listened for <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.tracks?.[
+          $rewindReport.jellyfinRewindReport.tracks?.[
             rankingMetric
-          ]?.[0]?.totalPlayDuration[informationSource]?.toFixed(0),
+          ][informationSource]?.[0]
+            ?.totalPlayDuration[informationSource]?.toFixed(0),
         )
       }</span> minutes.
     </div>

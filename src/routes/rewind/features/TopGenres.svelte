@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -24,8 +24,8 @@
 
   // plays a random track from the top 5 genres
   async function playTopGenres() {
-    const topGenres = $lightRewindReport.jellyfinRewindReport.genres
-      ?.[rankingMetric]?.slice(0, 5); // first genre excluded
+    const topGenres = $rewindReport.jellyfinRewindReport.genres
+      ?.[rankingMetric][informationSource]?.slice(0, 5); // first genre excluded
     const randomGenreId = Math.floor(Math.random() * topGenres.length);
     const randomGenre = topGenres[randomGenreId];
     console.log(`randomGenre:`, randomGenre);
@@ -54,7 +54,8 @@
     id="top-genres-main-feature"
     class="flex flex-col gap-2 p-6 text-black"
   >
-    {#each       $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]
+    {#each       $rewindReport.jellyfinRewindReport.genres
+        ?.[rankingMetric][informationSource]
         ?.slice(0, 8) as
       genre,
       index
@@ -146,10 +147,11 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-48"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.genres?.[rankingMetric]?.slice(
-      8,
-      20,
-    ) as
+  {#each     $rewindReport.jellyfinRewindReport.genres
+      ?.[rankingMetric][informationSource]?.slice(
+        8,
+        20,
+      ) as
     genre,
     index
     (genre.id)

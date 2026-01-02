@@ -12,7 +12,7 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
     try {
       const playbackReportItem = playbackReportJSON[item.Id];
       const adjustedPlaybackReportPlayCount = playbackReportItem?.Plays?.filter(
-        (x) => Math.floor(Number(x.duration)) > 0
+        (x) => Math.floor(Number(x.duration)) > 0,
       )?.length;
 
       if (!playbackReportItem) {
@@ -34,11 +34,10 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
             name: item.AlbumArtists?.[0]?.Name || `Unknown Artist`,
           },
         },
-        genreBaseInfo:
-          item.GenreItems?.map((genre) => ({
-            id: genre.Id,
-            name: genre.Name || `Unknown Genre`,
-          })) || [],
+        genreBaseInfo: item.GenreItems?.map((genre) => ({
+          id: genre.Id,
+          name: genre.Name || `Unknown Genre`,
+        })) || [],
         image: new PrimaryImage({
           parentItemId: item.ImageTags?.Primary ? item.Id : item.AlbumId,
           primaryTag: item.ImageTags?.Primary
@@ -79,31 +78,29 @@ export function generateTopTrackInfo(itemInfo, playbackReportJSON) {
           ? new Date(item.UserData.LastPlayedDate)
           : new Date(0),
         totalPlayDuration: {
-          jellyfin:
-            !isNaN(
-                Number(item.UserData?.PlayCount) *
-                  (Number(item.RunTimeTicks) / (10000000 * 60)),
-              )
-              ? Number(item.UserData?.PlayCount) *
-                (Number(item.RunTimeTicks) / (10000000 * 60))
-              : 0, // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
+          jellyfin: !isNaN(
+              Number(item.UserData?.PlayCount) *
+                (Number(item.RunTimeTicks) / (10000000 * 60)),
+            )
+            ? Number(item.UserData?.PlayCount) *
+              (Number(item.RunTimeTicks) / (10000000 * 60))
+            : 0, // convert jellyfin's runtime ticks to minutes (https://learn.microsoft.com/en-us/dotnet/api/system.datetime.ticks?view=net-7.0)
           playbackReport: !isNaN(Number(playbackReportItem?.TotalDuration) / 60)
             ? (Number(playbackReportItem?.TotalDuration) / 60 || 0)
             : 0, // convert to minutes
-          average:
-            !isNaN(
-                Math.ceil(
-                  ((Number(item.UserData?.PlayCount) *
-                    (Number(item.RunTimeTicks) / (10000000 * 60))) +
-                    (Number(playbackReportItem?.TotalDuration) / 60 || 0)) / 2,
-                ),
-              )
-              ? Math.ceil(
+          average: !isNaN(
+              Math.ceil(
                 ((Number(item.UserData?.PlayCount) *
                   (Number(item.RunTimeTicks) / (10000000 * 60))) +
                   (Number(playbackReportItem?.TotalDuration) / 60 || 0)) / 2,
-              )
-              : 0,
+              ),
+            )
+            ? Math.ceil(
+              ((Number(item.UserData?.PlayCount) *
+                (Number(item.RunTimeTicks) / (10000000 * 60))) +
+                (Number(playbackReportItem?.TotalDuration) / 60 || 0)) / 2,
+            )
+            : 0,
         },
         isFavorite: item.UserData?.IsFavorite,
         lastPlay: playbackReportItem?.LastPlay,
@@ -579,11 +576,10 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
   totalStats.totalMusicDays = totalStats.totalMusicDays.size;
 
   totalStats.minutesPerDay = {
-    mean:
-      Object.values(totalStats.minutesPerDay).reduce(
-        (acc, cur) => acc + cur,
-        0,
-      ) / Object.values(totalStats.minutesPerDay).length,
+    mean: Object.values(totalStats.minutesPerDay).reduce(
+      (acc, cur) => acc + cur,
+      0,
+    ) / Object.values(totalStats.minutesPerDay).length,
     median: Object.values(totalStats.minutesPerDay).length % 2 === 0
       ? (Object.values(
         totalStats.minutesPerDay,
@@ -617,9 +613,8 @@ export function generateTotalStats(topTrackInfo, enhancedPlaybackReport) {
         .lengths[sortedTrackLengths[Math.floor(sortedTrackLengths.length / 2)]];
   totalStats.libraryStats.trackLength.min =
     totalStats.libraryStats.trackLength.lengths[sortedTrackLengths[0]];
-  totalStats.libraryStats.trackLength.max =
-    totalStats.libraryStats.trackLength
-      .lengths[sortedTrackLengths[sortedTrackLengths.length - 1]];
+  totalStats.libraryStats.trackLength.max = totalStats.libraryStats.trackLength
+    .lengths[sortedTrackLengths[sortedTrackLengths.length - 1]];
 
   delete totalStats.libraryStats.trackLength.lengths;
 

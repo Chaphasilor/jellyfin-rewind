@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -27,7 +27,7 @@
       >{
         showAsNumber(
           (
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.totalRuntime /
             60.0 /
             60.0
@@ -39,7 +39,7 @@
       That's <span class="font-semibold text-3xl text-sky-500 font-quicksand">{
         showAsNumber(
           (
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.totalRuntime /
             60.0 /
             60.0 /
@@ -56,7 +56,7 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.tracks?.favorite,
           )
         }</span> favorite tracks.</span>
@@ -66,7 +66,7 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.tracks?.total,
           )
         }</span> unique tracks.</span>
@@ -76,7 +76,7 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.albums?.total,
           )
         }</span> albums.</span>
@@ -86,7 +86,7 @@
           class="text-3xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.artists?.total,
           )
         }</span> artists.</span>
@@ -101,7 +101,7 @@
           class="text-2xl text-sky-500 font-quicksand"
         >{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.trackLength?.mean
               .toFixed(0),
           )
@@ -111,7 +111,7 @@
       <span class="font-semibold -mt-1"
       >(Median: <span class="text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.trackLength?.median
               .toFixed(0),
           )
@@ -121,7 +121,7 @@
       <span class="font-semibold text-xl"
       >Shortest: <span class="text-2xl text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.trackLength?.min
               .toFixed(0),
           )
@@ -131,7 +131,7 @@
       <span class="font-semibold text-xl"
       >Longest: <span class="text-2xl text-sky-500 font-quicksand">{
           showAsNumber(
-            $lightRewindReport.jellyfinRewindReport?.libraryStats
+            $rewindReport.jellyfinRewindReport?.libraryStats
               ?.trackLength?.max
               .toFixed(0),
           )

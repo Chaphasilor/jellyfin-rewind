@@ -1,12 +1,12 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import { onMount } from "svelte";
 
   onMount(() => {
-    if (!$lightRewindReport) {
+    if (!$rewindReport) {
       if (jellyfin.baseurl && jellyfin.user) {
         goto("/loading");
       } else {

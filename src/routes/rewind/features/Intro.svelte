@@ -1,9 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import {
-    isAccuracyDisclaimerOpen,
-    lightRewindReport,
-  } from "$lib/globals";
+  import { isAccuracyDisclaimerOpen, rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -33,9 +30,7 @@
   <h2
     class="text-[1.65rem] leading-8 text-center mt-16 font-semibold text-gray-200"
   >
-    Welcome to<br />Jellyfin Rewind {
-      $lightRewindReport.jellyfinRewindReport?.year
-    }!
+    Welcome to<br />Jellyfin Rewind {$rewindReport?.jellyfinRewindReport?.year}!
   </h2>
 
   <div

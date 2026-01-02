@@ -1,12 +1,14 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport, year } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { formatArtists, showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
   import { loadImage } from "$lib/utility/jellyfin-helper";
+  import { goto } from "$app/navigation";
+  import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
 
   const {
     informationSource,
@@ -15,10 +17,16 @@
     fadeToNextTrack,
   }: FeatureProps = $props();
 
+  // svelte-ignore non_reactive_update
+  let unavailableOverlay: Unavailable;
+
   // plays a random track from the 5 most skipped tracks
   function playMostSkippedTracks() {
-    const mostSkippedTracks = $lightRewindReport.jellyfinRewindReport.tracks
-      ?.[`mostSkipped`]?.slice(0, 5); // first track excluded
+    if (!extraFeatures().mostSkippedTracks) {
+      return;
+    }
+    const mostSkippedTracks = $rewindReport.jellyfinRewindReport.tracks
+      ?.mostSkipped[informationSource]?.slice(0, 5); // first track excluded
     const randomTrackId = Math.floor(
       Math.random() * mostSkippedTracks.length,
     );
@@ -32,15 +40,13 @@
   export function onEnter() {
     playMostSkippedTracks();
   }
-  export function onExit() {
-  }
+  export function onExit() {}
 
   onMount(() => {
     console.log(`mostSkippedTracksMedia`);
 
-    const topTracks = $lightRewindReport.jellyfinRewindReport.tracks?.[
-      `mostSkipped`
-    ]?.slice(0, 5);
+    const topTracks = $rewindReport.jellyfinRewindReport.tracks
+      ?.mostSkipped[informationSource]?.slice(0, 5);
 
     topTracks.forEach((track, index) => {
       const trackPrimaryImage = document.querySelector(
@@ -63,8 +69,8 @@
   <h2 class="text-2xl mt-5">Sick of it:<br />Tracks you skipped the most</h2>
   {#if extraFeatures().mostSkippedTracks}
     <ol id="most-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
-      {#each       $lightRewindReport.jellyfinRewindReport.tracks?.[`mostSkipped`]
-        ?.slice(0, 5) as
+      {#each       $rewindReport.jellyfinRewindReport.tracks
+        ?.mostSkipped[informationSource]?.slice(0, 5) as
         track,
         index
         (track.id)
@@ -167,7 +173,11 @@
       {/each}
     </ol>
   {:else}
-    <Unavailable />
+    <Unavailable bind:this={unavailableOverlay}>
+      <UnavailableReasonPlaybackReporting
+        closeModal={() => unavailableOverlay.closeModal()}
+      />
+    </Unavailable>
   {/if}
 </div>
 <!-- continue as simple list -->
@@ -175,10 +185,8 @@
   <ol
     class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
   >
-    {#each     $lightRewindReport.jellyfinRewindReport.tracks?.[`mostSkipped`]?.slice(
-      5,
-      20,
-    ) as
+    {#each     $rewindReport.jellyfinRewindReport.tracks
+      ?.mostSkipped[informationSource]?.slice(5, 20) as
       track,
       index
       (track.id)

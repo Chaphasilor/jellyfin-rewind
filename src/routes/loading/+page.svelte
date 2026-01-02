@@ -1,34 +1,44 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import Loading from "$lib/components/Loading.svelte";
   import { goto } from "$app/navigation";
   import {
     downloadingProgress,
     generatingProgress,
-    lightRewindReport,
     processingProgress,
     processingResult,
+    rewindReport,
   } from "$lib/globals";
   import processing from "$lib/jellyfin/queries/local/processing";
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
+  import jellyfin from "$lib/jellyfin";
 
   let error: string | undefined = $state(undefined);
 
-  processing().then(async (result) => {
-    if (result.success) {
-      processingResult.set(result.data);
-      const conversionResult = await processingResultToRewindReport(
-        $processingResult,
-      );
-      if (conversionResult.success) {
-        lightRewindReport.set(conversionResult.data);
-        console.log(`$lightRewindReport:`, $lightRewindReport);
-      }
-      goto("/launch");
-    } else {
-      console.error("Failed to process", result.reason);
-      error = result.reason
+  onMount(() => {
+    console.log(`loading jellyfin:`, jellyfin);
+    if (!jellyfin.baseurl || !jellyfin.user || !jellyfin.user?.id) {
+      goto("/welcome");
+      return;
     }
+    console.log(`processing`);
+    processing().then(async (result) => {
+      if (result.success) {
+        processingResult.set(result.data);
+        const conversionResult = await processingResultToRewindReport(
+          $processingResult,
+        );
+        if (conversionResult.success) {
+          rewindReport.set(conversionResult.data);
+          console.log(`$rewindReport:`, $rewindReport);
+        }
+        goto("/launch");
+      } else {
+        console.error("Failed to process", result.reason);
+        error = result.reason;
+      }
+    });
   });
 </script>
 

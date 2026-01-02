@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -18,8 +18,8 @@
   }: FeatureProps = $props();
 
   async function playTopArtist() {
-    const topArtistByDuration = $lightRewindReport.jellyfinRewindReport
-      .artists?.[rankingMetric]?.[0];
+    const topArtistByDuration = $rewindReport.jellyfinRewindReport
+      .artists?.[rankingMetric][informationSource]?.[0];
     console.log(`topArtistByDuration:`, topArtistByDuration);
 
     let artistsTracks = await loadTracksForGroup(
@@ -44,8 +44,8 @@
       `#top-artist-image`,
     );
     console.log(`img:`, topArtistPrimaryImage);
-    const topTrackByDuration = $lightRewindReport.jellyfinRewindReport
-      .artists?.[rankingMetric]?.[0];
+    const topTrackByDuration = $rewindReport.jellyfinRewindReport
+      .artists?.[rankingMetric][informationSource]?.[0];
     console.log(`topTrackByDuration:`, topTrackByDuration);
     loadImage(
       [topArtistPrimaryImage],
@@ -57,7 +57,7 @@
 
 <div class="text-center text-white">
   <h2 class="text-2xl mt-5">
-    Your Top Artist<br />of {$lightRewindReport.jellyfinRewindReport?.year}:
+    Your Top Artist<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
   <div class="flex mt-10 flex-col">
     <img
@@ -68,8 +68,8 @@
       <div class="-rotate-6 mt-16 text-5xl font-semibold">
         <div class="">
           {
-            $lightRewindReport.jellyfinRewindReport.artists
-              ?.[rankingMetric]?.[0]
+            $rewindReport.jellyfinRewindReport.artists
+              ?.[rankingMetric][informationSource]?.[0]
               ?.name
           }
         </div>
@@ -82,26 +82,28 @@
     <div>
       Streamed <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.artists?.[
+          $rewindReport.jellyfinRewindReport.artists?.[
             rankingMetric
-          ]?.[0]?.playCount?.[informationSource],
+          ][informationSource]?.[0]?.playCount?.[informationSource],
         )
       }</span> times.
     </div>
     <div>
       Listened to <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.artists?.[
+          $rewindReport.jellyfinRewindReport.artists?.[
             rankingMetric
-          ]?.[0]?.uniquePlayedTracks?.[informationSource],
+          ][informationSource]?.[0]?.uniquePlayedTracks
+            ?.[informationSource],
         )
       }</span>
       unique tracks <br />for
       <span class="font-semibold">{
         showAsNumber(
-          $lightRewindReport.jellyfinRewindReport.artists?.[
+          $rewindReport.jellyfinRewindReport.artists?.[
             rankingMetric
-          ]?.[0]?.totalPlayDuration[informationSource].toFixed(0),
+          ][informationSource]?.[0]
+            ?.totalPlayDuration[informationSource].toFixed(0),
         )
       }</span> minutes.
     </div>

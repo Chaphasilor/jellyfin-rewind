@@ -93,8 +93,10 @@ export default class Cache<D> {
       return this.entries.sort(
         (a, b) =>
           (ascending ? 1 : -1) *
-          (a[1].counters.counters[source][counter] -
-            b[1].counters.counters[source][counter]),
+          //@ts-ignore: TS can't extend enums
+          (a[1].counters[source][counter] -
+            //@ts-ignore: TS can't extend enums
+            b[1].counters[source][counter]),
       );
     }
     return this.entries.sort((a, b) => {
@@ -102,8 +104,10 @@ export default class Cache<D> {
       let bCount = 0;
       (counter as (NumericPlaybackCounterKeys)[]).forEach(
         (c) => {
-          aCount += a[1].counters.counters[source][c];
-          bCount += b[1].counters.counters[source][c];
+          //@ts-ignore: TS can't extend enums
+          aCount += a[1].counters[source][c];
+          //@ts-ignore: TS can't extend enums
+          bCount += b[1].counters[source][c];
         },
       );
       return (ascending ? 1 : -1) * (aCount - bCount);

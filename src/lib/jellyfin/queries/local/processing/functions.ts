@@ -168,6 +168,7 @@ export function increaseTimesForTrack(
 }
 
 export async function getMusicLibrary(): Promise<Result<any[]>> {
+  console.log(`music libs jellyfin:`, jellyfin);
   const allLibraries = await jellyfin.getData(
     `UserViews?userId=${jellyfin.user?.id}`,
   ) as Result<{
@@ -396,11 +397,24 @@ export function increaseCachesForPlaybackReportingTrack(
 
 export function increaseCachesForJellyfinTrack(
   track: JellyfinTrack,
+  processedTrack: Track,
   delta: PlaybackCounterDelta,
 ) {
   const source = CounterSources.JELLYFIN;
   // we can't set any of the listen-related caches, since vanilla Jellyfin doesn't provide that data
   tracksCache.count(track.Id, source, delta);
+  processedTrack.albumId
+    ? albumsCache.count(processedTrack.albumId, source, delta)
+    : null;
+  (new Set<string>([...processedTrack.artists, ...processedTrack.albumArtists]))
+    .forEach(
+      (artist) => {
+        artistCache.count(artist, source, delta);
+      },
+    );
+  processedTrack.genres.forEach((genre) => {
+    genresCache.count(genre, source, delta);
+  });
 }
 
 function generateCountsDelta(
@@ -421,7 +435,7 @@ function generateCountsDelta(
     // if it was played this year => all plays from all time included
     // but if it wasn't played this year (only before that) => 0 plays counted
     const jellyfinPlayCount = (item?.UserData?.LastPlayedDate &&
-        new Date(item?.UserData?.LastPlayedDate).getFullYear() !== year)
+        new Date(item?.UserData?.LastPlayedDate).getFullYear() < year)
       ? item?.UserData?.PlayCount ?? 0
       : 0;
     return {
@@ -454,10 +468,11 @@ export function updateCountersForPlaybackReportingTrack(
 
 export function updateCountersForJellyfinTrack(
   track: JellyfinTrack,
+  processedTrack: Track,
 ) {
   const delta = generateCountsDelta(null, track);
   generalCounter.v.applyDelta(CounterSources.JELLYFIN, delta);
-  increaseCachesForJellyfinTrack(track, delta);
+  increaseCachesForJellyfinTrack(track, processedTrack, delta);
   increaseTimesForTrack(CounterSources.JELLYFIN, null, delta);
 }
 

@@ -1,11 +1,13 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport, year } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
+  import { goto } from "$app/navigation";
+  import UnavailableReasonOldReport from "$lib/components/UnavailableReasonOldReport.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
@@ -13,8 +15,7 @@
   // svelte-ignore non_reactive_update
   let unavailableOverlay: Unavailable;
 
-  export function onEnter() {
-  }
+  export function onEnter() {}
   export function onExit() {
     unavailableOverlay?.closeModal();
   }
@@ -28,14 +29,14 @@
 
   <div class="mt-24 w-full px-6 flex flex-col items-center gap-2">
     <div class="font-semibold text-xl">
-      This year, you had <span
+      This year, you listened to <span
         class="font-semibold text-3xl text-sky-500 font-quicksand"
       >{
         extraFeatures().listeningActivityDifference
           ? showAsNumber(
             Math.abs(
-              $lightRewindReport.jellyfinRewindReport?.featureDelta
-                ?.listeningActivityDifference?.totalPlays[
+              $rewindReport.jellyfinRewindReport?.featureDelta
+                ?.listeningActivityDifference?.totalPlaytime[
                   informationSource
                 ] ?? 0,
             ).toFixed(0),
@@ -44,15 +45,15 @@
       }</span>
       {
         !extraFeatures().listeningActivityDifference ||
-            ($lightRewindReport.jellyfinRewindReport?.featureDelta
+            ($rewindReport.jellyfinRewindReport?.featureDelta
                 ?.listeningActivityDifference
-                ?.totalPlays[informationSource] ?? 0) >= 0
+                ?.totalPlaytime[informationSource] ?? 0) >= 0
           ? `more`
           : `less`
-      } streams than in {
-        $lightRewindReport.jellyfinRewindReport
+      } minutes than in {
+        $rewindReport.jellyfinRewindReport
           ?.featureDelta?.year ??
-          $lightRewindReport.jellyfinRewindReport?.year - 1
+          $rewindReport.jellyfinRewindReport?.year - 1
       }.
     </div>
   </div>
@@ -66,7 +67,7 @@
           extraFeatures().listeningActivityDifference
             ? showAsNumber(
               Math.abs(
-                $lightRewindReport.jellyfinRewindReport?.featureDelta
+                $rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays.tracks ??
                   0,
               ),
@@ -75,7 +76,7 @@
         }</span>
         {
           !extraFeatures().listeningActivityDifference ||
-              ($lightRewindReport.jellyfinRewindReport?.featureDelta
+              ($rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays.tracks ??
                   0) >= 0
             ? `more`
@@ -89,7 +90,7 @@
           extraFeatures().listeningActivityDifference
             ? showAsNumber(
               Math.abs(
-                $lightRewindReport.jellyfinRewindReport?.featureDelta
+                $rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays
                   .artists ?? 0,
               ),
@@ -98,7 +99,7 @@
         }</span>
         {
           !extraFeatures().listeningActivityDifference ||
-              ($lightRewindReport.jellyfinRewindReport?.featureDelta
+              ($rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays
                   .artists ?? 0) >= 0
             ? `more`
@@ -112,7 +113,7 @@
           extraFeatures().listeningActivityDifference
             ? showAsNumber(
               Math.abs(
-                $lightRewindReport.jellyfinRewindReport?.featureDelta
+                $rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays.albums ??
                   0,
               ),
@@ -121,7 +122,7 @@
         }</span>
         {
           !extraFeatures().listeningActivityDifference ||
-              ($lightRewindReport.jellyfinRewindReport?.featureDelta
+              ($rewindReport.jellyfinRewindReport?.featureDelta
                   ?.listeningActivityDifference?.uniquePlays.albums ??
                   0) >= 0
             ? `more`
@@ -134,7 +135,7 @@
     <div class="font-semibold text-xl">
       You {
         !extraFeatures().listeningActivityDifference ||
-            ($lightRewindReport.jellyfinRewindReport?.featureDelta
+            ($rewindReport.jellyfinRewindReport?.featureDelta
                 ?.favoriteDifference ?? 0) >= 0
           ? `added`
           : `removed`
@@ -143,7 +144,7 @@
         extraFeatures().listeningActivityDifference
           ? showAsNumber(
             Math.abs(
-              $lightRewindReport.jellyfinRewindReport?.featureDelta
+              $rewindReport.jellyfinRewindReport?.featureDelta
                 ?.favoriteDifference ?? 0,
             ),
           )
@@ -155,7 +156,7 @@
   {#if extraFeatures().listeningActivityDifference}
     <div class="mt-16 w-full px-10">
       <span class="font-semibold text-xl">{
-        ($lightRewindReport.jellyfinRewindReport?.featureDelta
+        ($rewindReport.jellyfinRewindReport?.featureDelta
             ?.listeningActivityDifference?.totalPlays[informationSource] ??
             0) >=
             0
@@ -166,6 +167,10 @@
   {/if}
 
   {#if !extraFeatures().listeningActivityDifference}
-    <Unavailable bind:this={unavailableOverlay} />
+    <Unavailable bind:this={unavailableOverlay}>
+      <UnavailableReasonOldReport
+        closeModal={() => unavailableOverlay.closeModal()}
+      />
+    </Unavailable>
   {/if}
 </div>

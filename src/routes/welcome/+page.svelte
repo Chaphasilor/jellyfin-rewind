@@ -11,7 +11,7 @@
 
   onMount(async () => {
     await jellyfin.load();
-    loggedIn = !!jellyfin.baseurl && !!jellyfin.user;
+    loggedIn = !!jellyfin.baseurl && !!jellyfin.user && !!jellyfin.user?.id;
   });
 </script>
 

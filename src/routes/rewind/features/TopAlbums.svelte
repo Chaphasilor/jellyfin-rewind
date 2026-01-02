@@ -1,6 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import { lightRewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
   import { CounterSources, type FeatureProps } from "$lib/types";
@@ -20,8 +20,8 @@
 
   // plays a random track from the top 5 albums (excluding the top album)
   async function playTopAlbums() {
-    const topAlbums = $lightRewindReport.jellyfinRewindReport.albums
-      ?.[rankingMetric]?.slice(1, 5); // first album excluded
+    const topAlbums = $rewindReport.jellyfinRewindReport.albums
+      ?.[rankingMetric][informationSource]?.slice(1, 5); // first album excluded
     const randomAlbumId = Math.floor(Math.random() * topAlbums.length);
     const randomAlbum = topAlbums[randomAlbumId];
     console.log(`randomAlbum:`, randomAlbum);
@@ -42,8 +42,8 @@
   }
 
   onMount(() => {
-    const topAlbums = $lightRewindReport.jellyfinRewindReport.albums
-      ?.[rankingMetric]?.slice(0, 5);
+    const topAlbums = $rewindReport.jellyfinRewindReport.albums
+      ?.[rankingMetric][informationSource]?.slice(0, 5);
 
     topAlbums.forEach((album, index) => {
       const albumPrimaryImage = document.querySelector(
@@ -65,7 +65,8 @@
 <div class="text-center">
   <h2 class="text-2xl font-medium mt-5">Your Top Albums<br />of the year</h2>
   <ol id="top-albums-main-feature" class="flex flex-col gap-2 p-6">
-    {#each       $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]
+    {#each       $rewindReport.jellyfinRewindReport.albums
+        ?.[rankingMetric][informationSource]
         ?.slice(0, 5) as
       album,
       index
@@ -148,10 +149,11 @@
 <ol
   class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
 >
-  {#each     $lightRewindReport.jellyfinRewindReport.albums?.[rankingMetric]?.slice(
-      5,
-      20,
-    ) as
+  {#each     $rewindReport.jellyfinRewindReport.albums
+      ?.[rankingMetric][informationSource]?.slice(
+        5,
+        20,
+      ) as
     album,
     index
     (album.id)

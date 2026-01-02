@@ -1,6 +1,12 @@
-import type { FullRewindReport, LightRewindReport } from "$lib/types.ts";
+import type {
+  FullRewindReport,
+  LightRewindReport,
+  RewindReport,
+} from "$lib/types.ts";
 
-export function importRewindReport(fileHandle: Blob) {
+export function importRewindReport(
+  fileHandle: Blob,
+): Promise<FullRewindReport | LightRewindReport> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
@@ -17,8 +23,8 @@ export function importRewindReport(fileHandle: Blob) {
 }
 
 export function getFeatureDelta(
-  oldReport: FullRewindReport,
-  newReport: LightRewindReport,
+  oldReport: FullRewindReport | LightRewindReport,
+  newReport: RewindReport,
 ) {
   console.log(`oldReport:`, oldReport);
   console.log(`newReport:`, newReport);
@@ -43,6 +49,24 @@ export function getFeatureDelta(
       oldReport.jellyfinRewindReport.generalStats.totalPlays.playbackReport,
   };
 
+  const totalPlaytime = {
+    average:
+      newReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .average -
+      oldReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .average,
+    jellyfin:
+      newReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .jellyfin -
+      oldReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .jellyfin,
+    playbackReport:
+      newReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .playbackReport -
+      oldReport.jellyfinRewindReport.generalStats.totalPlaybackDurationMinutes
+        .playbackReport,
+  };
+
   // favorites difference
   const favoriteDifference =
     (newReport.jellyfinRewindReport?.libraryStats?.tracks?.favorite ?? 0) -
@@ -51,6 +75,7 @@ export function getFeatureDelta(
   const listeningActivityDifference = {
     uniquePlays: uniquePlays,
     totalPlays: totalPlays,
+    totalPlaytime: totalPlaytime,
   };
 
   return {

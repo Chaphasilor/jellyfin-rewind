@@ -4,19 +4,20 @@
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import {
-    lightRewindReport,
     playbackReportingInspectionResult,
     processingResult,
+    rewindReport,
   } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import processing from "$lib/jellyfin/queries/local/processing";
   import { PlaybackReportingIssueAction } from "$lib/types";
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
+  import { onMount } from "svelte";
 
-  let serverUrl: string = "";
-  let userName: string = "";
-  let userPassword: string = "";
+  let serverUrl: string = $state("");
+  let userName: string = $state("");
+  let userPassword: string = $state("");
   let connectionHelpOpen = $state(false);
 
   async function proceed() {
@@ -34,6 +35,10 @@
       goto("/importLastYearsReport");
     }
   }
+
+  //TODO offer logging into an admin account to get playback reporting data somehow?
+  // maybe with a token, second login, or just by prompting the user during login?
+  // but then again, it should be possible for people to use a regular account for listening, log in with that account, and still get the playback reporting data. so a secondary admin login is needed for that
 
   // only when devin' attempt an auto login
   if (dev) {
@@ -108,6 +113,14 @@
       proceed();
     });
   }
+
+  onMount(async () => {
+    await jellyfin.load();
+    if (jellyfin.baseurl) {
+      serverUrl = jellyfin.baseurl;
+      serverValid = true;
+    }
+  });
 </script>
 
 <div class="max-w-xl mx-auto p-6 text-center flex flex-col items-center gap-2">

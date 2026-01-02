@@ -1,11 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { lightRewindReport, processingResult } from "$lib/globals";
-  import type { FeatureEvents, FeatureProps } from "$lib/types";
+  import { processingResult, rewindReport } from "$lib/globals";
+  import {
+    type FeatureEvents,
+    type FeatureProps,
+    InformationSource,
+  } from "$lib/types";
   import { processingResultToRewindReport } from "$lib/utility/convert";
   import { logAndReturn } from "$lib/utility/logging";
   import { type Component, onMount } from "svelte";
-  import Monthly from "./features/Monthly.svelte";
   import TotalPlaytime from "./features/TotalPlaytime.svelte";
   import TopTrack from "./features/TopTrack.svelte";
   import { on } from "svelte/events";
@@ -32,38 +35,41 @@
   import type { Features } from "tailwindcss";
   import type { Point } from "chart.js";
   import { page } from "$app/state";
+  import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
+  import { skipped } from "$lib/jellyfin/queries/local/processing/values";
 
-  if (!$lightRewindReport?.jellyfinRewindReport) {
+  if (!$rewindReport?.jellyfinRewindReport) {
+    console.warn(`No $rewindReport found, redirecting to /welcome...`);
     goto("/welcome");
   }
 
-  let optimalDataSource: `jellyfin` | `playbackReport` | `average` =
-    $derived.by(() => {
-      if ($lightRewindReport.jellyfinRewindReport.playbackReportAvailable) {
-        if (
-          !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing
-        ) {
-          if ($lightRewindReport.jellyfinRewindReport.playbackReportComplete) {
-            return `playbackReport`;
-          } else {
-            return `average`;
-          }
+  let optimalDataSource: InformationSource = $derived.by(() => {
+    if ($rewindReport?.jellyfinRewindReport?.playbackReportAvailable) {
+      if (!$rewindReport?.jellyfinRewindReport?.playbackReportDataMissing) {
+        if ($rewindReport?.jellyfinRewindReport?.playbackReportComplete) {
+          return InformationSource.PLAYBACK_REPORTING;
         } else {
-          return `jellyfin`;
+          return InformationSource.AVERAGE;
         }
       } else {
-        return `jellyfin`;
+        return InformationSource.JELLYFIN;
       }
-    });
+    } else {
+      return InformationSource.JELLYFIN;
+    }
+  });
+  // svelte-ignore state_referenced_locally
+  console.log(`optimalDataSource:`, optimalDataSource);
 
   let informationSource: FeatureProps["informationSource"] =
     // svelte-ignore state_referenced_locally
     $state(optimalDataSource);
+  console.log(`informationSource:`, informationSource);
 
   let rankingMetric: FeatureProps["rankingMetric"] = $state("playCount");
 
   let extraFeatures: FeatureProps["extraFeatures"] = $derived(() => {
-    if (!$lightRewindReport?.jellyfinRewindReport) {
+    if (!$rewindReport?.jellyfinRewindReport) {
       return {
         fullReport: false,
         totalPlaytimeGraph: false,
@@ -76,31 +82,37 @@
     }
     return {
       //@ts-ignore: compatibility with the full report
-      fullReport: $lightRewindReport.jellyfinRewindReport.type === `full`,
+      fullReport: $rewindReport?.jellyfinRewindReport?.type === `full`,
       totalPlaytimeGraph:
-        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+        $rewindReport?.jellyfinRewindReport?.playbackReportAvailable &&
+        !$rewindReport?.jellyfinRewindReport?.playbackReportDataMissing,
       leastSkippedTracks:
-        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+        $rewindReport?.jellyfinRewindReport?.playbackReportAvailable &&
+        !$rewindReport?.jellyfinRewindReport?.playbackReportDataMissing,
       mostSkippedTracks:
-        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
+        $rewindReport?.jellyfinRewindReport?.playbackReportAvailable &&
+        !$rewindReport?.jellyfinRewindReport?.playbackReportDataMissing,
       totalMusicDays:
-        $lightRewindReport.jellyfinRewindReport.playbackReportAvailable &&
-        !$lightRewindReport.jellyfinRewindReport.playbackReportDataMissing,
-      mostSuccessivePlays:
-        !!$lightRewindReport.jellyfinRewindReport.generalStats
-          .mostSuccessivePlays,
-      listeningActivityDifference:
-        !!$lightRewindReport.jellyfinRewindReport.featureDelta,
+        $rewindReport?.jellyfinRewindReport?.playbackReportAvailable &&
+        !$rewindReport?.jellyfinRewindReport?.playbackReportDataMissing,
+      mostSuccessivePlays: !!$rewindReport?.jellyfinRewindReport
+        ?.generalStats.mostSuccessivePlays,
+      listeningActivityDifference: !!$rewindReport?.jellyfinRewindReport
+        ?.featureDelta,
     };
   });
 
   let currentFeatureIndex = $state(0);
-  let features = () => [
+  let features: () => {
+    component: Component<FeatureProps, FeatureEvents>;
+    skip?: boolean;
+  }[] = () => [
     {
       component: Intro,
+    },
+    {
+      component: JellyfinSourceDisclaimer,
+      skip: informationSource !== InformationSource.JELLYFIN,
     },
     {
       component: TotalPlaytime,
@@ -133,7 +145,7 @@
       component: FeatureDelta,
     },
     {
-      skip: !$lightRewindReport.jellyfinRewindReport.tracks
+      skip: !$rewindReport?.jellyfinRewindReport?.tracks
         ?.forgottenFavoriteTracks[informationSource]?.length,
       component: ForgottenFavorites,
     },
@@ -141,8 +153,9 @@
       component: TopGenres,
     },
     {
-      skip: !$lightRewindReport.jellyfinRewindReport.tracks?.leastSkipped
-        ?.length,
+      skip: !$rewindReport?.jellyfinRewindReport?.tracks?.leastSkipped[
+        informationSource
+      ]?.length,
       component: LeastSkipped,
     },
     {
@@ -152,9 +165,6 @@
     {
       component: Summary,
     },
-    // {
-    //   component: Monthly,
-    // },
     {
       component: Outro,
     },
@@ -230,7 +240,9 @@
   let featureInstances: Record<number, FeatureEvents> = {};
 
   function scrollToActive() {
-    const element = document.getElementById(`feature-${currentFeatureIndex}`);
+    const element = document.getElementById(
+      `feature-${currentFeatureIndex}`,
+    );
     element?.scrollIntoView({
       behavior: "smooth",
       inline: "center",
@@ -275,10 +287,12 @@
 
   // fade between two tracks over 1000ms
   async function fadeToNextTrack(trackInfo: { id: any }) {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -347,10 +361,12 @@
 
   // fade both tracks out over 1000ms
   function pausePlayback() {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -389,7 +405,10 @@
           player2.pause();
           //!!! don't reset currentTime, otherwise the track will start from the beginning when resuming playback
         } else {
-          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+          setTimeout(
+            doFade(stepIndex + 1),
+            fadeDuration / fadeSteps.length,
+          );
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -406,10 +425,12 @@
 
   // uses the tag data to determine the previously active player and resumes playback by fading it in
   function resumePlayback() {
-    const player1: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-1`);
-    const player2: HTMLAudioElement | null =
-      document.querySelector(`#audio-player-2`);
+    const player1: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-1`,
+    );
+    const player2: HTMLAudioElement | null = document.querySelector(
+      `#audio-player-2`,
+    );
     console.log(`player1:`, player1);
     console.log(`player2:`, player2);
 
@@ -438,7 +459,10 @@
         activePlayer.volume = fadeSteps[stepIndex];
 
         if (stepIndex !== fadeSteps.length - 1) {
-          setTimeout(doFade(stepIndex + 1), fadeDuration / fadeSteps.length);
+          setTimeout(
+            doFade(stepIndex + 1),
+            fadeDuration / fadeSteps.length,
+          );
         }
       } catch (err) {
         console.error(`Error while fading tracks:`, err);
@@ -503,21 +527,6 @@
 <audio id="audio-player-1" loop></audio>
 <audio id="audio-player-2" loop></audio>
 
-<!-- <div class="volumeBox">
-  <div>
-    <input
-      type="range"
-      min="0"
-      max="100"
-      on:click|stopPropagation
-      on:change|stopPropagation|preventDefault={(e) => {
-        const value = Number(e.currentTarget.value);
-        console.log({ newVolume: value }); // TODO: Change volume
-      }}
-    />
-    92%
-  </div>
-</div> -->
 <div id="volumeToggle" class="fixed top-0 right-0 z-10 px-6 py-5">
   <!-- svelte-ignore event_directive_deprecated -->
   <button
