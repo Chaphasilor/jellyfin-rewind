@@ -62,22 +62,9 @@ async function waitForUi() {
     await new Promise((r) => setTimeout(r, 1)); // give Ui time to update
   }
 }
-async function nextProcessing(detail: string) {
-  processingProgress.update((state) => ({
-    ...state,
-    cur: state.cur + 1,
-    detail,
-  }));
-  await waitForUi();
-}
 
 const execute = async (): Promise<Result<ProcessingResults>> => {
   await reset();
-  downloadingProgress.set({
-    cur: 1,
-    max: 1,
-    detail: "Getting library metadata",
-  });
 
   const libraryResult = await getMusicLibrary();
   if (!libraryResult.success || !libraryResult.data) {
@@ -90,13 +77,9 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
   // fetch library items
   const libraryData: LibraryData = [];
+  downloadingProgress.setMax(musicLibraries.length * 4)
   for (let i = 0; i < musicLibraries.length; i++) {
     const library = musicLibraries[i];
-    downloadingProgress.set({
-      cur: i * 4,
-      max: musicLibraries.length * 4,
-      detail: `Getting items for '${library.Name}'`,
-    });
 
     const tracksResult = await getTracksForLibrary(library.Id);
     if (!tracksResult.success) {
@@ -105,11 +88,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
     const tracks = tracksResult.data.Items;
 
-    downloadingProgress.set({
-      cur: i * 4 + 1,
-      max: musicLibraries.length * 4,
-      detail: `Getting items for '${library.Name}'`,
-    });
+    await downloadingProgress.next()
 
     const albumsResult = await getAlbumsForLibrary(library.Id);
     if (!albumsResult.success) {
@@ -117,11 +96,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
     const albums = albumsResult.success ? albumsResult.data?.Items : [];
 
-    downloadingProgress.set({
-      cur: i * 4 + 2,
-      max: musicLibraries.length * 4,
-      detail: `Getting items for '${library.Name}'`,
-    });
+    await downloadingProgress.next()
 
     const artistsResult = await getAllArtistsWithProperIdsForLibrary(
       library.Id,
@@ -147,11 +122,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       ? albumArtistsResult.data?.Items
       : [];
 
-    downloadingProgress.set({
-      cur: i * 4 + 3,
-      max: musicLibraries.length * 4,
-      detail: `Getting items for '${library.Name}'`,
-    });
+    await downloadingProgress.next()
 
     const genresResult = await getGenresForLibrary(library.Id);
     if (!genresResult.success) {
@@ -159,11 +130,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
     const genres = genresResult.success ? genresResult.data?.Items : [];
 
-    downloadingProgress.set({
-      cur: i * 4 + 4,
-      max: musicLibraries.length * 4,
-      detail: `Getting items for '${library.Name}'`,
-    });
+    await downloadingProgress.next()
 
     libraryData.push({
       id: library.Id,
@@ -178,11 +145,6 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   }
   logAndReturn("libraryData", libraryData);
 
-  downloadingProgress.set({
-    cur: 2,
-    max: 2,
-    detail: "Getting Playback Reporting log",
-  });
   let listens: ListenQueryRow[] = [];
 
   try {
@@ -196,20 +158,15 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     console.error(`Couldn't get listensResult: ${error}`);
     playbackReportingAvailable.set(false);
   }
-  downloadingProgress.set({ cur: 2, max: 2, detail: "" });
 
-  processingProgress.set({
-    cur: 0,
-    max: libraryData.reduce(
+  processingProgress.setMax(libraryData.reduce(
       (sum, lib) =>
         sum + lib.tracks.length + lib.albums.length + lib.artists.length +
         +lib.performingArtists.length +
         lib.albumArtists.length +
         lib.genres.length,
       0,
-    ),
-    detail: "Preparing...",
-  });
+  ));
 
   for (const lib of libraryData) {
     //!!! process tracks last so we can increase the counts for all other item types
@@ -217,7 +174,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Albums
     for (let i = 0; i < lib.albums.length; i++) {
       const album = lib.albums[i];
-      await nextProcessing(album.Name);
+      await processingProgress.next()
       const processedAlbum = processAlbum(album);
       updateCountersForAlbum(CounterSources.JELLYFIN, album);
     }
@@ -225,7 +182,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Artists
     for (let i = 0; i < lib.artists.length; i++) {
       const artist = lib.artists[i];
-      await nextProcessing(artist.Name);
+      await processingProgress.next()
       const processedArtist = processArtist(artist);
       updateCountersForArtist(CounterSources.JELLYFIN, artist);
     }
@@ -233,7 +190,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Performing Artists
     for (let i = 0; i < lib.performingArtists.length; i++) {
       const performingArtist = lib.performingArtists[i];
-      await nextProcessing(performingArtist.Name);
+      await processingProgress.next()
       const processedArtist = processArtist(performingArtist);
         updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
     }
@@ -241,7 +198,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     //processingListensProgressming & album artists explicitly, and dedupe
     for (let i = 0; i < lib.albumArtists.length; i++) {
       const albumArtist = lib.albumArtists[i];
-      await nextProcessing(albumArtist.Name);
+      await processingProgress.next()
       const processedArtist = processArtist(albumArtist);
       updateCountersForArtist(CounterSources.JELLYFIN, albumArtist);
     }
@@ -250,7 +207,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Genres
     for (let i = 0; i < lib.genres.length; i++) {
       const genre = lib.genres[i];
-      await nextProcessing(genre.Name);
+      await processingProgress.next()
       const processedGenre = processGenre(genre);
       updateCountersForGenre(CounterSources.JELLYFIN, genre);
     }
@@ -258,7 +215,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Tracks
     for (let i = 0; i < lib.tracks.length; i++) {
       const track = lib.tracks[i];
-      await nextProcessing(track.Name);
+      await processingProgress.next()
       if (track.UserData.IsFavorite) favorites.v++;
       const processedTrack = compactTrack(track);
       const processedTrackId = tracksCache.setAndGetValue(
@@ -274,14 +231,10 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     playbackReportingAvailable.set(false);
     console.warn(`No listens to process from Playback Reporting.`);
   } else {
-    processingListensProgress.set({ cur: 0, max: listens.length, detail: "" });
+    processingListensProgress.setMax(listens.length)
     for (let i = 0; i < listens.length; i++) {
       const rawListen = listens[i];
-      processingListensProgress.update((state) => ({
-        ...state,
-        cur: i + 1,
-        detail: `${rawListen.ItemName}`,
-      }));
+      await processingListensProgress.next()
 
       const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
         return new Listen(rawListen, tracksCache.get(rawListen.ItemId));
@@ -300,7 +253,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
   }
 
-  generatingProgress.set({cur:1, max: 1, detail: ""})
+  generatingProgress.setMax(1)
 
   return logAndReturn("processing", {
     success: true,

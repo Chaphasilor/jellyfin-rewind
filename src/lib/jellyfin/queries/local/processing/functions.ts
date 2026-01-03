@@ -528,10 +528,10 @@ export function reset() {
   generalCounter.v = new PlaybackCounter(normalCountersInit);
   skipped.v = 0;
 
-  downloadingProgress.set({ cur: 0, max: 0, detail: "" });
-  processingProgress.set({ cur: 0, max: 0, detail: "" });
-  processingListensProgress.set({ cur: 0, max: 0, detail: "" });
-  generatingProgress.set({ cur: 0, max: 0, detail: "" });
+  downloadingProgress.reset();
+  processingProgress.reset();
+  processingListensProgress.reset();
+  generatingProgress.reset();
 
   return killCurrentTask();
 }

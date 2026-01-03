@@ -49,19 +49,13 @@
   <JellyfinRewindLogo />
 
   <div>
-    <Loading {...$downloadingProgress} title="Fetching Library Data..." />
+    <Loading progress={downloadingProgress} />
 
-    <Loading {...$processingProgress} title="Preparing Library Data..." />
+    <Loading progress={processingProgress} />
 
-    <Loading
-      {...$processingListensProgress}
-      title="Processing Listening Data..."
-    />
+    <Loading progress={processingListensProgress} />
 
-    <Loading
-      {...$generatingProgress}
-      title="Generating your Personal Rewind Report..."
-    />
+    <Loading progress={generatingProgress} />
   </div>
 
   {#if error}
