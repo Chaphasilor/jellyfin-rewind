@@ -80,6 +80,10 @@
     loggingIn = true;
     await pingServer();
     if (error != undefined) return;
+    // log out to reset target user
+    await jellyfin.terminateSession();
+    // set server url again in case it was reset during logout
+    await jellyfin.connectToURL(serverUrl);
     const auth = await jellyfin.userLogin(userName, userPassword);
     loginValid = auth.success;
     loggingIn = false;
