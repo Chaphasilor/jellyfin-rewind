@@ -167,7 +167,7 @@
   });
 </script>
 
-<div class="relative h-screen text-center">
+<div class="relative h-screen text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">
     Your Total Playtime{#if informationSource !== "playbackReport"}
       <!-- svelte-ignore event_directive_deprecated -->

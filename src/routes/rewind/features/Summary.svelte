@@ -72,7 +72,7 @@
   });
 </script>
 
-<div class="h-full p-4 flex flex-col justify-around">
+<div class="h-full pt-10 p-4 flex flex-col justify-around">
   <h2
     class="text-2xl mt-8 font-quicksand leading-8 flex flex-col items-center gap-1.5 text-center font-semibold text-gray-200"
   >

@@ -137,9 +137,9 @@
       You didn't log in with an administrator account. Using a <b
         class="font-bold"
       >non</b>-admin account is indeed the recommended way for listening to
-      music on Jellyfin, <b class="font-bold">but</b> without
-      administrator access, Jellyfin Rewind can't read data from the Playback
-      Reporting plugin.
+      music on Jellyfin, <b class="font-bold">but</b> without administrator
+      access, Jellyfin Rewind can't read data from the Playback Reporting
+      plugin.
     </p>
     <p class="text-sm">
       You can skip this step if you're not comfortable logging in with an admin
@@ -160,6 +160,7 @@
     <label for="password" class="relative flex flex-col">
       <small>Admin Password</small>
       <input
+        class="font-mono"
         name="password"
         type="password"
         bind:value={adminUserPassword}

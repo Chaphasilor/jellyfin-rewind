@@ -151,6 +151,7 @@
     <label class="relative flex flex-col" for="serverUrl">
       <small>Server URL</small>
       <input
+        class="font-mono"
         name="serverUrl"
         type="url"
         placeholder="https://demo.jellyfin.org"
@@ -207,6 +208,7 @@
     <label for="password" class="relative flex flex-col">
       <small>Password</small>
       <input
+        class="font-mono"
         name="password"
         type="password"
         bind:value={userPassword}

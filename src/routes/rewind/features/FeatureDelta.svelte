@@ -23,7 +23,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-10">Your Listening Habits</h2>
   <h3 class="text-2xl font-medium">...compared to last year!</h3>
 

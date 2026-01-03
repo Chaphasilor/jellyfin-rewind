@@ -48,7 +48,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">Your Top Genres<br />of the year</h2>
   <ol
     id="top-genres-main-feature"

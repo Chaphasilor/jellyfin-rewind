@@ -497,7 +497,7 @@
   index: number,
   Feature: Component<FeatureProps, FeatureEvents>,
 )}
-  <div class="relative h-screen pt-10" id="feature-{index}">
+  <div class="relative h-screen" id="feature-{index}">
     <Feature
       bind:this={featureInstances[index]}
       {informationSource}

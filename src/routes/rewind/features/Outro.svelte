@@ -65,7 +65,7 @@
   onMount(() => {});
 </script>
 
-<div class="p-4">
+<div class="p-4 pt-10">
   <h2
     class="text-[1.65rem] leading-8 text-center mt-4 font-semibold text-gray-100"
   >

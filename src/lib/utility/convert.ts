@@ -719,9 +719,16 @@ export async function processingResultToRewindReport(
                 : CounterSources.AVERAGE;
               current[sourceKey] = result.tracksCache.sorted(
                 source,
-                ["partialSkips", "fullSkips"],
+                ["fullSkips", "partialSkips", "listenDuration"],
                 "DESC",
-              ).slice(0, 10)
+              ).filter(([trackId, value]) =>
+                //@ts-ignore: counter sources are a bit broken
+                value.counters[source].listenDuration > 5 &&
+                //@ts-ignore: counter sources are a bit broken
+                (value.counters[source].partialSkips > 0 ||
+                  //@ts-ignore: counter sources are a bit broken
+                  value.counters[source].fullSkips > 0)
+              ).slice(0, 20)
                 .map(
                   cacheTrackToOldTrack,
                 );
@@ -741,7 +748,28 @@ export async function processingResultToRewindReport(
                 source,
                 ["partialSkips", "fullSkips"],
                 "ASC",
-              ).slice(0, 10)
+              ).filter(([trackId, value]) =>
+                //@ts-ignore: counter sources are a bit broken
+                value.counters[source].fullPlays > 5 &&
+                //@ts-ignore: counter sources are a bit broken
+                (value.counters[source].partialSkips === 0 &&
+                  //@ts-ignore: counter sources are a bit broken
+                  value.counters[source].fullSkips === 0)
+              ).toSorted(([aId, aValue], [bId, bValue]) => {
+                const playDifference =
+                  //@ts-ignore: counter sources are a bit broken
+                  bValue.counters[source].fullPlays -
+                  //@ts-ignore: counter sources are a bit broken
+                  aValue.counters[source].fullPlays;
+                if (playDifference === 0) {
+                  //@ts-ignore: counter sources are a bit broken
+                  return bValue.counters[source].listenDuration -
+                    //@ts-ignore: counter sources are a bit broken
+                    aValue.counters[source].listenDuration;
+                } else {
+                  return playDifference;
+                }
+              }).slice(0, 20)
                 .map(
                   cacheTrackToOldTrack,
                 );

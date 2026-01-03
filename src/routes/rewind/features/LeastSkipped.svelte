@@ -65,7 +65,7 @@
   });
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl mt-5">Til the end:<br />Tracks you never skipped</h2>
   {#if extraFeatures().leastSkippedTracks}
     <ol id="least-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
@@ -187,7 +187,7 @@
     class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
   >
     {#each     $rewindReport.jellyfinRewindReport.tracks
-      ?.leastSkipped[informationSource]?.slice(5, 20) as
+      ?.leastSkipped[informationSource]?.slice(5) as
       track,
       index
       (track.id)

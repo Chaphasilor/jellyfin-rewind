@@ -309,7 +309,7 @@ class Jellyfin {
     let oldTargetUserToken: string | undefined;
     if (oldSession) {
       const { token, url, targetUserToken } = JSON.parse(oldSession);
-      oldToken = token;;
+      oldToken = token;
       oldUrl = url;
       oldTargetUserToken = targetUserToken;
     }

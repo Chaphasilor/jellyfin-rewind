@@ -22,7 +22,7 @@
   onMount(() => {});
 </script>
 
-<div class="p-4">
+<div class="p-4 pt-10">
   <div class="mt-6 w-full flex flex-col items-center mb-16">
     <JellyfinRewindLogo />
   </div>

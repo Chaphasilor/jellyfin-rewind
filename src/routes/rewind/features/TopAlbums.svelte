@@ -62,7 +62,7 @@
   });
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">Your Top Albums<br />of the year</h2>
   <ol id="top-albums-main-feature" class="flex flex-col gap-2 p-6">
     {#each       $rewindReport.jellyfinRewindReport.albums

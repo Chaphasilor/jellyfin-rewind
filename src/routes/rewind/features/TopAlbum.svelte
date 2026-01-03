@@ -48,7 +48,7 @@
   });
 </script>
 
-<div class="text-center text-white">
+<div class="text-center text-white pt-10">
   <h2 class="text-2xl mt-5">
     Your Top Album<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>

@@ -17,7 +17,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">Your Library & You</h2>
 
   <div class="mt-12 w-full px-6 flex flex-col items-center gap-2">

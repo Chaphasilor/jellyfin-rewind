@@ -57,7 +57,7 @@
   });
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-xl font-medium mt-5 px-2">
     Remember These Forgotten Favorites?
   </h2>
@@ -155,10 +155,10 @@
 </div>
 <!-- continue as simple list -->
 <ol
-  class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
+  class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-36"
 >
   {#each     $rewindReport.jellyfinRewindReport.tracks
-      ?.forgottenFavoriteTracks[informationSource].slice(5, 10) as
+      ?.forgottenFavoriteTracks[informationSource].slice(5) as
     track,
     index
     (track.id)
