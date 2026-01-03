@@ -135,9 +135,9 @@
   >
     <p class="">
       You didn't log in with an administrator account. Using a <b
-        class="font-quicksand-bold"
+        class="font-bold"
       >non</b>-admin account is indeed the recommended way for listening to
-      music on Jellyfin, <b class="font-quicksand-bold">but</b> without
+      music on Jellyfin, <b class="font-bold">but</b> without
       administrator access, Jellyfin Rewind can't read data from the Playback
       Reporting plugin.
     </p>

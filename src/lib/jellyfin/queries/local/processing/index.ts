@@ -17,7 +17,9 @@ import { run } from "svelte/legacy";
 import allListens from "../../api/playbackReporting.ts";
 import {
   compactTrack,
+  getAlbumArtistsForLibrary,
   getAlbumsForLibrary,
+  getAllArtistsWithProperIdsForLibrary,
   getArtistsForLibrary,
   getGenresForLibrary,
   getMusicLibrary,
@@ -120,11 +122,29 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       detail: `Getting items for '${library.Name}'`,
     });
 
-    const artistsResult = await getArtistsForLibrary(library.Id);
+    const artistsResult = await getAllArtistsWithProperIdsForLibrary(
+      library.Id,
+    );
     if (!artistsResult.success) {
       console.warn(`No artists found for library:`, library.Name);
     }
     const artists = artistsResult.success ? artistsResult.data?.Items : [];
+
+    const performingArtistsResult = await getArtistsForLibrary(library.Id);
+    if (!performingArtistsResult.success) {
+      console.warn(`No performingArtists found for library:`, library.Name);
+    }
+    const performingArtists = performingArtistsResult.success
+      ? performingArtistsResult.data?.Items
+      : [];
+
+    const albumArtistsResult = await getAlbumArtistsForLibrary(library.Id);
+    if (!albumArtistsResult.success) {
+      console.warn(`No albumArtists found for library:`, library.Name);
+    }
+    const albumArtists = albumArtistsResult.success
+      ? albumArtistsResult.data?.Items
+      : [];
 
     downloadingProgress.set({
       cur: i * 4 + 3,
@@ -150,6 +170,8 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       tracks: tracks,
       albums: albums,
       artists: artists,
+      performingArtists: performingArtists,
+      albumArtists: albumArtists,
       genres: genres,
     });
   }
@@ -180,6 +202,8 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     max: libraryData.reduce(
       (sum, lib) =>
         sum + lib.tracks.length + lib.albums.length + lib.artists.length +
+        +lib.performingArtists.length +
+        lib.albumArtists.length +
         lib.genres.length,
       0,
     ),
@@ -198,12 +222,27 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
 
     // Process Artists
-    //TODO handle album artists and dedupe
     for (let i = 0; i < lib.artists.length; i++) {
       const artist = lib.artists[i];
       await nextProcessing(artist.Name);
       const processedArtist = processArtist(artist);
       updateCountersForArtist(CounterSources.JELLYFIN, artist);
+    }
+
+    // Process Performing Artists
+    for (let i = 0; i < lib.performingArtists.length; i++) {
+      const performingArtist = lib.performingArtists[i];
+      await nextProcessing(performingArtist.Name);
+      const processedArtist = processArtist(performingArtist);
+      updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
+    }
+
+    //TODO handle performing & album artists explicitly, and dedupe
+    for (let i = 0; i < lib.albumArtists.length; i++) {
+      const albumArtist = lib.albumArtists[i];
+      await nextProcessing(albumArtist.Name);
+      const processedArtist = processArtist(albumArtist);
+      updateCountersForArtist(CounterSources.JELLYFIN, albumArtist);
     }
 
     console.log(`lib.genres.length:`, lib.genres.length);

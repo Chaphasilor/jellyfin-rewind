@@ -41,7 +41,7 @@
     </p>
     <p>
       This means that the data displayed in this report <b
-        class="font-quicksand-bold text-orange-400!"
+        class="font-bold text-orange-400!"
       >may not be as accurate or comprehensive as it could be</b>. Jellyfin
       doesn't remember <i>when</i> you played something, only when you <i
       >last</i> played it. That means it's not possible to properly limit

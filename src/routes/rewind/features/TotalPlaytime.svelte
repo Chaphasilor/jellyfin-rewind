@@ -208,8 +208,8 @@
     {/if}<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
 
-  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-3xl">
-    <span class="font-quicksand-bold">{
+  <div class="mt-10 -rotate-6 font-quicksand font-bold text-sky-500 text-3xl">
+    <span class="">{
       showAsNumber(
         $rewindReport.jellyfinRewindReport.generalStats
           .totalPlaybackDurationMinutes[

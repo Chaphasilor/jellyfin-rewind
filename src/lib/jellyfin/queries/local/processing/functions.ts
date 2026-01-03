@@ -220,6 +220,19 @@ export async function getAlbumsForLibrary(libraryId: string) {
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinAlbum[] }>;
 }
 
+// The Jellyfin API offers the `/Artists` and `/Artists/AlbumArtists` endpoints, but those return items with a different ID than the `/Items` endpoint
+// The tracks seem to reference both types of IDs, so we need to fetch from both endpoints
+export async function getAllArtistsWithProperIdsForLibrary(libraryId: string) {
+  const query: string[] = [];
+  query.push(`ParentId=${libraryId}`);
+  query.push(`includeItemTypes=MusicArtist`);
+  query.push(`recursive=true`);
+  query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
+  query.push(`enableImageTypes=Primary`);
+  const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
+  return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
+}
+
 export async function getArtistsForLibrary(libraryId: string) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
@@ -234,7 +247,7 @@ export async function getArtistsForLibrary(libraryId: string) {
 
 export async function getAlbumArtistsForLibrary(libraryId: string) {
   const query: string[] = [];
-  query.push(`parentId=${libraryId}`);
+  // query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=BasicSyncInfo,Genres`);
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);

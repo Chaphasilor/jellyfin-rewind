@@ -74,7 +74,7 @@
             <span class="font-semibold basext-xl">{index + 1}.</span>
             <div class="flex flex-col gap-0.5 items-start">
               <span
-                class="font-quicksand-bold text-lg uppercase tracking-widest w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
+                class="font-bold text-lg uppercase tracking-widest w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
               >{genre.name}</span>
 
               <div
