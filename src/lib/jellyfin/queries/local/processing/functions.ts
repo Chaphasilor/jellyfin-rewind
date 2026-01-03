@@ -1,6 +1,7 @@
 import {
   downloadingProgress,
   generatingProgress,
+  processingListensProgress,
   processingProgress,
   year,
 } from "$lib/globals.ts";
@@ -529,6 +530,7 @@ export function reset() {
 
   downloadingProgress.set({ cur: 0, max: 0, detail: "" });
   processingProgress.set({ cur: 0, max: 0, detail: "" });
+  processingListensProgress.set({ cur: 0, max: 0, detail: "" });
   generatingProgress.set({ cur: 0, max: 0, detail: "" });
 
   return killCurrentTask();

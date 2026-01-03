@@ -16,6 +16,7 @@ export const endSql = formatDateToSql(end);
 
 export const downloadingProgress = writable({ cur: 0, max: 0, detail: "" });
 export const processingProgress = writable({ cur: 0, max: 0, detail: "" });
+export const processingListensProgress = writable({ cur: 0, max: 0, detail: "" });
 export const generatingProgress = writable({ cur: 0, max: 0, detail: "" });
 
 export const playbackReportingAvailable = writable<boolean>(true);

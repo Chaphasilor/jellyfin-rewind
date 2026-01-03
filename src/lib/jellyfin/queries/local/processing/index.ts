@@ -2,6 +2,7 @@ import {
   downloadingProgress,
   generatingProgress,
   playbackReportingAvailable,
+  processingListensProgress,
   processingProgress,
 } from "$lib/globals.ts";
 import {
@@ -234,10 +235,10 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       const performingArtist = lib.performingArtists[i];
       await nextProcessing(performingArtist.Name);
       const processedArtist = processArtist(performingArtist);
-      updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
+        updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
     }
 
-    //TODO handle performing & album artists explicitly, and dedupe
+    //processingListensProgressming & album artists explicitly, and dedupe
     for (let i = 0; i < lib.albumArtists.length; i++) {
       const albumArtist = lib.albumArtists[i];
       await nextProcessing(albumArtist.Name);
@@ -273,10 +274,10 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     playbackReportingAvailable.set(false);
     console.warn(`No listens to process from Playback Reporting.`);
   } else {
-    generatingProgress.set({ cur: 0, max: listens.length, detail: "" });
+    processingListensProgress.set({ cur: 0, max: listens.length, detail: "" });
     for (let i = 0; i < listens.length; i++) {
       const rawListen = listens[i];
-      generatingProgress.update((state) => ({
+      processingListensProgress.update((state) => ({
         ...state,
         cur: i + 1,
         detail: `${rawListen.ItemName}`,
@@ -298,6 +299,8 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       await waitForUi();
     }
   }
+
+  generatingProgress.set({cur:1, max: 1, detail: ""})
 
   return logAndReturn("processing", {
     success: true,

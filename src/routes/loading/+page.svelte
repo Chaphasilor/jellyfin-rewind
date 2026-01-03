@@ -5,6 +5,7 @@
   import {
     downloadingProgress,
     generatingProgress,
+    processingListensProgress,
     processingProgress,
     processingResult,
     rewindReport,
@@ -48,13 +49,18 @@
   <JellyfinRewindLogo />
 
   <div>
-    <Loading {...$downloadingProgress} title="Fetching..." />
+    <Loading {...$downloadingProgress} title="Fetching Library Data..." />
 
-    <Loading {...$processingProgress} title="Processing Data..." />
+    <Loading {...$processingProgress} title="Preparing Library Data..." />
+
+    <Loading
+      {...$processingListensProgress}
+      title="Processing Listening Data..."
+    />
 
     <Loading
       {...$generatingProgress}
-      title="Generating Your Rewind Report..."
+      title="Generating your Personal Rewind Report..."
     />
   </div>
 
