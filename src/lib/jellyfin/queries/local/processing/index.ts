@@ -14,7 +14,6 @@ import {
   type Result,
 } from "$lib/types.ts";
 import { logAndReturn } from "$lib/utility/logging.ts";
-import { run } from "svelte/legacy";
 import allListens from "../../api/playbackReporting.ts";
 import {
   compactTrack,
@@ -23,8 +22,8 @@ import {
   getAllArtistsWithProperIdsForLibrary,
   getArtistsForLibrary,
   getGenresForLibrary,
+  getItemsBatched,
   getMusicLibrary,
-  getTrackFromItem,
   getTracksForLibrary,
   processAlbum,
   processArtist,
@@ -77,11 +76,11 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
   // fetch library items
   const libraryData: LibraryData = [];
-  downloadingProgress.setMax(musicLibraries.length * 4)
+  downloadingProgress.setMax(musicLibraries.length * 6)
   for (let i = 0; i < musicLibraries.length; i++) {
     const library = musicLibraries[i];
 
-    const tracksResult = await getTracksForLibrary(library.Id);
+    const tracksResult = await getItemsBatched((start, limit) => getTracksForLibrary(library.Id, start, limit));
     if (!tracksResult.success) {
       console.warn(`No tracks found for library:`, library.Name);
       continue;
@@ -90,7 +89,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const albumsResult = await getAlbumsForLibrary(library.Id);
+    const albumsResult = await getItemsBatched((start, limit) => getAlbumsForLibrary(library.Id, start, limit));
     if (!albumsResult.success) {
       console.warn(`No albums found for library:`, library.Name);
     }
@@ -98,15 +97,13 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const artistsResult = await getAllArtistsWithProperIdsForLibrary(
-      library.Id,
-    );
+    const artistsResult = await getItemsBatched((start, limit) => getAllArtistsWithProperIdsForLibrary(library.Id, start, limit));
     if (!artistsResult.success) {
       console.warn(`No artists found for library:`, library.Name);
     }
     const artists = artistsResult.success ? artistsResult.data?.Items : [];
 
-    const performingArtistsResult = await getArtistsForLibrary(library.Id);
+    const performingArtistsResult = await getItemsBatched((start, limit) => getArtistsForLibrary(library.Id, start, limit));
     if (!performingArtistsResult.success) {
       console.warn(`No performingArtists found for library:`, library.Name);
     }
@@ -114,7 +111,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       ? performingArtistsResult.data?.Items
       : [];
 
-    const albumArtistsResult = await getAlbumArtistsForLibrary(library.Id);
+    const albumArtistsResult = await getItemsBatched((start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit));
     if (!albumArtistsResult.success) {
       console.warn(`No albumArtists found for library:`, library.Name);
     }
@@ -124,7 +121,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const genresResult = await getGenresForLibrary(library.Id);
+    const genresResult = await getItemsBatched((start, limit) => getGenresForLibrary(library.Id, start, limit));
     if (!genresResult.success) {
       console.warn(`No genres found for library:`, library.Name);
     }
