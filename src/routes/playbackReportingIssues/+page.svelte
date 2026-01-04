@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Header from "$lib/components/Header.svelte";
+    import CloseIcon from "$lib/components/icons/CloseIcon.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import { playbackReportingInspectionResult, year } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
@@ -299,22 +300,7 @@
         class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]"
         title="Close"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="icon icon-tabler icon-tabler-x"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
+        <CloseIcon />
       </button>
     </div>
     <div class="w-full h-full overflow-x-auto p-4">

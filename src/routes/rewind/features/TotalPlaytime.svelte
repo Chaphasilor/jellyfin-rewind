@@ -12,6 +12,7 @@
   import Unavailable from "$lib/components/Unavailable.svelte";
   import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
+    import StarIcon from "$lib/components/icons/StarIcon.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
@@ -184,26 +185,7 @@
           isAccuracyDisclaimerOpen.set(true);
         }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 icon icon-tabler icon-tabler-asterisk"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M12 12l8 -4.5"></path>
-          <path d="M12 12v9"></path>
-          <path d="M12 12l-8 -4.5"></path>
-          <path d="M12 12l8 4.5"></path>
-          <path d="M12 3v9"></path>
-          <path d="M12 12l-8 4.5"></path>
-        </svg>
+        <StarIcon />
       </button>
     {/if}<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>

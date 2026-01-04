@@ -115,9 +115,6 @@
           target="_blank"
         >Open Settings</a>
       {:else}
-        <a
-          class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0 opacity-50 cursor-not-allowed"
-        >Open Settings!</a>
         <p class="font-medium mb-6">
           You're not logged in with an administrator account, but you need to be
           an admin in order to install plugins. If you are logged into Jellyfin
