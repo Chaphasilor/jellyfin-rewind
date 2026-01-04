@@ -1,18 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { processingResult, rewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import {
     type FeatureEvents,
     type FeatureProps,
     InformationSource,
   } from "$lib/types";
-  import { processingResultToRewindReport } from "$lib/utility/convert";
-  import { logAndReturn } from "$lib/utility/logging";
   import { type Component, onMount } from "svelte";
   import TotalPlaytime from "./features/TotalPlaytime.svelte";
   import TopTrack from "./features/TopTrack.svelte";
-  import { on } from "svelte/events";
-  import PageTransition from "$lib/components/PageTransition.svelte";
   import TopTracks from "./features/TopTracks.svelte";
   import DaysListened from "./features/DaysListened.svelte";
   import TopArtist from "./features/TopArtist.svelte";
@@ -28,15 +24,8 @@
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
   import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
-  import {
-    checkPlaybackReportingSetup,
-    loadAudio,
-  } from "$lib/utility/jellyfin-helper";
-  import type { Features } from "tailwindcss";
-  import type { Point } from "chart.js";
-  import { page } from "$app/state";
+  import { loadAudio,} from "$lib/utility/jellyfin-helper";
   import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
-  import { skipped } from "$lib/jellyfin/queries/local/processing/values";
   import MuteVolumeIcon from "$lib/components/icons/MuteVolumeIcon.svelte";
   import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
 

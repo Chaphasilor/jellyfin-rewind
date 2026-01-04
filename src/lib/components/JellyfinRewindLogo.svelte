@@ -1,6 +1,3 @@
-<script lang="ts">
-</script>
-
 <header>
   <img src="/jellyfin/banner-dark.svg" alt="Jellyfin Rewind Logo" />
 </header>

@@ -4,15 +4,9 @@
   import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import {
-    playbackReportingInspectionResult,
-    processingResult,
-    rewindReport,
-  } from "$lib/globals";
+  import { playbackReportingInspectionResult } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
-  import processing from "$lib/jellyfin/queries/local/processing";
   import { PlaybackReportingIssueAction } from "$lib/types";
-  import { processingResultToRewindReport } from "$lib/utility/convert";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
 

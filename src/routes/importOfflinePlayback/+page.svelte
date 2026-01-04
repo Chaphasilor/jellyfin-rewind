@@ -1,12 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Header from "$lib/components/Header.svelte";
-  import { oldReport } from "$lib/globals";
-  import { importRewindReport } from "$lib/utility/oldReportDelta";
-  import Jellyfin from "$lib/jellyfin/index";
   import { importOfflinePlayback } from "$lib/utility/offlineImport";
   import { uploadOfflinePlaybackBatched } from "$lib/jellyfin/queries/api/playbackReporting";
-  import Modal from "$lib/components/Modal.svelte";
   import jellyfin from "$lib/jellyfin/index";
   import ShareIcon from "$lib/components/icons/ShareIcon.svelte";
   import LogoutOrInIcon from "$lib/components/icons/LogoutOrInIcon.svelte";

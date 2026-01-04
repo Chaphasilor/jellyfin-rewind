@@ -5,7 +5,6 @@ import {
   type FullRewindReport,
   type Genre,
   InformationSource,
-  type LightRewindReport,
   type OldAlbum,
   type OldArtist,
   type OldGenre,
@@ -17,7 +16,6 @@ import {
   type Track,
 } from "../types.ts";
 import {
-  end,
   oldReport,
   playbackReportingAvailable,
   year,

@@ -1,14 +1,7 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
-  import {
-    isAccuracyDisclaimerOpen,
-    rewindReport,
-    year,
-  } from "$lib/globals";
+  import { year } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import type { FeatureProps } from "$lib/types";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import jellyfin from "$lib/jellyfin";
   import { goto } from "$app/navigation";

@@ -1,9 +1,5 @@
 <script>
-  import { writable } from "svelte/store";
   import Modal from "./Modal.svelte";
-  import { importRewindReport } from "$lib/utility/oldReportDelta";
-  import { goto } from "$app/navigation";
-  import { year } from "$lib/globals";
   import InfoIcon from "./icons/InfoIcon.svelte";
   const { children } = $props();
 

@@ -1,9 +1,8 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
   import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import { showPlaying } from "$lib/utility/other";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { loadTracksForGroup } from "$lib/utility/jellyfin-helper";
   import CircleIcon from "$lib/components/icons/CircleIcon.svelte";

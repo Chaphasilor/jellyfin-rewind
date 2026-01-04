@@ -7,21 +7,17 @@ import {
 } from "$lib/globals.ts";
 import jellyfin from "$lib/jellyfin/index.ts";
 import {
-  type Album,
   CounterSources,
   type Genre,
   type JellyfinAlbum,
   type JellyfinArtist,
   type JellyfinGenre,
   type JellyfinTrack,
-  type LibraryData,
   Listen,
-  type ListenQueryRow,
   normalCountersInit,
   PlaybackCounter,
   type PlaybackCounterDelta,
   type Result,
-  SkipType,
   type Track,
 } from "$lib/types.ts";
 import { getDayOfYear } from "$lib/utility/other.ts";

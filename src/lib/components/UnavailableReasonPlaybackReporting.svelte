@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { goto } from "$app/navigation";
-  import { year } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
 
   const { closeModal }: { closeModal: () => void } = $props();

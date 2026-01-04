@@ -3,8 +3,6 @@
   import Header from "$lib/components/Header.svelte";
   import { oldReport, year } from "$lib/globals";
   import { importRewindReport } from "$lib/utility/oldReportDelta";
-  import Jellyfin from "$lib/jellyfin/index";
-  import jellyfin from "$lib/jellyfin/index";
 
   let importingLastYearsReport = $state(false);
 </script>

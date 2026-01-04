@@ -2,15 +2,12 @@
   import Chart from "chart.js/auto";
   import {
     isAccuracyDisclaimerOpen,
-    rewindReport,
-    year,
+    rewindReport
   } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
-  import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
   import StarIcon from "$lib/components/icons/StarIcon.svelte";
 
@@ -19,7 +16,6 @@
 
   // svelte-ignore non_reactive_update
   let unavailableOverlay: Unavailable;
-  let canvas: HTMLCanvasElement;
   let doPollCanvas = $state(false);
 
   function showPlaytimeByMonthChart() {

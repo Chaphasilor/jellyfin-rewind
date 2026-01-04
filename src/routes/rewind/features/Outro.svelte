@@ -1,16 +1,11 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
+  import type { FeatureProps } from "$lib/types";
   import { rewindReport, year } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import { goto } from "$app/navigation";
+  import { reset } from "$lib/jellyfin/queries/local/processing/functions";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import { writable } from "svelte/store";
-  import { goto } from "$app/navigation";
-  import { log } from "$lib/utility/logging";
-  import { reset } from "$lib/jellyfin/queries/local/processing/functions";
   import jellyfin from "$lib/jellyfin";
   import DownloadIcon from "$lib/components/icons/DownloadIcon.svelte";
 

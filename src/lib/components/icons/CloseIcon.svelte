@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { text } from "@sveltejs/kit";
-
   export let red: boolean = false;
 </script>
 <svg

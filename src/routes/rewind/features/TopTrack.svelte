@@ -1,9 +1,7 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
   import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { loadImage } from "$lib/utility/jellyfin-helper";
 
