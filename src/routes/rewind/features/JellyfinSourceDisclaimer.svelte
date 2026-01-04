@@ -1,14 +1,7 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
-  import {
-    isAccuracyDisclaimerOpen,
-    rewindReport,
-    year,
-  } from "$lib/globals";
+  import { year } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
+  import type { FeatureProps } from "$lib/types";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import jellyfin from "$lib/jellyfin";
   import { goto } from "$app/navigation";
@@ -26,7 +19,7 @@
   onMount(() => {});
 </script>
 
-<div class="p-4">
+<div class="p-4 pt-10">
   <div class="mt-6 w-full flex flex-col items-center mb-8">
     <JellyfinRewindLogo />
   </div>
@@ -41,7 +34,7 @@
     </p>
     <p>
       This means that the data displayed in this report <b
-        class="font-quicksand-bold text-orange-400!"
+        class="font-bold text-orange-400!"
       >may not be as accurate or comprehensive as it could be</b>. Jellyfin
       doesn't remember <i>when</i> you played something, only when you <i
       >last</i> played it. That means it's not possible to properly limit

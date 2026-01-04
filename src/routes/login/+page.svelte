@@ -1,17 +1,14 @@
 <script lang="ts">
   import { dev } from "$app/environment";
   import { goto } from "$app/navigation";
+  import CheckmarkIcon from "$lib/components/icons/CheckmarkIcon.svelte";
+  import CloseIcon from "$lib/components/icons/CloseIcon.svelte";
+  import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import {
-    playbackReportingInspectionResult,
-    processingResult,
-    rewindReport,
-  } from "$lib/globals";
+  import { playbackReportingInspectionResult } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
-  import processing from "$lib/jellyfin/queries/local/processing";
   import { PlaybackReportingIssueAction } from "$lib/types";
-  import { processingResultToRewindReport } from "$lib/utility/convert";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
 
@@ -80,6 +77,10 @@
     loggingIn = true;
     await pingServer();
     if (error != undefined) return;
+    // log out to reset target user
+    await jellyfin.terminateSession();
+    // set server url again in case it was reset during logout
+    await jellyfin.connectToURL(serverUrl);
     const auth = await jellyfin.userLogin(userName, userPassword);
     loginValid = auth.success;
     loggingIn = false;
@@ -151,6 +152,7 @@
     <label class="relative flex flex-col" for="serverUrl">
       <small>Server URL</small>
       <input
+        class="font-mono"
         name="serverUrl"
         type="url"
         placeholder="https://demo.jellyfin.org"
@@ -159,38 +161,9 @@
       />
       <span class="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
         {#if serverValid}
-          <svg
-            class="text-green-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M5 12l5 5l10 -10" />
-          </svg>
+          <CheckmarkIcon />
         {:else if           serverUrl && serverUrl.length > 3 && !connectingToServer}
-          <svg
-            class="text-red-500 icon icon-tabler icons-tabler-outline icon-tabler-check"
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M18 6l-12 12" />
-            <path d="M6 6l12 12" />
-          </svg>
+          <CloseIcon red={true} />
         {/if}
       </span>
     </label>
@@ -207,6 +180,7 @@
     <label for="password" class="relative flex flex-col">
       <small>Password</small>
       <input
+        class="font-mono"
         name="password"
         type="password"
         bind:value={userPassword}
@@ -232,7 +206,7 @@
           class="self-center mt-2 text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white"
           on:click={() => (connectionHelpOpen = true)}
         >
-          Help me!?
+          Help me!
         </button>
       </div>
     </div>
@@ -244,23 +218,7 @@
       on:click={tryLogIn}
     >
       <span>{loggingIn ? `Logging in...` : `Log In`}</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path
-          d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"
-        >
-        </path>
-      </svg>
+      <ForwardsArrowIcon />
     </button>
   {:else}
     <button

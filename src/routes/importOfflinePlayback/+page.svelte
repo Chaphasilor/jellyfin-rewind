@@ -1,13 +1,11 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import Header from "$lib/components/Header.svelte";
-  import { oldReport } from "$lib/globals";
-  import { importRewindReport } from "$lib/utility/oldReportDelta";
-  import Jellyfin from "$lib/jellyfin/index";
   import { importOfflinePlayback } from "$lib/utility/offlineImport";
   import { uploadOfflinePlaybackBatched } from "$lib/jellyfin/queries/api/playbackReporting";
-  import Modal from "$lib/components/Modal.svelte";
   import jellyfin from "$lib/jellyfin/index";
+  import ShareIcon from "$lib/components/icons/ShareIcon.svelte";
+  import LogoutOrInIcon from "$lib/components/icons/LogoutOrInIcon.svelte";
 
   let importingOfflinePlayback = $state(false);
   // let finampOfflineExportDialogOpen = $state(false);
@@ -51,25 +49,7 @@
       <div class="flex flex-col gap-0.5">
         <span>Export & save Offline Plays</span><span
           class="flex flex-row gap-1.5"
-        >by clicking the <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="icon icon-tabler icons-tabler-outline icon-tabler-share"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M6 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-            <path d="M18 6m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-            <path d="M18 18m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
-            <path d="M8.7 10.7l6.6 -3.4" />
-            <path d="M8.7 13.3l6.6 3.4" />
-          </svg>icon, then</span>
+        >by clicking the <ShareIcon />icon, then</span>
       </div>
 
       <label
@@ -79,8 +59,9 @@
         }`}
       >
         <span>Import Offline Playback History</span>
-        <span class="font-bold text-[1.1rem] text-orange-800"
-        >Only import once per Finamp install!</span>
+        <span class="font-bold text-[1.1rem] text-orange-800">
+          Only import once per Finamp install!
+        </span>
       </label>
       <!-- svelte-ignore event_directive_deprecated -->
       <input
@@ -166,25 +147,7 @@
         }}
       >
         <span>Log In As Admin</span>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 stroke-[2.5] icon icon-tabler icon-tabler-logout"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path
-            d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2"
-          >
-          </path>
-          <path d="M7 12h14l-3 -3m0 6l3 -3"></path>
-        </svg>
+        <LogoutOrInIcon />
       </button>
       <button
         class="px-2 py-1 rounded-lg mt-4 text-sm border-gray-400 hover:bg-gray-300 border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
@@ -195,22 +158,3 @@
     </div>
   {/if}
 </div>
-<!-- 
-<Modal open={finampOfflineExportDialogOpen}>
-  <h1>Important Offline Listens from Finamp Beta</h1>
-  <p>Its really easy!</p>
-  <ol type="1">
-    <li>
-      Click <a href="finamp://internal/playbackhistory"
-      >this link to open Finamp on this device</a>, or follow steps 1-3
-    </li>
-    <li>Open Finamp</li>
-    <li>Expand Sidebar</li>
-    <li>Click on "Playback History"</li>
-    <li>Save History via the share button on the top right</li>
-    <li>Import it here!</li>
-  </ol>
-  <button on:click={() => (finampOfflineExportDialogOpen = false)}>
-    Okay!
-  </button>
-</Modal> -->

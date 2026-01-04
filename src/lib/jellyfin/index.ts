@@ -297,18 +297,29 @@ class Jellyfin {
   }
 
   private saveToLocalStorage(): Result<undefined> {
-    if (!this.token) {
-      return logAndReturn("save", {
-        success: false,
-        reason: "Storing a session without a token is unnecessary",
-      });
+    // if (!this.token) {
+    //   return logAndReturn("save", {
+    //     success: false,
+    //     reason: "Storing a session without a token is unnecessary",
+    //   });
+    // }
+    const oldSession = localStorage.getItem("session");
+    let oldToken: string | undefined;
+    let oldUrl: string | undefined;
+    let oldTargetUserToken: string | undefined;
+    if (oldSession) {
+      const { token, url, targetUserToken } = JSON.parse(oldSession);
+      oldToken = token;
+      oldUrl = url;
+      oldTargetUserToken = targetUserToken;
     }
+
     localStorage.setItem(
       "session",
       JSON.stringify({
-        token: this.token,
-        url: this.baseurl,
-        targetUserToken: this.targetUserToken,
+        token: this.token ?? oldToken,
+        url: this.baseurl ?? oldUrl,
+        targetUserToken: this.targetUserToken ?? oldTargetUserToken,
       }),
     );
     return logAndReturn("save", { success: true });
@@ -329,7 +340,6 @@ class Jellyfin {
     }
     await this.tokenLogin(token);
     await this.targetUserTokenLogin(targetUserToken);
-    return logAndReturn("load", await this.tokenLogin(token));
   }
 
   terminateSession() {

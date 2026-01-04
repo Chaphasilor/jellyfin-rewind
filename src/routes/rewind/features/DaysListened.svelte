@@ -1,13 +1,10 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
-  import { rewindReport, year } from "$lib/globals";
+  import type { FeatureProps } from "$lib/types";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { Spring } from "svelte/motion";
   import Unavailable from "$lib/components/Unavailable.svelte";
-  import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
@@ -53,7 +50,7 @@
   });
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <div class="mt-16 -rotate-6 font-quicksand text-sky-500 text-8xl">
     <span class="font-quicksand-bold">{
       extraFeatures().totalMusicDays
@@ -73,7 +70,7 @@
         364}
         <div>
           <span class="font-semibold text-sm text-center"
-          >What did you do on the {(365 - musicDays.current).toFixed(0)} missing
+          >What did you do on the {(365 - musicDays.target).toFixed(0)} missing
             days?!</span>
         </div>
       {:else}
@@ -89,7 +86,7 @@
     <div class="mt-24 w-full px-10 flex flex-col items-center gap-3">
       <div>
         <span class="font-semibold text-xl"
-        >On those {musicDays.current.toFixed(0)}
+        >On those {musicDays.target.toFixed(0)}
           days,<br />you listened to
           <span class="text-3xl text-sky-500 font-quicksand">{
             showAsNumber(

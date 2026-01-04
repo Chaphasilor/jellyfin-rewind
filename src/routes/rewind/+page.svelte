@@ -1,18 +1,14 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { processingResult, rewindReport } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import {
     type FeatureEvents,
     type FeatureProps,
     InformationSource,
   } from "$lib/types";
-  import { processingResultToRewindReport } from "$lib/utility/convert";
-  import { logAndReturn } from "$lib/utility/logging";
   import { type Component, onMount } from "svelte";
   import TotalPlaytime from "./features/TotalPlaytime.svelte";
   import TopTrack from "./features/TopTrack.svelte";
-  import { on } from "svelte/events";
-  import PageTransition from "$lib/components/PageTransition.svelte";
   import TopTracks from "./features/TopTracks.svelte";
   import DaysListened from "./features/DaysListened.svelte";
   import TopArtist from "./features/TopArtist.svelte";
@@ -28,15 +24,10 @@
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
   import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
-  import {
-    checkPlaybackReportingSetup,
-    loadAudio,
-  } from "$lib/utility/jellyfin-helper";
-  import type { Features } from "tailwindcss";
-  import type { Point } from "chart.js";
-  import { page } from "$app/state";
+  import { loadAudio } from "$lib/utility/jellyfin-helper";
   import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
-  import { skipped } from "$lib/jellyfin/queries/local/processing/values";
+  import MuteVolumeIcon from "$lib/components/icons/MuteVolumeIcon.svelte";
+  import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
 
   if (!$rewindReport?.jellyfinRewindReport) {
     console.warn(`No $rewindReport found, redirecting to /welcome...`);
@@ -497,7 +488,7 @@
   index: number,
   Feature: Component<FeatureProps, FeatureEvents>,
 )}
-  <div class="relative h-screen pt-10" id="feature-{index}">
+  <div class="relative h-screen" id="feature-{index}">
     <Feature
       bind:this={featureInstances[index]}
       {informationSource}
@@ -538,54 +529,9 @@
     type="button"
   >
     {#if soundMuted}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume-off"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path
-          d="M15 8a5 5 0 0 1 1.912 4.934m-1.377 2.602a5.001 5.001 0 0 1 -.535 .464"
-        >
-        </path>
-        <path
-          d="M17.7 5a9 9 0 0 1 2.362 11.086m-1.676 2.299a9.005 9.005 0 0 1 -.686 .615"
-        >
-        </path>
-        <path
-          d="M9.069 5.054l.431 -.554a0.8 .8 0 0 1 1.5 .5v2m0 4v8a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l1.294 -1.664"
-        >
-        </path>
-        <path d="M3 3l18 18"></path>
-      </svg>
+      <MuteVolumeIcon />
     {:else}
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-7 h-7 text-white icon icon-tabler icon-tabler-volume"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        stroke-width="2"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M15 8a5 5 0 0 1 0 8"></path>
-        <path d="M17.7 5a9 9 0 0 1 0 14"></path>
-        <path
-          d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a0.8 .8 0 0 1 1.5 .5v14a0.8 .8 0 0 1 -1.5 .5l-3.5 -4.5"
-        >
-        </path>
-      </svg>
+      <OnVolumeIcon />
     {/if}
   </button>
 </div>

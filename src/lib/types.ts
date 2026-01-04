@@ -66,6 +66,8 @@ export type LibraryData = Array<
     tracks: Array<JellyfinTrack>;
     albums: Array<JellyfinAlbum>;
     artists: Array<JellyfinArtist>;
+    performingArtists: Array<JellyfinArtist>;
+    albumArtists: Array<JellyfinArtist>;
     genres: Array<JellyfinGenre>;
   }
 >;

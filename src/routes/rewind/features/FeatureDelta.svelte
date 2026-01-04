@@ -1,12 +1,9 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
-  import { rewindReport, year } from "$lib/globals";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
-  import { goto } from "$app/navigation";
   import UnavailableReasonOldReport from "$lib/components/UnavailableReasonOldReport.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
@@ -23,7 +20,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-10">Your Listening Habits</h2>
   <h3 class="text-2xl font-medium">...compared to last year!</h3>
 

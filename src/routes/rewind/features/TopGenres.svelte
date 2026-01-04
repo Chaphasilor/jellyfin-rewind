@@ -1,11 +1,11 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
   import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import { showPlaying } from "$lib/utility/other";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import { loadTracksForGroup } from "$lib/utility/jellyfin-helper";
+  import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
 
   const {
     informationSource,
@@ -48,7 +48,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">Your Top Genres<br />of the year</h2>
   <ol
     id="top-genres-main-feature"
@@ -74,7 +74,7 @@
             <span class="font-semibold basext-xl">{index + 1}.</span>
             <div class="flex flex-col gap-0.5 items-start">
               <span
-                class="font-quicksand-bold text-lg uppercase tracking-widest w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
+                class="font-bold text-lg uppercase tracking-widest w-full text-start whitespace-nowrap text-ellipsis overflow-hidden"
               >{genre.name}</span>
 
               <div
@@ -88,18 +88,7 @@
                   }</span>
                   streams
                 </div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <circle cx="12" cy="12" r="4"></circle>
-                </svg>
+                <CircleIcon />
                 <div>
                   <span class="font-semibold text-black">{
                     showAsNumber(
@@ -109,18 +98,7 @@
                   }</span>
                   tracks
                 </div>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                  <circle cx="12" cy="12" r="4"></circle>
-                </svg>
+                <CircleIcon />
                 <div>
                   <span class="font-semibold text-black">{
                     showAsNumber(

@@ -1,24 +1,18 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import {
-    isAccuracyDisclaimerOpen,
-    rewindReport,
-    year,
-  } from "$lib/globals";
+  import { isAccuracyDisclaimerOpen, rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
-  import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
+  import StarIcon from "$lib/components/icons/StarIcon.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
 
   // svelte-ignore non_reactive_update
   let unavailableOverlay: Unavailable;
-  let canvas: HTMLCanvasElement;
   let doPollCanvas = $state(false);
 
   function showPlaytimeByMonthChart() {
@@ -167,7 +161,7 @@
   });
 </script>
 
-<div class="relative h-screen text-center">
+<div class="relative h-screen text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">
     Your Total Playtime{#if informationSource !== "playbackReport"}
       <!-- svelte-ignore event_directive_deprecated -->
@@ -184,32 +178,13 @@
           isAccuracyDisclaimerOpen.set(true);
         }}
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="w-5 h-5 icon icon-tabler icon-tabler-asterisk"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          stroke-width="2"
-          stroke="currentColor"
-          fill="none"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-          <path d="M12 12l8 -4.5"></path>
-          <path d="M12 12v9"></path>
-          <path d="M12 12l-8 -4.5"></path>
-          <path d="M12 12l8 4.5"></path>
-          <path d="M12 3v9"></path>
-          <path d="M12 12l-8 4.5"></path>
-        </svg>
+        <StarIcon />
       </button>
     {/if}<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>
 
-  <div class="mt-10 -rotate-6 font-quicksand text-sky-500 text-3xl">
-    <span class="font-quicksand-bold">{
+  <div class="mt-10 -rotate-6 font-quicksand font-bold text-sky-500 text-3xl">
+    <span class="">{
       showAsNumber(
         $rewindReport.jellyfinRewindReport.generalStats
           .totalPlaybackDurationMinutes[

@@ -1,11 +1,9 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
+  import type { FeatureProps } from "$lib/types";
   import { isAccuracyDisclaimerOpen, rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
-  import { showAsNumber } from "$lib/utility/format";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
+  import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
 
   const {
     informationSource,
@@ -22,7 +20,7 @@
   onMount(() => {});
 </script>
 
-<div class="p-4">
+<div class="p-4 pt-10">
   <div class="mt-6 w-full flex flex-col items-center mb-16">
     <JellyfinRewindLogo />
   </div>
@@ -81,22 +79,6 @@
     }}
   >
     <span>Let's Go!</span>
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right"
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      fill="none"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-      <path
-        d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"
-      >
-      </path>
-    </svg>
+    <ForwardsArrowIcon />
   </button>
 </div>

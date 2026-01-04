@@ -5,7 +5,6 @@ import {
   type FullRewindReport,
   type Genre,
   InformationSource,
-  type LightRewindReport,
   type OldAlbum,
   type OldArtist,
   type OldGenre,
@@ -16,12 +15,7 @@ import {
   type RewindReport,
   type Track,
 } from "../types.ts";
-import {
-  end,
-  oldReport,
-  playbackReportingAvailable,
-  year,
-} from "$lib/globals.ts";
+import { oldReport, playbackReportingAvailable, year } from "$lib/globals.ts";
 import Jellyfin from "$lib/jellyfin/index.ts";
 import { getFeatureDelta } from "./oldReportDelta.ts";
 import { logAndReturn } from "./logging.ts";
@@ -223,17 +217,18 @@ export async function processingResultToRewindReport(
 
     return {
       id: album.id,
-      name: album.name,
+      name: album.name ?? "Unknown Album",
       artists: album.artists.map((artistId) => {
         const artist = result.artistCache.get(artistId)!;
         return {
           id: artistId,
-          name: artist?.name!,
+          name: artist?.name ?? "Unknown Artist",
         };
       }),
       albumArtist: {
         id: album.albumArtists[0],
-        name: result.artistCache.get(album.albumArtists[0])?.name!,
+        name: result.artistCache.get(album.albumArtists[0])?.name ??
+          "Unknown Artist",
       },
       tracks: albumTracks.length,
       year: album.year!,
@@ -307,7 +302,7 @@ export async function processingResultToRewindReport(
 
     return {
       id: id,
-      name: artist.name,
+      name: artist.name ?? "Unknown Artist",
       tracks: artistTracks.length,
       images: {
         primary: {
@@ -369,7 +364,7 @@ export async function processingResultToRewindReport(
 
     return {
       id: id,
-      name: genre.name,
+      name: genre.name ?? "Unknown Genre",
       tracks: genreTracks.length,
       playCount: {
         playbackReport: value.counters.playbackReporting.fullPlays +
@@ -719,9 +714,16 @@ export async function processingResultToRewindReport(
                 : CounterSources.AVERAGE;
               current[sourceKey] = result.tracksCache.sorted(
                 source,
-                ["partialSkips", "fullSkips"],
+                ["fullSkips", "partialSkips", "listenDuration"],
                 "DESC",
-              ).slice(0, 10)
+              ).filter(([trackId, value]) =>
+                //@ts-ignore: counter sources are a bit broken
+                value.counters[source].listenDuration > 5 &&
+                //@ts-ignore: counter sources are a bit broken
+                (value.counters[source].partialSkips > 0 ||
+                  //@ts-ignore: counter sources are a bit broken
+                  value.counters[source].fullSkips > 0)
+              ).slice(0, 20)
                 .map(
                   cacheTrackToOldTrack,
                 );
@@ -741,7 +743,28 @@ export async function processingResultToRewindReport(
                 source,
                 ["partialSkips", "fullSkips"],
                 "ASC",
-              ).slice(0, 10)
+              ).filter(([trackId, value]) =>
+                //@ts-ignore: counter sources are a bit broken
+                value.counters[source].fullPlays > 5 &&
+                //@ts-ignore: counter sources are a bit broken
+                (value.counters[source].partialSkips === 0 &&
+                  //@ts-ignore: counter sources are a bit broken
+                  value.counters[source].fullSkips === 0)
+              ).toSorted(([aId, aValue], [bId, bValue]) => {
+                const playDifference =
+                  //@ts-ignore: counter sources are a bit broken
+                  bValue.counters[source].fullPlays -
+                  //@ts-ignore: counter sources are a bit broken
+                  aValue.counters[source].fullPlays;
+                if (playDifference === 0) {
+                  //@ts-ignore: counter sources are a bit broken
+                  return bValue.counters[source].listenDuration -
+                    //@ts-ignore: counter sources are a bit broken
+                    aValue.counters[source].listenDuration;
+                } else {
+                  return playDifference;
+                }
+              }).slice(0, 20)
                 .map(
                   cacheTrackToOldTrack,
                 );

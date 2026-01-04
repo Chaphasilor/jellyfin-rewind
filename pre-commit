@@ -1,0 +1,12 @@
+#!/bin/sh
+
+#
+# (optional) Copy this file to .git/hooks/
+#
+echo "Running Custom Commit Hook..."
+
+echo "Formatting..."
+deno fmt --indent-width 2 . || exit 1
+
+echo "Testing build..."
+deno task build || exit 1

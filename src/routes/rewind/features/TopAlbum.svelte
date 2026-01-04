@@ -1,9 +1,7 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
   import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import type { FeatureProps } from "$lib/types";
   import { formatArtists, showAsNumber } from "$lib/utility/format";
   import {
     loadImage,
@@ -48,7 +46,7 @@
   });
 </script>
 
-<div class="text-center text-white">
+<div class="text-center text-white pt-10">
   <h2 class="text-2xl mt-5">
     Your Top Album<br />of {$rewindReport.jellyfinRewindReport?.year}:
   </h2>

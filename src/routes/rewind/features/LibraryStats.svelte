@@ -1,9 +1,7 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
+  import type { FeatureProps } from "$lib/types";
   import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
@@ -17,7 +15,7 @@
   onMount(() => {});
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl font-medium mt-5">Your Library & You</h2>
 
   <div class="mt-12 w-full px-6 flex flex-col items-center gap-2">

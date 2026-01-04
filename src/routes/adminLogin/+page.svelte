@@ -1,17 +1,12 @@
 <script lang="ts">
   import { dev } from "$app/environment";
   import { goto } from "$app/navigation";
+  import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import {
-    playbackReportingInspectionResult,
-    processingResult,
-    rewindReport,
-  } from "$lib/globals";
+  import { playbackReportingInspectionResult } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
-  import processing from "$lib/jellyfin/queries/local/processing";
   import { PlaybackReportingIssueAction } from "$lib/types";
-  import { processingResultToRewindReport } from "$lib/utility/convert";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
 
@@ -35,10 +30,6 @@
       goto("/importLastYearsReport");
     }
   }
-
-  //TODO offer logging into an admin account to get playback reporting data somehow?
-  // maybe with a token, second login, or just by prompting the user during login?
-  // but then again, it should be possible for people to use a regular account for listening, log in with that account, and still get the playback reporting data. so a secondary admin login is needed for that
 
   // only when devin' attempt an auto login
   if (dev) {
@@ -135,11 +126,11 @@
   >
     <p class="">
       You didn't log in with an administrator account. Using a <b
-        class="font-quicksand-bold"
+        class="font-bold"
       >non</b>-admin account is indeed the recommended way for listening to
-      music on Jellyfin, <b class="font-quicksand-bold">but</b> without
-      administrator access, Jellyfin Rewind can't read data from the Playback
-      Reporting plugin.
+      music on Jellyfin, <b class="font-bold">but</b> without administrator
+      access, Jellyfin Rewind can't read data from the Playback Reporting
+      plugin.
     </p>
     <p class="text-sm">
       You can skip this step if you're not comfortable logging in with an admin
@@ -160,6 +151,7 @@
     <label for="password" class="relative flex flex-col">
       <small>Admin Password</small>
       <input
+        class="font-mono"
         name="password"
         type="password"
         bind:value={adminUserPassword}
@@ -197,23 +189,7 @@
       on:click={tryLogIn}
     >
       <span>{loggingIn ? `Logging in...` : `Log In`}</span>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        class="w-7 h-7 stroke-[2.5] icon icon-tabler icon-tabler-arrow-big-right"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-        fill="none"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path
-          d="M4 9h8v-3.586a1 1 0 0 1 1.707 -.707l6.586 6.586a1 1 0 0 1 0 1.414l-6.586 6.586a1 1 0 0 1 -1.707 -.707v-3.586h-8a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1z"
-        >
-        </path>
-      </svg>
+      <ForwardsArrowIcon />
     </button>
   {:else}
     <button

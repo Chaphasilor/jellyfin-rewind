@@ -1,10 +1,4 @@
-<script lang="ts">
-</script>
-
 <header>
-  <!-- src={state.settings.darkMode
-          ? "/media/banner-dark.svg"
-          : "/media/banner-light.svg"} -->
   <img src="/jellyfin/banner-dark.svg" alt="Jellyfin Rewind Logo" />
 </header>
 

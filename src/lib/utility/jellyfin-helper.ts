@@ -214,6 +214,7 @@ export async function checkIfPlaybackReportingInstalled(): Promise<
     },
   );
   const pluginsJson = await pluginsResponse.json();
+  console.log(`pluginsJson:`, pluginsJson);
 
   const playbackReportingPluginInstallation = pluginsJson.find((
     plugin: { Name: string },

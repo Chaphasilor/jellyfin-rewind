@@ -1,14 +1,13 @@
 <script lang="ts">
-  import Chart from "chart.js/auto";
-  import { rewindReport, year } from "$lib/globals";
+  import type { FeatureProps } from "$lib/types";
+  import { rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
-  import { indexOfMax, indexOfMin, showPlaying } from "$lib/utility/other";
-  import { CounterSources, type FeatureProps } from "$lib/types";
+  import { showPlaying } from "$lib/utility/other";
   import { formatArtists, showAsNumber } from "$lib/utility/format";
   import Unavailable from "$lib/components/Unavailable.svelte";
   import { loadImage } from "$lib/utility/jellyfin-helper";
-  import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
+  import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
 
   const {
     informationSource,
@@ -65,7 +64,7 @@
   });
 </script>
 
-<div class="text-center">
+<div class="text-center pt-10">
   <h2 class="text-2xl mt-5">Til the end:<br />Tracks you never skipped</h2>
   {#if extraFeatures().leastSkippedTracks}
     <ol id="least-skipped-tracks-main-feature" class="flex flex-col gap-2 p-6">
@@ -121,36 +120,14 @@
                 }</span>
                 skips
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <circle cx="12" cy="12" r="4"></circle>
-              </svg>
+              <CircleIcon />
               <div>
                 <span class="font-semibold text-white">{
                   showAsNumber(track.playCount[informationSource])
                 }</span>
                 streams
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="w-3 h-3 stroke-2 icon icon-tabler icon-tabler-point"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-                <circle cx="12" cy="12" r="4"></circle>
-              </svg>
+              <CircleIcon />
               <div>
                 <span class="font-semibold text-white">{
                   showAsNumber(
@@ -187,7 +164,7 @@
     class="text-sm px-4 flex flex-col gap-0.5 overflow-x-auto flex-wrap w-full items-left h-40"
   >
     {#each     $rewindReport.jellyfinRewindReport.tracks
-      ?.leastSkipped[informationSource]?.slice(5, 20) as
+      ?.leastSkipped[informationSource]?.slice(5) as
       track,
       index
       (track.id)

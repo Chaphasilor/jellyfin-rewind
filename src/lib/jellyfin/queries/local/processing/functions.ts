@@ -1,26 +1,23 @@
 import {
   downloadingProgress,
   generatingProgress,
+  processingListensProgress,
   processingProgress,
   year,
 } from "$lib/globals.ts";
 import jellyfin from "$lib/jellyfin/index.ts";
 import {
-  type Album,
   CounterSources,
   type Genre,
   type JellyfinAlbum,
   type JellyfinArtist,
   type JellyfinGenre,
   type JellyfinTrack,
-  type LibraryData,
   Listen,
-  type ListenQueryRow,
   normalCountersInit,
   PlaybackCounter,
   type PlaybackCounterDelta,
   type Result,
-  SkipType,
   type Track,
 } from "$lib/types.ts";
 import { getDayOfYear } from "$lib/utility/other.ts";
@@ -198,29 +195,109 @@ export async function getMusicLibrary(): Promise<Result<any[]>> {
   });
 }
 
-export async function getTracksForLibrary(libraryId: string) {
+export async function getItemsBatched<T>(
+  fetcher: (
+    startIndex: number,
+    limit: number,
+  ) => Promise<Result<{ Items: T[] }>>,
+  batchSize: number = 200,
+) {
+  const combinedResponse = {
+    Items: [] as T[],
+  };
+  let previousItemCount = 0;
+  let response;
+  do {
+    previousItemCount = combinedResponse.Items.length;
+    console.info(`Fetching track batch info`);
+    response = await fetcher(
+      previousItemCount,
+      batchSize,
+    );
+    if (response.success) {
+      combinedResponse.Items.push(...response.data.Items);
+    }
+  } while (
+    // only continue if new items were added in the last batch
+    previousItemCount < combinedResponse.Items.length
+  );
+
+  return logAndReturn("getItemsBatched", {
+    success: true,
+    data: combinedResponse,
+  });
+}
+
+export async function getTracksForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=Audio`);
   query.push(`recursive=true`);
   query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
   const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
 }
 
-export async function getAlbumsForLibrary(libraryId: string) {
+export async function getAlbumsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=MusicAlbum`);
   query.push(`recursive=true`);
   query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
   query.push(`enableImageTypes=Primary`);
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
   const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinAlbum[] }>;
 }
 
-export async function getArtistsForLibrary(libraryId: string) {
+// The Jellyfin API offers the `/Artists` and `/Artists/AlbumArtists` endpoints, but those return items with a different ID than the `/Items` endpoint
+// The tracks seem to reference both types of IDs, so we need to fetch from both endpoints
+export async function getAllArtistsWithProperIdsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
+  const query: string[] = [];
+  query.push(`ParentId=${libraryId}`);
+  query.push(`includeItemTypes=MusicArtist`);
+  query.push(`recursive=true`);
+  query.push(`fields=Genres,AudioInfo,ParentId,Ak`);
+  query.push(`enableImageTypes=Primary`);
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
+  const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
+  return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
+}
+
+export async function getArtistsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
@@ -228,23 +305,43 @@ export async function getArtistsForLibrary(libraryId: string) {
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);
   query.push(`recursive=true`);
   query.push(`enableImageTypes=Primary`);
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
   const route = `Artists?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinArtist[] }>;
 }
 
-export async function getAlbumArtistsForLibrary(libraryId: string) {
+export async function getAlbumArtistsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
-  query.push(`parentId=${libraryId}`);
+  // query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=BasicSyncInfo,Genres`);
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);
   query.push(`recursive=true`);
   query.push(`enableImageTypes=Primary`);
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
   const route = `Artists/AlbumArtists?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinArtist[] }>;
 }
 
-export async function getGenresForLibrary(libraryId: string) {
+export async function getGenresForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
@@ -252,6 +349,12 @@ export async function getGenresForLibrary(libraryId: string) {
   query.push(`recursive=true`);
   query.push(`enableImageTypes=Primary`);
 
+  if (start > 0) {
+    query.push(`startIndex=${start}`);
+  }
+  if (limit > 0) {
+    query.push(`limit=${limit}`);
+  }
   const route = `Genres?${query.join(`&`)}`;
   console.log(`route:`, route);
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinGenre[] }>;
@@ -514,9 +617,10 @@ export function reset() {
   generalCounter.v = new PlaybackCounter(normalCountersInit);
   skipped.v = 0;
 
-  downloadingProgress.set({ cur: 0, max: 0, detail: "" });
-  processingProgress.set({ cur: 0, max: 0, detail: "" });
-  generatingProgress.set({ cur: 0, max: 0, detail: "" });
+  downloadingProgress.reset();
+  processingProgress.reset();
+  processingListensProgress.reset();
+  generatingProgress.reset();
 
   return killCurrentTask();
 }
