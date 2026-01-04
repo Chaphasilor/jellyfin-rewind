@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-    import RocketIcon from "$lib/components/icons/RocketIcon.svelte";
+  import RocketIcon from "$lib/components/icons/RocketIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import { rewindReport } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";

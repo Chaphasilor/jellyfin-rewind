@@ -8,8 +8,8 @@
   import { uploadOfflinePlaybackBatched } from "$lib/jellyfin/queries/api/playbackReporting";
   import Modal from "$lib/components/Modal.svelte";
   import jellyfin from "$lib/jellyfin/index";
-    import ShareIcon from "$lib/components/icons/ShareIcon.svelte";
-    import LogoutOrInIcon from "$lib/components/icons/LogoutOrInIcon.svelte";
+  import ShareIcon from "$lib/components/icons/ShareIcon.svelte";
+  import LogoutOrInIcon from "$lib/components/icons/LogoutOrInIcon.svelte";
 
   let importingOfflinePlayback = $state(false);
   // let finampOfflineExportDialogOpen = $state(false);
@@ -64,7 +64,7 @@
       >
         <span>Import Offline Playback History</span>
         <span class="font-bold text-[1.1rem] text-orange-800">
-            Only import once per Finamp install!
+          Only import once per Finamp install!
         </span>
       </label>
       <!-- svelte-ignore event_directive_deprecated -->

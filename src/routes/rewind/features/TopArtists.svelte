@@ -9,7 +9,7 @@
     loadImage,
     loadTracksForGroup,
   } from "$lib/utility/jellyfin-helper";
-    import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
+  import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
 
   const {
     informationSource,

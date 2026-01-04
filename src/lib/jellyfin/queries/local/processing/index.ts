@@ -66,13 +66,14 @@ async function waitForUi() {
 const execute = async (): Promise<Result<ProcessingResults>> => {
   await reset();
 
-  const serverInfoResult = await jellyfin.pingServer()
+  const serverInfoResult = await jellyfin.pingServer();
   let serverInfo;
   if (serverInfoResult.success) {
     serverInfo = serverInfoResult.data;
   }
   // small batch sizes slow down 10.10, but 10.11 needs them to avoid timeouts due to performance issues
-  const preferSmallBatchSize = serverInfo?.Version?.includes?.("10.11.") ?? true
+  const preferSmallBatchSize = serverInfo?.Version?.includes?.("10.11.") ??
+    true;
 
   const libraryResult = await getMusicLibrary();
   if (!libraryResult.success || !libraryResult.data) {
@@ -85,36 +86,49 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
   // fetch library items
   const libraryData: LibraryData = [];
-  downloadingProgress.setMax(musicLibraries.length * 6)
+  downloadingProgress.setMax(musicLibraries.length * 6);
   for (let i = 0; i < musicLibraries.length; i++) {
     const library = musicLibraries[i];
 
-    const tracksResult = await getItemsBatched((start, limit) => getTracksForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const tracksResult = await getItemsBatched(
+      (start, limit) => getTracksForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!tracksResult.success) {
       console.warn(`No tracks found for library:`, library.Name);
       continue;
     }
     const tracks = tracksResult.data.Items;
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
-    const albumsResult = await getItemsBatched((start, limit) => getAlbumsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const albumsResult = await getItemsBatched(
+      (start, limit) => getAlbumsForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!albumsResult.success) {
       console.warn(`No albums found for library:`, library.Name);
     }
     const albums = albumsResult.success ? albumsResult.data?.Items : [];
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
-    const artistsResult = await getItemsBatched((start, limit) => getAllArtistsWithProperIdsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const artistsResult = await getItemsBatched(
+      (start, limit) =>
+        getAllArtistsWithProperIdsForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!artistsResult.success) {
       console.warn(`No artists found for library:`, library.Name);
     }
     const artists = artistsResult.success ? artistsResult.data?.Items : [];
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
-    const performingArtistsResult = await getItemsBatched((start, limit) => getArtistsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const performingArtistsResult = await getItemsBatched(
+      (start, limit) => getArtistsForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!performingArtistsResult.success) {
       console.warn(`No performingArtists found for library:`, library.Name);
     }
@@ -122,9 +136,12 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       ? performingArtistsResult.data?.Items
       : [];
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
-    const albumArtistsResult = await getItemsBatched((start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const albumArtistsResult = await getItemsBatched(
+      (start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!albumArtistsResult.success) {
       console.warn(`No albumArtists found for library:`, library.Name);
     }
@@ -132,15 +149,18 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       ? albumArtistsResult.data?.Items
       : [];
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
-    const genresResult = await getItemsBatched((start, limit) => getGenresForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
+    const genresResult = await getItemsBatched(
+      (start, limit) => getGenresForLibrary(library.Id, start, limit),
+      preferSmallBatchSize ? 200 : 2000,
+    );
     if (!genresResult.success) {
       console.warn(`No genres found for library:`, library.Name);
     }
     const genres = genresResult.success ? genresResult.data?.Items : [];
 
-    await downloadingProgress.next()
+    await downloadingProgress.next();
 
     libraryData.push({
       id: library.Id,
@@ -170,12 +190,12 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   }
 
   processingProgress.setMax(libraryData.reduce(
-      (sum, lib) =>
-        sum + lib.tracks.length + lib.albums.length + lib.artists.length +
-        +lib.performingArtists.length +
-        lib.albumArtists.length +
-        lib.genres.length,
-      0,
+    (sum, lib) =>
+      sum + lib.tracks.length + lib.albums.length + lib.artists.length +
+      +lib.performingArtists.length +
+      lib.albumArtists.length +
+      lib.genres.length,
+    0,
   ));
 
   for (const lib of libraryData) {
@@ -184,7 +204,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Albums
     for (let i = 0; i < lib.albums.length; i++) {
       const album = lib.albums[i];
-      await processingProgress.next()
+      await processingProgress.next();
       const processedAlbum = processAlbum(album);
       updateCountersForAlbum(CounterSources.JELLYFIN, album);
     }
@@ -192,7 +212,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Artists
     for (let i = 0; i < lib.artists.length; i++) {
       const artist = lib.artists[i];
-      await processingProgress.next()
+      await processingProgress.next();
       const processedArtist = processArtist(artist);
       updateCountersForArtist(CounterSources.JELLYFIN, artist);
     }
@@ -200,15 +220,15 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Performing Artists
     for (let i = 0; i < lib.performingArtists.length; i++) {
       const performingArtist = lib.performingArtists[i];
-      await processingProgress.next()
+      await processingProgress.next();
       const processedArtist = processArtist(performingArtist);
-        updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
+      updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
     }
 
     //processingListensProgressming & album artists explicitly, and dedupe
     for (let i = 0; i < lib.albumArtists.length; i++) {
       const albumArtist = lib.albumArtists[i];
-      await processingProgress.next()
+      await processingProgress.next();
       const processedArtist = processArtist(albumArtist);
       updateCountersForArtist(CounterSources.JELLYFIN, albumArtist);
     }
@@ -217,7 +237,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Genres
     for (let i = 0; i < lib.genres.length; i++) {
       const genre = lib.genres[i];
-      await processingProgress.next()
+      await processingProgress.next();
       const processedGenre = processGenre(genre);
       updateCountersForGenre(CounterSources.JELLYFIN, genre);
     }
@@ -225,7 +245,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     // Process Tracks
     for (let i = 0; i < lib.tracks.length; i++) {
       const track = lib.tracks[i];
-      await processingProgress.next()
+      await processingProgress.next();
       if (track.UserData.IsFavorite) favorites.v++;
       const processedTrack = compactTrack(track);
       const processedTrackId = tracksCache.setAndGetValue(
@@ -241,10 +261,10 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     playbackReportingAvailable.set(false);
     console.warn(`No listens to process from Playback Reporting.`);
   } else {
-    processingListensProgress.setMax(listens.length)
+    processingListensProgress.setMax(listens.length);
     for (let i = 0; i < listens.length; i++) {
       const rawListen = listens[i];
-      await processingListensProgress.next()
+      await processingListensProgress.next();
 
       const listen = listensCache.setAndGetValue(rawListen.rowid!, () => {
         return new Listen(rawListen, tracksCache.get(rawListen.ItemId));
@@ -263,7 +283,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     }
   }
 
-  generatingProgress.setMax(1)
+  generatingProgress.setMax(1);
 
   return logAndReturn("processing", {
     success: true,

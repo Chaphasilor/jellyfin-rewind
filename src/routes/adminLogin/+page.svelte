@@ -1,7 +1,7 @@
 <script lang="ts">
   import { dev } from "$app/environment";
   import { goto } from "$app/navigation";
-    import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
+  import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
   import {

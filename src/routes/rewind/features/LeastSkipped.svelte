@@ -9,7 +9,7 @@
   import { loadImage } from "$lib/utility/jellyfin-helper";
   import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
-    import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
+  import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
 
   const {
     informationSource,

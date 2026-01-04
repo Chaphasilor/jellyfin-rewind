@@ -17,8 +17,12 @@ export const endSql = formatDateToSql(end);
 
 export const downloadingProgress = new Progress("Fetching Library Data");
 export const processingProgress = new Progress("Preparing Library Data");
-export const processingListensProgress = new Progress("Processing Listening Data");
-export const generatingProgress = new Progress("Generating your Personal Rewind Report");
+export const processingListensProgress = new Progress(
+  "Processing Listening Data",
+);
+export const generatingProgress = new Progress(
+  "Generating your Personal Rewind Report",
+);
 
 export const playbackReportingAvailable = writable<boolean>(true);
 export const processingResult = writable<ProcessingResults>();

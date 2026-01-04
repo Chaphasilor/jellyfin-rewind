@@ -6,7 +6,7 @@
   import { CounterSources, type FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
-    import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
+  import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
 
   const {
     informationSource,

@@ -199,7 +199,13 @@ export async function getMusicLibrary(): Promise<Result<any[]>> {
   });
 }
 
-export async function getItemsBatched<T>(fetcher: (startIndex: number, limit: number) => Promise<Result<{ Items: T[] }>>, batchSize: number = 200) {
+export async function getItemsBatched<T>(
+  fetcher: (
+    startIndex: number,
+    limit: number,
+  ) => Promise<Result<{ Items: T[] }>>,
+  batchSize: number = 200,
+) {
   const combinedResponse = {
     Items: [] as T[],
   };
@@ -245,9 +251,13 @@ export async function getTracksForLibrary(
   }
   const route = `Users/${jellyfin.userId}/Items?${query.join(`&`)}`;
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
-}  
+}
 
-export async function getAlbumsForLibrary(libraryId: string, start: number = 0, limit: number = 0) {
+export async function getAlbumsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=MusicAlbum`);
@@ -266,7 +276,11 @@ export async function getAlbumsForLibrary(libraryId: string, start: number = 0, 
 
 // The Jellyfin API offers the `/Artists` and `/Artists/AlbumArtists` endpoints, but those return items with a different ID than the `/Items` endpoint
 // The tracks seem to reference both types of IDs, so we need to fetch from both endpoints
-export async function getAllArtistsWithProperIdsForLibrary(libraryId: string, start: number = 0, limit: number = 0) {
+export async function getAllArtistsWithProperIdsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`ParentId=${libraryId}`);
   query.push(`includeItemTypes=MusicArtist`);
@@ -283,7 +297,11 @@ export async function getAllArtistsWithProperIdsForLibrary(libraryId: string, st
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinTrack[] }>;
 }
 
-export async function getArtistsForLibrary(libraryId: string, start: number = 0, limit: number = 0) {
+export async function getArtistsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
@@ -301,7 +319,11 @@ export async function getArtistsForLibrary(libraryId: string, start: number = 0,
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinArtist[] }>;
 }
 
-export async function getAlbumArtistsForLibrary(libraryId: string, start: number = 0, limit: number = 0) {
+export async function getAlbumArtistsForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   // query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
@@ -319,7 +341,11 @@ export async function getAlbumArtistsForLibrary(libraryId: string, start: number
   return (await jellyfin.getData(route)) as Result<{ Items: JellyfinArtist[] }>;
 }
 
-export async function getGenresForLibrary(libraryId: string, start: number = 0, limit: number = 0) {
+export async function getGenresForLibrary(
+  libraryId: string,
+  start: number = 0,
+  limit: number = 0,
+) {
   const query: string[] = [];
   query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);

@@ -233,7 +233,8 @@ export async function processingResultToRewindReport(
       }),
       albumArtist: {
         id: album.albumArtists[0],
-        name: result.artistCache.get(album.albumArtists[0])?.name ?? "Unknown Artist",
+        name: result.artistCache.get(album.albumArtists[0])?.name ??
+          "Unknown Artist",
       },
       tracks: albumTracks.length,
       year: album.year!,

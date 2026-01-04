@@ -1,8 +1,8 @@
 <script lang="ts">
-    import type { Progress } from "$lib/utility/Progress";
+  import type { Progress } from "$lib/utility/Progress";
 
   export let progress: Progress;
-  let {current, max, name} = progress
+  let { current, max, name } = progress;
 </script>
 
 <div>

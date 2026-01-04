@@ -38,7 +38,7 @@
   import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
   import { skipped } from "$lib/jellyfin/queries/local/processing/values";
   import MuteVolumeIcon from "$lib/components/icons/MuteVolumeIcon.svelte";
-    import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
+  import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
 
   if (!$rewindReport?.jellyfinRewindReport) {
     console.warn(`No $rewindReport found, redirecting to /welcome...`);
@@ -540,9 +540,9 @@
     type="button"
   >
     {#if soundMuted}
-        <MuteVolumeIcon />
+      <MuteVolumeIcon />
     {:else}
-        <OnVolumeIcon />
+      <OnVolumeIcon />
     {/if}
   </button>
 </div>

@@ -12,7 +12,7 @@
   import Unavailable from "$lib/components/Unavailable.svelte";
   import { goto } from "$app/navigation";
   import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
-    import StarIcon from "$lib/components/icons/StarIcon.svelte";
+  import StarIcon from "$lib/components/icons/StarIcon.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();

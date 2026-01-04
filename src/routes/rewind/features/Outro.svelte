@@ -12,7 +12,7 @@
   import { log } from "$lib/utility/logging";
   import { reset } from "$lib/jellyfin/queries/local/processing/functions";
   import jellyfin from "$lib/jellyfin";
-    import DownloadIcon from "$lib/components/icons/DownloadIcon.svelte";
+  import DownloadIcon from "$lib/components/icons/DownloadIcon.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();

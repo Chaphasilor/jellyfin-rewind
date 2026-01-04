@@ -4,7 +4,7 @@
   import { importRewindReport } from "$lib/utility/oldReportDelta";
   import { goto } from "$app/navigation";
   import { year } from "$lib/globals";
-    import InfoIcon from "./icons/InfoIcon.svelte";
+  import InfoIcon from "./icons/InfoIcon.svelte";
   const { children } = $props();
 
   let modalOpen = $state(false);
