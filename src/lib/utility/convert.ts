@@ -223,17 +223,17 @@ export async function processingResultToRewindReport(
 
     return {
       id: album.id,
-      name: album.name,
+      name: album.name ?? "Unknown Album",
       artists: album.artists.map((artistId) => {
         const artist = result.artistCache.get(artistId)!;
         return {
           id: artistId,
-          name: artist?.name!,
+          name: artist?.name ?? "Unknown Artist",
         };
       }),
       albumArtist: {
         id: album.albumArtists[0],
-        name: result.artistCache.get(album.albumArtists[0])?.name!,
+        name: result.artistCache.get(album.albumArtists[0])?.name ?? "Unknown Artist",
       },
       tracks: albumTracks.length,
       year: album.year!,
@@ -307,7 +307,7 @@ export async function processingResultToRewindReport(
 
     return {
       id: id,
-      name: artist.name,
+      name: artist.name ?? "Unknown Artist",
       tracks: artistTracks.length,
       images: {
         primary: {
@@ -369,7 +369,7 @@ export async function processingResultToRewindReport(
 
     return {
       id: id,
-      name: genre.name,
+      name: genre.name ?? "Unknown Genre",
       tracks: genreTracks.length,
       playCount: {
         playbackReport: value.counters.playbackReporting.fullPlays +

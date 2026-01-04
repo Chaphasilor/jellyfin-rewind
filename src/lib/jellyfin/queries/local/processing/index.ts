@@ -102,6 +102,8 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       console.warn(`No artists found for library:`, library.Name);
     }
     const artists = artistsResult.success ? artistsResult.data?.Items : [];
+    
+    await downloadingProgress.next()
 
     const performingArtistsResult = await getItemsBatched((start, limit) => getArtistsForLibrary(library.Id, start, limit));
     if (!performingArtistsResult.success) {
@@ -110,6 +112,8 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     const performingArtists = performingArtistsResult.success
       ? performingArtistsResult.data?.Items
       : [];
+
+    await downloadingProgress.next()
 
     const albumArtistsResult = await getItemsBatched((start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit));
     if (!albumArtistsResult.success) {
