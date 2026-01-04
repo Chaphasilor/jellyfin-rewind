@@ -199,11 +199,10 @@ export async function getMusicLibrary(): Promise<Result<any[]>> {
   });
 }
 
-export async function getItemsBatched<T>(fetcher: (startIndex: number, limit: number) => Promise<Result<{ Items: T[] }>>) {
+export async function getItemsBatched<T>(fetcher: (startIndex: number, limit: number) => Promise<Result<{ Items: T[] }>>, batchSize: number = 200) {
   const combinedResponse = {
     Items: [] as T[],
   };
-  const batchSize = 200;
   let previousItemCount = 0;
   let response;
   do {

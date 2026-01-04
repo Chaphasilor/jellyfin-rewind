@@ -14,6 +14,7 @@ import {
   type Result,
 } from "$lib/types.ts";
 import { logAndReturn } from "$lib/utility/logging.ts";
+import jellyfin from "../../../index.ts";
 import allListens from "../../api/playbackReporting.ts";
 import {
   compactTrack,
@@ -65,6 +66,14 @@ async function waitForUi() {
 const execute = async (): Promise<Result<ProcessingResults>> => {
   await reset();
 
+  const serverInfoResult = await jellyfin.pingServer()
+  let serverInfo;
+  if (serverInfoResult.success) {
+    serverInfo = serverInfoResult.data;
+  }
+  // small batch sizes slow down 10.10, but 10.11 needs them to avoid timeouts due to performance issues
+  const preferSmallBatchSize = serverInfo?.Version?.includes?.("10.11.") ?? true
+
   const libraryResult = await getMusicLibrary();
   if (!libraryResult.success || !libraryResult.data) {
     return logAndReturn("processing", {
@@ -80,7 +89,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
   for (let i = 0; i < musicLibraries.length; i++) {
     const library = musicLibraries[i];
 
-    const tracksResult = await getItemsBatched((start, limit) => getTracksForLibrary(library.Id, start, limit));
+    const tracksResult = await getItemsBatched((start, limit) => getTracksForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!tracksResult.success) {
       console.warn(`No tracks found for library:`, library.Name);
       continue;
@@ -89,7 +98,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const albumsResult = await getItemsBatched((start, limit) => getAlbumsForLibrary(library.Id, start, limit));
+    const albumsResult = await getItemsBatched((start, limit) => getAlbumsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!albumsResult.success) {
       console.warn(`No albums found for library:`, library.Name);
     }
@@ -97,15 +106,15 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const artistsResult = await getItemsBatched((start, limit) => getAllArtistsWithProperIdsForLibrary(library.Id, start, limit));
+    const artistsResult = await getItemsBatched((start, limit) => getAllArtistsWithProperIdsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!artistsResult.success) {
       console.warn(`No artists found for library:`, library.Name);
     }
     const artists = artistsResult.success ? artistsResult.data?.Items : [];
-    
+
     await downloadingProgress.next()
 
-    const performingArtistsResult = await getItemsBatched((start, limit) => getArtistsForLibrary(library.Id, start, limit));
+    const performingArtistsResult = await getItemsBatched((start, limit) => getArtistsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!performingArtistsResult.success) {
       console.warn(`No performingArtists found for library:`, library.Name);
     }
@@ -115,7 +124,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const albumArtistsResult = await getItemsBatched((start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit));
+    const albumArtistsResult = await getItemsBatched((start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!albumArtistsResult.success) {
       console.warn(`No albumArtists found for library:`, library.Name);
     }
@@ -125,7 +134,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
 
     await downloadingProgress.next()
 
-    const genresResult = await getItemsBatched((start, limit) => getGenresForLibrary(library.Id, start, limit));
+    const genresResult = await getItemsBatched((start, limit) => getGenresForLibrary(library.Id, start, limit), preferSmallBatchSize ? 200 : 2000);
     if (!genresResult.success) {
       console.warn(`No genres found for library:`, library.Name);
     }
