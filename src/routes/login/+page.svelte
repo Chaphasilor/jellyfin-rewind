@@ -6,7 +6,7 @@
   import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import Modal from "$lib/components/Modal.svelte";
-  import { playbackReportingInspectionResult  } from "$lib/globals";
+  import { playbackReportingInspectionResult } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import { PlaybackReportingIssueAction } from "$lib/types";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";

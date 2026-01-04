@@ -1,9 +1,6 @@
 <script lang="ts">
   import Chart from "chart.js/auto";
-  import {
-    isAccuracyDisclaimerOpen,
-    rewindReport
-  } from "$lib/globals";
+  import { isAccuracyDisclaimerOpen, rewindReport } from "$lib/globals";
   import { onMount } from "svelte";
   import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";

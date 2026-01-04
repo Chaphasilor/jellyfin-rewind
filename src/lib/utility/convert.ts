@@ -15,11 +15,7 @@ import {
   type RewindReport,
   type Track,
 } from "../types.ts";
-import {
-  oldReport,
-  playbackReportingAvailable,
-  year,
-} from "$lib/globals.ts";
+import { oldReport, playbackReportingAvailable, year } from "$lib/globals.ts";
 import Jellyfin from "$lib/jellyfin/index.ts";
 import { getFeatureDelta } from "./oldReportDelta.ts";
 import { logAndReturn } from "./logging.ts";

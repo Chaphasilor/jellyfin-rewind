@@ -24,7 +24,7 @@
   import Intro from "./features/Intro.svelte";
   import FeatureDelta from "./features/FeatureDelta.svelte";
   import ForgottenFavorites from "./features/ForgottenFavorites.svelte";
-  import { loadAudio,} from "$lib/utility/jellyfin-helper";
+  import { loadAudio } from "$lib/utility/jellyfin-helper";
   import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
   import MuteVolumeIcon from "$lib/components/icons/MuteVolumeIcon.svelte";
   import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
