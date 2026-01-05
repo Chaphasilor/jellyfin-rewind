@@ -12,7 +12,7 @@
   let offlinePlayback;
 </script>
 
-<div class="p-4">
+<div class="p-4 pb-20">
   <Header />
 
   <div

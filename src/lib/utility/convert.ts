@@ -460,8 +460,8 @@ export async function processingResultToRewindReport(
   }
 
   const userInfo = {
-    id: Jellyfin.user!.id,
-    name: Jellyfin.user!.name,
+    id: Jellyfin.targetUser?.id ?? Jellyfin.user?.id!,
+    name: Jellyfin.targetUser?.name ?? Jellyfin.user?.name!,
   };
 
   const totalTracksLength = result.tracksCache.entries.reduce(
