@@ -70,11 +70,6 @@
 
   <div class="mt-4 w-full flex flex-col items-center">
     <JellyfinRewindLogo />
-    <h3
-      class="-rotate-6 ml-4 -mt-2 text-3xl font-quicksand font-medium text-[#00A4DC]"
-    >
-      Rewind
-    </h3>
   </div>
 
   <div
