@@ -32,7 +32,7 @@ class Jellyfin {
     console.log(`url:`, url);
 
     this.baseurl = url_.data!.toString().replace(/\/+$/, "");
-    console.log(`connectToURL baseUrl:`, this.baseurl)
+    console.log(`connectToURL baseUrl:`, this.baseurl);
 
     const ping = await this.pingServer();
     if (!ping.success) return ping; // invalid Server
