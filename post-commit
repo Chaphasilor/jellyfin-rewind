@@ -1,0 +1,18 @@
+#!/bin/sh
+
+#
+# (optional) Copy this file to .git/hooks/
+#
+
+echo "Checking formatting..."
+
+deno task format
+
+changes=$(git status --porcelain)
+
+if [ -n "$changes" ]; then
+  echo "Formatting changes detected"
+
+  git add .
+  git commit -m "Hook: Formatting" --no-verify
+fi

@@ -14,6 +14,7 @@
   let serverUrl: string = $state("");
   let adminUserName: string = $state("");
   let adminUserPassword: string = $state("");
+  // svelte-ignore non_reactive_update
   let connectionHelpOpen = writable(false);
 
   async function proceed() {
@@ -34,10 +35,15 @@
 
   // only when devin' attempt an auto login
   if (dev) {
-    serverUrl = Deno.env.get("PUBLIC_JELLYFIN_SERVER_URL");
-    adminUserName = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_USERNAME");
-    adminUserPassword = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_PASSWORD");
-    pingServer().then(() => authenticate().then(proceed));
+    import("$env/static/public").then(async (i) => {
+      serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
+      adminUserName = i.PUBLIC_JELLYFIN_ADMIN_USERNAME;
+      adminUserPassword = i.PUBLIC_JELLYFIN_ADMIN_PASSWORD;
+      if (!serverUrl || !adminUserName || !adminUserPassword) return;
+      await pingServer();
+      await authenticate();
+      proceed();
+    });
   }
 
   let error: string | undefined = $state(undefined);

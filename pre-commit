@@ -5,18 +5,11 @@
 #
 
 echo "Running Custom Commit Hook..."
-
-
-echo "Formatting..."
-deno task format
-if [ $? -gt 0 ]; then
-    notify-send --urgency="critical" --app-name="Git pre Commit Hook" "Jellyfin Rewind" "Formatting Failed"
-    exit 1
-fi
-
 echo "Testing build..."
+
 deno task build
-if [ $? -gt 0 ]; then
-    notify-send --urgency="critical" --app-name="Git pre Commit Hook" "Jellyfin Rewind" "Building Failed"
+
+if [ $? -ne 0 ]; then
+    echo "Error: Build failed"
     exit 1
 fi
