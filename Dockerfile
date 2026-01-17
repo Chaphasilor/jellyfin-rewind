@@ -14,6 +14,7 @@ ENV VITE_COMMIT_HASH=$VITE_COMMIT_HASH VITE_TARGET_YEAR=$VITE_TARGET_YEAR VITE_S
 RUN deno task build
 
 
+
 # host
 FROM nginx:alpine
 # this image is used to serve the static files, without any nodejs dependency

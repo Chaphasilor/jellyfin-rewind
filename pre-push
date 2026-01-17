@@ -4,12 +4,12 @@
 # (optional) Copy this file to .git/hooks/
 #
 
+echo "Running Custom Push Hook..."
 echo "Checking formatting..."
 
 deno task format
 
 changes=$(git status --porcelain)
-
 if [ -n "$changes" ]; then
   echo "Formatting changes detected"
 
