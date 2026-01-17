@@ -1,4 +1,17 @@
 {
+  "tasks": {
+    "dev": "deno run -A npm:vite dev",
+    "build": "deno run -A npm:vite build",
+    "preview": "deno run -A npm:vite preview",
+    "format": "deno fmt --indent-width 2 ."
+  },
   "unstable": ["fmt-component"],
-  "allowScripts": ["npm:@sveltejs/kit@2.15.1", "npm:esbuild@0.21.5"]
+  "allowScripts": ["npm:@sveltejs/kit@2.15.1", "npm:esbuild@0.21.5"],
+  "lint": {
+    "include": ["src/**/*.{ts,js,svelte}"],
+    "exclude": ["node_modules", ".svelte-kit", "dist", "build"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  }
 }

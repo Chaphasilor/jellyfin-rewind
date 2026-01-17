@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import {
   downloadingProgress,
   generatingProgress,
@@ -56,10 +57,10 @@ export function processAlbum(album: JellyfinAlbum): string | undefined {
       ? new Date(album.UserData.LastPlayedDate)
       : null,
     artists: (album.ArtistItems ?? []).map((
-      { Id, Name }: { Id: string; Name: string },
+      { Id }: { Id: string; Name: string },
     ) => Id),
     albumArtists: (album.AlbumArtists ?? []).map((
-      { Id, Name }: { Id: string; Name: string },
+      { Id }: { Id: string; Name: string },
     ) => Id),
     imageTag: (album.ImageTags ?? { Primary: undefined }).Primary,
     imageBlur: album.ImageTags && album.ImageBlurHashes.Primary
@@ -316,12 +317,10 @@ export async function getArtistsForLibrary(
 }
 
 export async function getAlbumArtistsForLibrary(
-  libraryId: string,
   start: number = 0,
   limit: number = 0,
 ) {
   const query: string[] = [];
-  // query.push(`parentId=${libraryId}`);
   query.push(`userId=${jellyfin.userId}`);
   query.push(`fields=BasicSyncInfo,Genres`);
   query.push(`enableImageTypes=Primary,Backdrop,Banner,Thumb`);
@@ -427,19 +426,17 @@ export function compactTrack(track: JellyfinTrack): Track {
       : null,
     albumId: track.AlbumId,
     artists: track.ArtistItems.map((
-      { Id, Name }: { Id: string; Name: string },
+      { Id }: { Id: string; Name: string },
     ) => Id),
     albumArtists: track.AlbumArtists.map((
-      { Id, Name }: { Id: string; Name: string },
+      { Id }: { Id: string; Name: string },
     ) => Id),
     duration: Math.ceil(track.RunTimeTicks / 10_000_000),
     favorite: track.UserData.IsFavorite,
     lastPlayed: track.UserData?.LastPlayedDate
       ? new Date(track.UserData.LastPlayedDate)
       : null,
-    genres: track.GenreItems.map(({ Id, Name }: { Id: string; Name: string }) =>
-      Id
-    ),
+    genres: track.GenreItems.map(({ Id }: { Id: string; Name: string }) => Id),
     imageTag: (track.ImageTags ?? { Primary: undefined }).Primary,
     imageBlur: track.ImageTags && track.ImageBlurHashes.Primary
       ? track.ImageBlurHashes.Primary[track.ImageTags.Primary]

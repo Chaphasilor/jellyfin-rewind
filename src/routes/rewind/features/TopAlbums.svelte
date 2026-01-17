@@ -76,7 +76,11 @@
         <div
           class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"
         >
-          <img id={`top-albums-image-${index}`} class="w-full h-full" />
+          <img
+            id={`top-albums-image-${index}`}
+            class="w-full h-full"
+            alt="album"
+          />
           <div
             id={`top-albums-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
@@ -136,6 +140,7 @@
         >
           <img
             id={`top-albums-background-image-${index}`}
+            alt="albums background"
             class="w-full h-full"
           />
         </div>

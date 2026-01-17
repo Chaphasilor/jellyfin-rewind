@@ -47,7 +47,7 @@
 
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] disabled:bg-[#00A4DC]/30 text-white font-semibold mt-12 flex flex-row gap-4 items-center mx-auto"
-    on:click={() => {
+    onclick={() => {
       document.documentElement.requestFullscreen();
       goto("/rewind");
     }}

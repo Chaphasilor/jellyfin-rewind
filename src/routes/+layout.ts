@@ -8,5 +8,5 @@ export const ssr = false;
 // which will build an static web page, every page
 // needs to be prerender to avoid errors while
 // building. This is because server code ($lib)
-// shouldnt exist in an static application
+// shouldn't exist in an static application
 export const prerender = true;

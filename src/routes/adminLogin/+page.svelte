@@ -33,15 +33,10 @@
 
   // only when devin' attempt an auto login
   if (dev) {
-    import("$env/static/public").then(async (i) => {
-      serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
-      adminUserName = i.PUBLIC_JELLYFIN_ADMIN_USERNAME;
-      adminUserPassword = i.PUBLIC_JELLYFIN_ADMIN_PASSWORD;
-      if (!serverUrl || !adminUserName || !adminUserPassword) return;
-      await pingServer();
-      await authenticate();
-      proceed();
-    });
+    serverUrl = Deno.env.get("PUBLIC_JELLYFIN_SERVER_URL");
+    adminUserName = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_USERNAME");
+    adminUserPassword = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_PASSWORD");
+    pingServer().then(() => authenticate().then(proceed));
   }
 
   let error: string | undefined = $state(undefined);
@@ -138,13 +133,13 @@
       reduce the quality and accuracy of your Jellyfin Rewind Report!
     </p>
   </div>
-  <form class="form px-3" on:submit={tryLogIn}>
+  <form class="form px-3" onsubmit={tryLogIn}>
     <label for="username" class="relative flex flex-col">
       <small>Admin Username</small>
       <input
         name="username"
         bind:value={adminUserName}
-        on:keyup={handleLoginInput}
+        onkeyup={handleLoginInput}
       />
     </label>
 
@@ -155,8 +150,8 @@
         name="password"
         type="password"
         bind:value={adminUserPassword}
-        on:keyup={handleLoginInput}
-        on:keydown={(e) => {
+        onkeyup={handleLoginInput}
+        onkeydown={(e) => {
           if (e.key === "Enter") {
             tryLogIn();
           }
@@ -175,7 +170,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="self-center mt-2 text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white"
-          on:click={() => (connectionHelpOpen = true)}
+          onclick={() => (connectionHelpOpen = true)}
         >
           Help me!?
         </button>
@@ -186,7 +181,7 @@
   {#if !serverValid || !loginValid || !adminUserName || !adminUserPassword}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={tryLogIn}
+      onclick={tryLogIn}
     >
       <span>{loggingIn ? `Logging in...` : `Log In`}</span>
       <ForwardsArrowIcon />
@@ -194,7 +189,7 @@
   {:else}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={() => proceed()}
+      onclick={() => proceed()}
     >
       Continue To Rewind
     </button>
@@ -202,7 +197,7 @@
 
   <button
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-8 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    on:click={() => proceed()}
+    onclick={() => proceed()}
   >
     <span>Continue without administrator access<br />(not recommended)</span>
   </button>

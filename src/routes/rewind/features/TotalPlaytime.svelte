@@ -4,9 +4,10 @@
   import { onMount } from "svelte";
   import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-  import Unavailable from "$lib/components/Unavailable.svelte";
-  import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
+  import Unavailable from "$lib/components/Unavailable/Unavailable.svelte";
   import StarIcon from "$lib/components/icons/StarIcon.svelte";
+  import UnavailableReasonPlaybackReporting from "$lib/components/Unavailable/UnavailableReasonPlaybackReporting.svelte";
+    import { stopPropagation } from "$lib/utility/handlers";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();
@@ -168,15 +169,14 @@
       <button
         class="inline-flex flex-row align-items-start hover:text-gray-700 cursor-pointer"
         title="Learn about data accuracy"
-        role="button"
         tabindex="0"
-        on:keydown|stopPropagation={() => {
+        onkeydown={stopPropagation(() => {
           isAccuracyDisclaimerOpen.set(true);
-        }}
-        on:click|stopPropagation={() => {
+        })}
+        onclick={stopPropagation(() => {
           console.log(`click:`);
           isAccuracyDisclaimerOpen.set(true);
-        }}
+        })}
       >
         <StarIcon />
       </button>

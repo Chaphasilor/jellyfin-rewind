@@ -4,8 +4,8 @@
   import { onMount } from "svelte";
   import { showAsNumber } from "$lib/utility/format";
   import { Spring } from "svelte/motion";
-  import Unavailable from "$lib/components/Unavailable.svelte";
-  import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
+  import Unavailable from "$lib/components/Unavailable/Unavailable.svelte";
+  import UnavailableReasonPlaybackReporting from "$lib/components/Unavailable/UnavailableReasonPlaybackReporting.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();

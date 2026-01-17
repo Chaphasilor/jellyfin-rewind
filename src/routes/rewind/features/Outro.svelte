@@ -8,9 +8,9 @@
   import Modal from "$lib/components/Modal.svelte";
   import jellyfin from "$lib/jellyfin";
   import DownloadIcon from "$lib/components/icons/DownloadIcon.svelte";
+  import { stopPropagation } from "$lib/utility/handlers";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {}: FeatureProps = $props();
 
   let rewindReportDownloaded = $state(false);
 
@@ -84,9 +84,9 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-6 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-3 flex flex-row gap-4 items-center mx-auto"
-    on:click|stopPropagation={() => {
+    onclick={stopPropagation(() => {
       download();
-    }}
+    })}
   >
     <span class="leading-7">Download Your<br />Rewind Report</span>
     <DownloadIcon />
@@ -105,7 +105,7 @@
         class="text-[#00A4DC] hover:text-[#0085B2]"
         href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
         target="_blank"
-        on:click|stopPropagation={() => {}}
+        onclick={stopPropagation()}
       >GitHub</a>!<br />Feel free to leave suggestions or report bugs :)
     </p>
     <p>
@@ -121,27 +121,27 @@
   <h1>Thanks for checking out the {year} rewind!</h1>
   {#if !rewindReportDownloaded}
     <p>
-      You havent yet downloaded the rewind, so you can compare {year} to {
+      You haven't yet downloaded the rewind, so you can compare {year} to {
         year + 1
       }
     </p>
     <p>Do you want to close the rewind without saving?</p>
-    <button on:click|stopPropagation={() => download()}>
+    <button onclick={stopPropagation(() => download())}>
       Stop! I want to the Download Report!
     </button>
   {:else}
     <p>Make sure you have placed the rewind json in the right place.</p>
     <p>If you want you can also download it again</p>
-    <button on:click|stopPropagation={() => download()}>
+    <button onclick={stopPropagation(() => download())}>
       I want to be sure!
     </button>
   {/if}
   <br>
   <br>
   <br>
-  <button on:click={() => closeModalOpen = false}>Dont Close</button>
+  <button onclick={() => closeModalOpen = false}>Don't Close</button>
   <br>
   <br>
-  <button on:click={() => close()}>Close</button>
-  <button on:click={() => close(true)}>Close & Logout</button>
+  <button onclick={() => close()}>Close</button>
+  <button onclick={() => close(true)}>Close & Logout</button>
 </Modal>

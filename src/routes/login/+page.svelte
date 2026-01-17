@@ -39,19 +39,15 @@
 
   // only when devin' attempt an auto login
   if (dev) {
-    import("$env/static/public").then(async (i) => {
-      serverUrl = i.PUBLIC_JELLYFIN_SERVER_URL;
-      userName = i.PUBLIC_JELLYFIN_USERNAME;
-      userPassword = i.PUBLIC_JELLYFIN_PASSWORD;
-      if (!serverUrl || !userName || !userPassword) return;
-      await pingServer();
-      await authenticate();
-      if (jellyfin.user?.isAdmin) {
-        proceed();
-      } else {
-        goto("/adminLogin");
-      }
-    });
+    serverUrl = Deno.env.get("PUBLIC_JELLYFIN_SERVER_URL");
+    userName = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_USERNAME");
+    userPassword = Deno.env.get("PUBLIC_JELLYFIN_ADMIN_PASSWORD");
+    pingServer().then(() =>
+      authenticate().then(() => {
+        if (jellyfin.user?.isAdmin) proceed();
+        else goto("/adminLogin");
+      })
+    );
   }
 
   let error: string | undefined = $state(undefined);
@@ -148,7 +144,7 @@
       URL and you can easily copy it!
     </p>
   </div>
-  <form class="form px-3" on:submit={tryLogIn}>
+  <form class="form px-3" onsubmit={tryLogIn}>
     <label class="relative flex flex-col" for="serverUrl">
       <small>Server URL</small>
       <input
@@ -157,7 +153,7 @@
         type="url"
         placeholder="https://demo.jellyfin.org"
         bind:value={serverUrl}
-        on:keyup={handleServerInput}
+        onkeyup={handleServerInput}
       />
       <span class="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
         {#if serverValid}
@@ -173,7 +169,7 @@
       <input
         name="username"
         bind:value={userName}
-        on:keyup={handleLoginInput}
+        onkeyup={handleLoginInput}
       />
     </label>
 
@@ -184,8 +180,8 @@
         name="password"
         type="password"
         bind:value={userPassword}
-        on:keyup={handleLoginInput}
-        on:keydown={(e) => {
+        onkeyup={handleLoginInput}
+        onkeydown={(e) => {
           if (e.key === "Enter") {
             tryLogIn();
           }
@@ -204,7 +200,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="self-center mt-2 text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white"
-          on:click={() => (connectionHelpOpen = true)}
+          onclick={() => (connectionHelpOpen = true)}
         >
           Help me!
         </button>
@@ -215,7 +211,7 @@
   {#if !serverValid || !loginValid || !userName || !userPassword}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={tryLogIn}
+      onclick={tryLogIn}
     >
       <span>{loggingIn ? `Logging in...` : `Log In`}</span>
       <ForwardsArrowIcon />
@@ -223,7 +219,7 @@
   {:else}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={() => proceed()}
+      onclick={() => proceed()}
     >
       Continue To Rewind
     </button>

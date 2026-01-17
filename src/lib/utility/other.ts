@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { type Writable } from "svelte/store";
 import type { Result } from "$lib/types.ts";
 

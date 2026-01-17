@@ -32,7 +32,7 @@
   <!-- 
   <button
     class="px-2 py-1 rounded-lg text-sm border-2 border-gray-400 hover:bg-gray-300 font-medium text-gray-200 mt-4 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    on:click={() => (finampOfflineExportDialogOpen = true)}
+    onclick={() => (finampOfflineExportDialogOpen = true)}
   >
     <span>How can I import my offline plays?</span>
   </button> -->
@@ -69,7 +69,7 @@
         id="import-file"
         class="hidden"
         accept=".txt,.json,.jsonl"
-        on:change={async (e) => {
+        onchange={async (e) => {
           console.info(`Importing offline playback...`);
           const input = e.target;
           if (!input) {
@@ -121,7 +121,7 @@
         </p> -->
           <button
             class="px-2 py-1 rounded-lg mt-4 text-sm border-gray-400 hover:bg-gray-300 border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
-            on:click={() => goto("/importLastYearsReport")}
+            onclick={() => goto("/importLastYearsReport")}
           >
             <span>Continue without importing</span>
           </button>
@@ -140,7 +140,7 @@
       <!-- svelte-ignore event_directive_deprecated -->
       <button
         class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-6 flex flex-row gap-3 items-center mx-auto text-red-500 hover:text-white"
-        on:click={async () => {
+        onclick={async () => {
           // await jellyfin.terminateSession();
           goto("/adminLogin");
           //TODO await deleteRewind()
@@ -151,7 +151,7 @@
       </button>
       <button
         class="px-2 py-1 rounded-lg mt-4 text-sm border-gray-400 hover:bg-gray-300 border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
-        on:click={() => goto("/importLastYearsReport")}
+        onclick={() => goto("/importLastYearsReport")}
       >
         <span>Continue without importing</span>
       </button>

@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { decode as decodeBlurhash } from "blurhash";
 import jellyfin from "../jellyfin/index.ts";
 import { checkIfOfflinePlaybackImportAvailable } from "./offlineImport.ts";

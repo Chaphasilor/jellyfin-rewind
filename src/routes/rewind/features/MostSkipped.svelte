@@ -4,10 +4,10 @@
   import { onMount } from "svelte";
   import { showPlaying } from "$lib/utility/other";
   import { formatArtists, showAsNumber } from "$lib/utility/format";
-  import Unavailable from "$lib/components/Unavailable.svelte";
+  import Unavailable from "$lib/components/Unavailable/Unavailable.svelte";
   import { loadImage } from "$lib/utility/jellyfin-helper";
-  import UnavailableReasonPlaybackReporting from "$lib/components/UnavailableReasonPlaybackReporting.svelte";
   import CircleIcon from "$lib/components/icons/CircleIcon.svelte";
+  import UnavailableReasonPlaybackReporting from "$lib/components/Unavailable/UnavailableReasonPlaybackReporting.svelte";
 
   const {
     informationSource,
@@ -82,6 +82,7 @@
           >
             <img
               id={`most-skipped-tracks-image-${index}`}
+              alt="most-skipped-tracks-image-{index}"
               class="w-full h-full"
             />
             <div
@@ -143,6 +144,7 @@
           >
             <img
               id={`most-skipped-tracks-background-image-${index}`}
+              alt="most-skipped-tracks-background-image-{index}"
               class="w-full h-full"
             />
           </div>

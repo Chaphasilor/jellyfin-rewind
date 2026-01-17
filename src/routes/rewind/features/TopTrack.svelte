@@ -44,6 +44,7 @@
   <div class="flex mt-10 flex-col">
     <img
       bind:this={topTrackPrimaryImage}
+      alt="track"
       id="top-track-image"
       class="w-[30vh] h-[30vh] mx-auto rounded-md drop-shadow-[0_35px_35px_rgba(255,255,255,0.25)]"
     />

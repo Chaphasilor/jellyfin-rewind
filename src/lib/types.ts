@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import Cache from "$lib/utility/cache.ts";
 
 export type Result<T> = T extends undefined

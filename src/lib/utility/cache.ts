@@ -20,6 +20,17 @@ export default class Cache<D> {
     this.defaultCounters = { ...defaultCounters };
   }
 
+  setIfNotExists(key: string, value: () => D) {
+    if (this.hasKey(key)) return;
+
+    const data = value();
+    this.data[key] = {
+      data,
+      counters: new PlaybackCounter(this.defaultCounters), // stop counter sharing
+    };
+    this.keys.add(key);
+  }
+
   setAndGetValue(key: string, value: () => D) {
     if (this.hasKey(key)) return this.data[key].data;
 

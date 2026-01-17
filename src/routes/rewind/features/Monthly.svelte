@@ -57,11 +57,16 @@
     rawData.forEach(([month, d]) => {
       const i = parseInt(month);
       duration[i] = Math.round(
+        // @ts-expect-error TS doesn't understand d.counters is indexable
         d.counters[actualInformationSource].listenDuration / 60,
       );
+      // @ts-expect-error TS doesn't understand d.counters is indexable
       plays[i] = d.counters[actualInformationSource].fullPlays +
+        // @ts-expect-error TS doesn't understand d.counters is indexable
         d.counters[actualInformationSource].partialSkips;
+      // @ts-expect-error TS doesn't understand d.counters is indexable
       skips[i] = d.counters[actualInformationSource].fullSkips +
+        // @ts-expect-error TS doesn't understand d.counters is indexable
         d.counters[actualInformationSource].partialSkips;
     });
 

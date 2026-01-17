@@ -1,29 +1,35 @@
 <script lang="ts">
+  import { stopPropagation } from "$lib/utility/handlers";
   import { fade } from "svelte/transition";
 
   export let open: boolean;
-  console.log({ open });
 </script>
 
 {#if open}
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="fixed top-0 left-0 w-screen h-screen bg-white/10 backdrop-blur flex justify-center items-center z-50 px-8 py-12"
-    on:click|stopPropagation={() => (open = false)}
-    on:scroll|stopPropagation={() => {}}
-    on:wheel|stopPropagation={() => {}}
+    onkeypress={stopPropagation(() => open = false)}
+    onclick={stopPropagation(() => open = false)}
+    onscroll={stopPropagation()}
+    onwheel={stopPropagation()}
     in:fade={{ delay: 0, duration: 250 }}
     out:fade={{ delay: 0, duration: 250 }}
+    role="button"
+    aria-roledescription="Dismiss the Modal"
+    tabindex="0"
   >
     <div
-      on:click|stopPropagation
+      onkeypress={stopPropagation(() => open = false)}
+      onclick={stopPropagation()}
       class="relative w-full max-w-2xl h-full rounded-xl shadow-lg pt-16 p-4 bg-gray-900 text-white overflow-y-auto"
+      role="button"
+      tabindex="0"
     >
       <button
         class="fixed top-16 right-12 text-white bg-black/50 p-2 rounded-lg"
         title="Close dialog"
-        on:click={() => (open = false)}
+        aria-roledescription="Dismiss the Modal"
+        onclick={stopPropagation(() => open = false)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

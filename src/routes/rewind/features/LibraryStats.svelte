@@ -4,8 +4,7 @@
   import { onMount } from "svelte";
   import { showAsNumber } from "$lib/utility/format";
 
-  const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
-    $props();
+  const {}: FeatureProps = $props();
 
   export function onEnter() {
   }

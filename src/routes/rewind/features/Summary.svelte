@@ -108,6 +108,7 @@
       <h4 class="text-xs">Top Track</h4>
       <img
         id="summary-top-track-image"
+        alt="top track"
         class="w-auto h-[5rem] my-1.5 rounded-md"
       />
       <div class="text-balance">
@@ -134,6 +135,7 @@
       <h4 class="text-xs">Top Artist</h4>
       <img
         id="summary-top-artist-image"
+        alt="top artist"
         class="w-auto h-[5rem] my-1.5 rounded-md"
       />
       <div class="text-balance">
@@ -198,6 +200,7 @@
         <h4 class="text-xs">Most Successive Streams</h4>
         <img
           id="summary-most-successive-streams-track-image"
+          alt="most successive streams track"
           class="w-auto h-[5rem] my-1.5 rounded-md"
         />
         <div class="text-balance">

@@ -100,7 +100,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-          on:click={async () => {
+          onclick={async () => {
             try {
               await installPlaybackReportingPlugin();
               playbackReportingInspectionResult.set(
@@ -122,7 +122,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-          on:click={async () => {
+          onclick={async () => {
             try {
               await restartServer();
               waitingForRestart = true;
@@ -153,7 +153,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-          on:click={async () => {
+          onclick={async () => {
             try {
               await enablePlaybackReportingPlugin(
                 $playbackReportingInspectionResult.setup,
@@ -184,7 +184,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-2 py-1 rounded-lg text-sm font-semibold border-2 border-orange-500 hover:bg-orange-600 text-orange-500 hover:text-white"
-          on:click={async () => {
+          onclick={async () => {
             playbackReportingInspectionResult.set(
               await checkPlaybackReportingSetup(),
             );
@@ -198,7 +198,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-3 py-2 my-1 mx-auto rounded-lg text-white font-semibold bg-[#00A4DC] hover:bg-[#0085B2]"
-          on:click={async () => {
+          onclick={async () => {
             try {
               const newSettings = {
                 ...($playbackReportingInspectionResult?.setup?.settings ??
@@ -223,7 +223,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-2! py-1! mt-1 mx-auto rounded-lg! text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 flex flex-row gap-4 items-center mx-auto hover:text-white"
-          on:click={async () => {
+          onclick={async () => {
             try {
               const newSettings = {
                 ...($playbackReportingInspectionResult?.setup?.settings ??
@@ -255,7 +255,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="px-2 py-1 rounded-lg text-sm font-semibold border-2 border-orange-500 hover:bg-orange-600 text-orange-500 hover:text-white"
-          on:click={async () => {
+          onclick={async () => {
             playbackReportingInspectionResult.set(
               await checkPlaybackReportingSetup(),
             );
@@ -272,14 +272,14 @@
 
   <button
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 text-balance text-center mt-12 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    on:click={() => (playbackReportingDialogOpen = true)}
+    onclick={() => (playbackReportingDialogOpen = true)}
   >
     <span>More Information about why this is important</span>
   </button>
 
   <button
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-24 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    on:click={() => goto("/importLastYearsReport")}
+    onclick={() => goto("/importLastYearsReport")}
   >
     <span>Continue anyway (not recommended!)</span>
   </button>
@@ -296,7 +296,7 @@
         Setting up Playback Reporting
       </h3>
       <button
-        on:click={() => (playbackReportingDialogOpen = false)}
+        onclick={() => (playbackReportingDialogOpen = false)}
         class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]"
         title="Close"
       >
@@ -383,5 +383,5 @@
       </div>
     </div>
   </div>
-  <button on:click={() => (playbackReportingDialogOpen = false)}>Okay!</button>
+  <button onclick={() => (playbackReportingDialogOpen = false)}>Okay!</button>
 </Modal>

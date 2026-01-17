@@ -8,6 +8,12 @@ declare global {
     // interface PageState {}
     // interface Platform {}
   }
+  // VSCode says Deno isn't available inside +page.svelte files, which is wrong
+  declare const Deno: {
+    env: {
+      get: (key: string) => string;
+    };
+  };
 }
 
 export {};

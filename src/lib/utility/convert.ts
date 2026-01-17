@@ -5,6 +5,7 @@ import {
   type FullRewindReport,
   type Genre,
   InformationSource,
+  type LightRewindReport,
   type OldAlbum,
   type OldArtist,
   type OldGenre,
@@ -516,7 +517,7 @@ export async function processingResultToRewindReport(
         totalPlays: {
           // playbackReport:
           playbackReport: result.tracksCache.entries.reduce(
-            (sum, [id, value]) =>
+            (sum, [_id, value]) =>
               sum +
               value.counters.playbackReporting.fullPlays +
               value.counters.playbackReporting.partialSkips +
@@ -524,7 +525,7 @@ export async function processingResultToRewindReport(
             0,
           ),
           average: result.tracksCache.entries.reduce(
-            (sum, [id, value]) =>
+            (sum, [_id, value]) =>
               sum +
               value.counters.average.fullPlays +
               value.counters.average.partialSkips +
@@ -532,7 +533,7 @@ export async function processingResultToRewindReport(
             0,
           ),
           jellyfin: result.tracksCache.entries.reduce(
-            (sum, [id, value]) =>
+            (sum, [_id, value]) =>
               sum +
               value.counters.jellyfin.fullPlays +
               value.counters.jellyfin.partialSkips +
@@ -542,17 +543,17 @@ export async function processingResultToRewindReport(
         },
         totalPlaybackDurationMinutes: {
           playbackReport: Number((result.tracksCache.entries.reduce(
-            (sum, [id, value]) =>
+            (sum, [_id, value]) =>
               sum +
               value.counters.playbackReporting.listenDuration,
             0,
           ) / 60).toFixed(1)),
           average: Number((result.tracksCache.entries.reduce(
-            (sum, [id, value]) => sum + value.counters.average.listenDuration,
+            (sum, [_id, value]) => sum + value.counters.average.listenDuration,
             0,
           ) / 60).toFixed(1)),
           jellyfin: Number((result.tracksCache.entries.reduce(
-            (sum, [id, value]) => sum + value.counters.jellyfin.listenDuration,
+            (sum, [_id, value]) => sum + value.counters.jellyfin.listenDuration,
             0,
           ) / 60).toFixed(1)),
         },
@@ -642,13 +643,13 @@ export async function processingResultToRewindReport(
         minutesPerDay: {
           //TODO we can calculate the mean for jellyfin too
           mean: result.dayOfYear.entries.reduce(
-            (sum, [day, value]) =>
+            (sum, [_day, value]) =>
               sum + value.counters.playbackReporting.listenDuration / 60,
             0,
           ) / result.dayOfYear.len,
           median: (() => {
             const durations = result.dayOfYear.entries
-              .map(([day, value]) =>
+              .map(([_day, value]) =>
                 value.counters.playbackReporting.listenDuration / 60
               )
               .sort((a, b) => a - b);
@@ -716,7 +717,7 @@ export async function processingResultToRewindReport(
                 source,
                 ["fullSkips", "partialSkips", "listenDuration"],
                 "DESC",
-              ).filter(([trackId, value]) =>
+              ).filter(([_trackId, value]) =>
                 //@ts-ignore: counter sources are a bit broken
                 value.counters[source].listenDuration > 5 &&
                 //@ts-ignore: counter sources are a bit broken
@@ -743,14 +744,14 @@ export async function processingResultToRewindReport(
                 source,
                 ["partialSkips", "fullSkips"],
                 "ASC",
-              ).filter(([trackId, value]) =>
+              ).filter(([_trackId, value]) =>
                 //@ts-ignore: counter sources are a bit broken
                 value.counters[source].fullPlays > 5 &&
                 //@ts-ignore: counter sources are a bit broken
                 (value.counters[source].partialSkips === 0 &&
                   //@ts-ignore: counter sources are a bit broken
                   value.counters[source].fullSkips === 0)
-              ).toSorted(([aId, aValue], [bId, bValue]) => {
+              ).toSorted(([_aId, aValue], [_bId, bValue]) => {
                 const playDifference =
                   //@ts-ignore: counter sources are a bit broken
                   bValue.counters[source].fullPlays -
@@ -917,7 +918,7 @@ export async function processingResultToRewindReport(
         tracks: {
           total: result.tracksCache.len,
           favorite:
-            result.tracksCache.entries.filter(([id, value]) =>
+            result.tracksCache.entries.filter(([_id, value]) =>
               value.data.favorite
             ).length,
         },
@@ -931,7 +932,7 @@ export async function processingResultToRewindReport(
           mean: totalTracksLength / result.tracksCache.len,
           median: (() => {
             const durations = result.tracksCache.entries
-              .map(([id, value]) => value.data.duration)
+              .map(([_id, value]) => value.data.duration)
               .sort((a, b) => a - b);
             const mid = Math.floor(durations.length / 2);
             return durations.length % 2 !== 0
@@ -939,12 +940,12 @@ export async function processingResultToRewindReport(
               : (durations[mid - 1] + durations[mid]) / 2;
           })(),
           min: result.tracksCache.entries.reduce(
-            (min, [id, value]) =>
+            (min, [_id, value]) =>
               value.data.duration < min ? value.data.duration : min,
             Infinity,
           ),
           max: result.tracksCache.entries.reduce(
-            (max, [id, value]) =>
+            (max, [_id, value]) =>
               value.data.duration > max ? value.data.duration : max,
             0,
           ),
@@ -952,13 +953,16 @@ export async function processingResultToRewindReport(
         totalRuntime: totalTracksLength,
       },
       playbackReportComplete: result.monthOfYear.entries.filter(
-        ([month, value]) => value.counters.playbackReporting.listenDuration > 0,
+        ([_month, value]) =>
+          value.counters.playbackReporting.listenDuration > 0,
       ).length === 12,
     },
   };
-  const $oldReport = await new Promise<FullRewindReport | undefined>((
+  const $oldReport = await new Promise<
+    FullRewindReport | LightRewindReport | undefined
+  >((
     resolve,
-    reject,
+    _reject,
   ) =>
     oldReport.subscribe((value) => {
       resolve(value);

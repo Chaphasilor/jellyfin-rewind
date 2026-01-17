@@ -13,7 +13,6 @@
   const {
     informationSource,
     rankingMetric,
-    extraFeatures,
     fadeToNextTrack,
   }: FeatureProps = $props();
 
@@ -78,7 +77,11 @@
         <div
           class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"
         >
-          <img id={`top-artists-image-${index}`} class="w-full h-full" />
+          <img
+            id={`top-artists-image-${index}`}
+            class="w-full h-full"
+            alt="artist"
+          />
           <div
             id={`top-artists-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
@@ -131,6 +134,7 @@
         >
           <img
             id={`top-artists-background-image-${index}`}
+            alt="artist background"
             class="w-full h-full"
           />
         </div>

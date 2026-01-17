@@ -3,8 +3,8 @@
   import { onMount } from "svelte";
   import type { FeatureProps } from "$lib/types";
   import { showAsNumber } from "$lib/utility/format";
-  import Unavailable from "$lib/components/Unavailable.svelte";
-  import UnavailableReasonOldReport from "$lib/components/UnavailableReasonOldReport.svelte";
+  import Unavailable from "$lib/components/Unavailable/Unavailable.svelte";
+  import UnavailableReasonOldReport from "$lib/components/Unavailable/UnavailableReasonOldReport.svelte";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();

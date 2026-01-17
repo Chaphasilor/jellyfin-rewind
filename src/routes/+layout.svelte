@@ -153,7 +153,7 @@
       </p>
       <button
         class="px-3 py-2 my-1 mt-8 mb-20 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-        on:click={$isAccuracyDisclaimerOpen = false}
+        onclick={() => $isAccuracyDisclaimerOpen = false}
       >
         Understood, close!
       </button>

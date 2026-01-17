@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import ForwardsArrowIcon from "$lib/components/icons/ForwardsArrowIcon.svelte";
+  import { stopPropagation } from "$lib/utility/handlers";
 
   const {
     informationSource,
@@ -47,7 +48,7 @@
         class="text-[#00A4DC] hover:text-[#0085B2]"
         href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
         target="_blank"
-        on:click|stopPropagation={() => {}}
+        onclick={stopPropagation()}
       >GitHub</a>
       or
       <!-- svelte-ignore event_directive_deprecated -->
@@ -55,7 +56,7 @@
         class="text-[#00A4DC] hover:text-[#0085B2]"
         href="https://reddit.com/u/Chaphasilor"
         target="_blank"
-        on:click|stopPropagation={() => {}}
+        onclick={stopPropagation()}
       >Reddit</a>.
     </p>
   </div>
@@ -64,7 +65,7 @@
     <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-300 mt-4 flex flex-row gap-4 items-center mx-auto"
-      on:click|stopPropagation={() => isAccuracyDisclaimerOpen.set(true)}
+      onclick={stopPropagation(() => isAccuracyDisclaimerOpen.set(true))}
     >
       Accuracy Disclaimer
     </button>
@@ -73,10 +74,10 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-8 flex flex-row gap-4 items-center mx-auto"
-    on:click|stopPropagation={() => {
+    onclick={stopPropagation(() => {
       console.info("button");
       onNextFeature();
-    }}
+    })}
   >
     <span>Let's Go!</span>
     <ForwardsArrowIcon />

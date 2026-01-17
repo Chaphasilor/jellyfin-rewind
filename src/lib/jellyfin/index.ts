@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { endSql as endExclusiveSql, startSql, year } from "$lib/globals.ts";
 import type {
   JellyfinResponse_SystemInfoPublic,
@@ -77,7 +78,7 @@ class Jellyfin {
             return {
               success: false,
               reason:
-                `Server didnt respond with code 200 but instead with ${response.status}: ${response.statusText}`,
+                `Server didn't respond with code 200 but instead with ${response.status}: ${response.statusText}`,
             };
           }
           return {
@@ -441,7 +442,7 @@ class Jellyfin {
           : modifiers.toDate.includes(column)
           ? new Date(cell.replace(" ", "T") + "Z") //!!! the plugin doesn't return proper ISO strings, so JavaScript assumes local time when parsing
           : cell;
-        // @ts-ignore
+        // @ts-expect-error ts doesnt understand that item is indexable
         item[column] = value;
       }
       return item;

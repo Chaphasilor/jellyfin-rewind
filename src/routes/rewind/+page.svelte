@@ -28,6 +28,7 @@
   import JellyfinSourceDisclaimer from "./features/JellyfinSourceDisclaimer.svelte";
   import MuteVolumeIcon from "$lib/components/icons/MuteVolumeIcon.svelte";
   import OnVolumeIcon from "$lib/components/icons/OnVolumeIcon.svelte";
+  import { stopPropagation } from "$lib/utility/handlers";
 
   if (!$rewindReport?.jellyfinRewindReport) {
     console.warn(`No $rewindReport found, redirecting to /welcome...`);
@@ -522,10 +523,10 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-1 z-[150]"
-    on:click|stopPropagation={() => {
+    onclick={stopPropagation(() => {
       soundMuted ? resumePlayback() : pausePlayback();
       soundMuted = !soundMuted;
-    }}
+    })}
     type="button"
   >
     {#if soundMuted}
@@ -535,40 +536,3 @@
     {/if}
   </button>
 </div>
-
-<style lang="scss">
-  .volumeBox {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    translate: 0 25%;
-    opacity: 0.5;
-    transition: 250ms ease-out;
-    &:hover {
-      translate: 0 -10%;
-      opacity: 1;
-    }
-    div {
-      background-color: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(60px);
-      padding-right: 1.7rem;
-      padding-left: 1.7rem;
-      padding-top: 0.8rem;
-      padding-bottom: 0.5rem;
-      border-top-left-radius: 1.5rem;
-      border-top-right-radius: 1.5rem;
-      border-bottom-left-radius: 0.5rem;
-      border-bottom-right-radius: 0.5rem;
-      display: flex;
-      align-items: center;
-      column-gap: 1rem;
-      input {
-        $accent: rgb(241, 181, 57);
-        accent-color: $accent;
-        padding: 0;
-      }
-    }
-  }
-</style>

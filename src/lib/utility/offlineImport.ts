@@ -1,3 +1,4 @@
+// deno-lint-ignore-file no-explicit-any
 import { loadItemInfoBatched } from "$lib/jellyfin/queries/local/processing/functions.ts";
 import type { ListenQueryRow } from "$lib/types.ts";
 import { fetchDevices } from "$lib/utility/jellyfin-helper.ts";
@@ -55,7 +56,7 @@ async function parseOfflinePlaybackData(fileContent: string) {
   let content;
   try {
     content = JSON.parse(fileContent);
-  } catch (err) {
+  } catch (_err) {
     content = null;
   }
 
@@ -114,7 +115,7 @@ function parseFinampOfflinePlaybackData(contentLines: string[]) {
           //TODO add device information to exported offline plays file
         };
         return play;
-      } catch (err) {
+      } catch (_err) {
         return null;
       }
     }).filter((x) => !!x),
@@ -130,7 +131,8 @@ export async function checkIfOfflinePlaybackImportAvailable() {
       if (device[`AppName`] === `Finamp`) {
         const versionString = device[`AppVersion`];
         const versionRegex = /^(\d+)\.(\d+)\.(\d+)$/;
-        const [, major, minor, patch] = versionString.match(versionRegex) || [];
+        const [, major, minor, _patch] = versionString.match(versionRegex) ||
+          [];
         return Number(major) > 0 || Number(minor) >= 9;
       }
       return false;

@@ -1,6 +1,7 @@
 <script>
-  import Modal from "./Modal.svelte";
-  import InfoIcon from "./icons/InfoIcon.svelte";
+  import { stopPropagation } from "$lib/utility/handlers";
+  import Modal from "../Modal.svelte";
+  import InfoIcon from "../icons/InfoIcon.svelte";
   const { children } = $props();
 
   let modalOpen = $state(false);
@@ -16,9 +17,7 @@
     Unavailable
   </span>
   <button
-    on:click|stopPropagation={() => {
-      modalOpen = true;
-    }}
+    onclick={stopPropagation(() => modalOpen = true)}
     class="w-32 rounded-md flex flex-row items-center justify-around px-2 py-1 bg-white text-gray-900"
   >
     <InfoIcon />

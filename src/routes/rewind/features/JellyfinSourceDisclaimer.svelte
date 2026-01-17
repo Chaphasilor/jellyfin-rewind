@@ -5,11 +5,9 @@
   import JellyfinRewindLogo from "$lib/components/JellyfinRewindLogo.svelte";
   import jellyfin from "$lib/jellyfin";
   import { goto } from "$app/navigation";
+  import { stopPropagation } from "$lib/utility/handlers";
 
   const {
-    informationSource,
-    rankingMetric,
-    extraFeatures,
     onNextFeature,
   }: FeatureProps = $props();
 
@@ -51,7 +49,7 @@
   {#if !jellyfin.user?.isAdmin}
     <button
       class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 mt-6 flex flex-row gap-4 items-center mx-auto hover:text-white"
-      on:click={() => goto("/adminLogin")}
+      onclick={() => goto("/adminLogin")}
     >
       <span>Log in as admin</span>
     </button>
@@ -59,7 +57,7 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold mt-6 flex flex-row gap-4 items-center mx-auto"
-    on:click|stopPropagation={() => onNextFeature()}
+    onclick={stopPropagation(() => onNextFeature())}
   >
     Understood, continue!
   </button>

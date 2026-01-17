@@ -21,6 +21,7 @@
       target="_blank"
     >Open Plugins Page!</a>
   {:else}
+    <!-- svelte-ignore a11y_missing_attribute : ok because link is disabled anyway -->
     <a
       class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0 opacity-50 cursor-not-allowed"
     >Open Plugins Page!</a>
@@ -50,6 +51,7 @@
       target="_blank"
     >Open Settings</a>
   {:else}
+    <!-- svelte-ignore a11y_missing_attribute : ok because link is disabled anyway-->
     <a
       class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC] saturate-0 opacity-50 cursor-not-allowed"
     >Open Settings!</a>
@@ -77,7 +79,7 @@
 </div>
 <button
   class="px-3 py-2 my-1 mt-8 mb-20 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-  on:click={() => closeModal()}
+  onclick={() => closeModal()}
 >
   Understood, close!
 </button>

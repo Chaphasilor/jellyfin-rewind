@@ -139,7 +139,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     await downloadingProgress.next();
 
     const albumArtistsResult = await getItemsBatched(
-      (start, limit) => getAlbumArtistsForLibrary(library.Id, start, limit),
+      (start, limit) => getAlbumArtistsForLibrary(start, limit),
       preferSmallBatchSize ? 200 : 2000,
     );
     if (!albumArtistsResult.success) {
@@ -205,7 +205,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     for (let i = 0; i < lib.albums.length; i++) {
       const album = lib.albums[i];
       await processingProgress.next();
-      const processedAlbum = processAlbum(album);
+      processAlbum(album);
       updateCountersForAlbum(CounterSources.JELLYFIN, album);
     }
 
@@ -213,7 +213,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     for (let i = 0; i < lib.artists.length; i++) {
       const artist = lib.artists[i];
       await processingProgress.next();
-      const processedArtist = processArtist(artist);
+      processArtist(artist);
       updateCountersForArtist(CounterSources.JELLYFIN, artist);
     }
 
@@ -221,15 +221,15 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     for (let i = 0; i < lib.performingArtists.length; i++) {
       const performingArtist = lib.performingArtists[i];
       await processingProgress.next();
-      const processedArtist = processArtist(performingArtist);
+      processArtist(performingArtist);
       updateCountersForArtist(CounterSources.JELLYFIN, performingArtist);
     }
 
-    //processingListensProgressming & album artists explicitly, and dedupe
+    //processingListens Progressing & album artists explicitly, and dedupe
     for (let i = 0; i < lib.albumArtists.length; i++) {
       const albumArtist = lib.albumArtists[i];
       await processingProgress.next();
-      const processedArtist = processArtist(albumArtist);
+      processArtist(albumArtist);
       updateCountersForArtist(CounterSources.JELLYFIN, albumArtist);
     }
 
@@ -238,7 +238,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
     for (let i = 0; i < lib.genres.length; i++) {
       const genre = lib.genres[i];
       await processingProgress.next();
-      const processedGenre = processGenre(genre);
+      processGenre(genre);
       updateCountersForGenre(CounterSources.JELLYFIN, genre);
     }
 
@@ -248,7 +248,7 @@ const execute = async (): Promise<Result<ProcessingResults>> => {
       await processingProgress.next();
       if (track.UserData.IsFavorite) favorites.v++;
       const processedTrack = compactTrack(track);
-      const processedTrackId = tracksCache.setAndGetValue(
+      tracksCache.setIfNotExists(
         track.Id,
         () => processedTrack,
       );

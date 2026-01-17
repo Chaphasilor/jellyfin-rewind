@@ -83,7 +83,11 @@
         <div
           class="relative w-[8vh] h-[8vh] flex-shrink-0 rounded-md overflow-hidden"
         >
-          <img id={`forgotten-tracks-image-${index}`} class="w-full h-full" />
+          <img
+            id={`forgotten-tracks-image-${index}`}
+            class="w-full h-full"
+            alt="forgotten-tracks-image-{index}"
+          />
           <div
             id={`forgotten-tracks-visualizer-${index}`}
             class="absolute top-0 left-0 w-full h-full grid place-content-center text-white bg-black/30 hidden"
@@ -135,6 +139,7 @@
         >
           <img
             id={`forgotten-tracks-background-image-${index}`}
+            alt="forgotten-tracks-background-image-{index}"
             class="w-full h-full"
           />
         </div>

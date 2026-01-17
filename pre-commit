@@ -7,7 +7,7 @@
 echo "Running Custom Commit Hook..."
 
 echo "Formatting..."
-deno fmt --indent-width 2 . || exit 1
+deno task format || exit 1
 
 echo "Testing build..."
-npm run build || exit 1 && exit 0
+deno task build || exit 1

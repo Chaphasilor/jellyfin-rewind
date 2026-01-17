@@ -24,7 +24,7 @@
   <!-- svelte-ignore event_directive_deprecated -->
   <button
     class="px-3 py-2 my-1 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-    on:click={() => {
+    onclick={() => {
       goto("/importLastYearsReport");
       closeModal();
     }}
@@ -41,7 +41,7 @@
 </div>
 <button
   class="px-3 py-2 my-1 mt-8 mb-20 mx-auto rounded-md text-white font-semibold bg-[#00A4DC]"
-  on:click={() => closeModal()}
+  onclick={() => closeModal()}
 >
   Understood, close!
 </button>

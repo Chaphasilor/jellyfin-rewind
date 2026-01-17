@@ -5,6 +5,7 @@
   import { playbackReportingInspectionResult, year } from "$lib/globals";
   import jellyfin from "$lib/jellyfin";
   import { PlaybackReportingIssueAction } from "$lib/types";
+  import { stopPropagation } from "$lib/utility/handlers";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
 
@@ -35,7 +36,7 @@
       class="text-[#00A4DC] underline hover:text-[#0085B2]"
       href="https://github.com/Chaphasilor/jellyfin-rewind/issues"
       target="_blank"
-      on:click|stopPropagation={() => {}}
+      onclick={stopPropagation()}
     >code on GitHub</a>!
   </p>
 
@@ -48,7 +49,7 @@
     <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={async () => {
+      onclick={async () => {
         if (!jellyfin.user?.isAdmin) {
           goto("/adminLogin");
           return;
@@ -77,7 +78,7 @@
     <!-- svelte-ignore event_directive_deprecated -->
     <button
       class="px-4 py-2 rounded-xl border-2 border-red-400 hover:bg-red-500 dark:border-red-600 dark:hover:bg-red-700 font-medium mt-12 flex flex-row gap-3 items-center mx-auto text-red-500 hover:text-white"
-      on:click={async () => {
+      onclick={async () => {
         await jellyfin.terminateSession();
         loggedIn = false;
         //TODO await deleteRewind()
@@ -89,7 +90,7 @@
   {:else}
     <button
       class="px-7 py-3 rounded-2xl text-[1.4rem] bg-[#00A4DC] hover:bg-[#0085B2] text-white font-semibold flex flex-row gap-4 items-center mx-auto"
-      on:click={() => goto("/login")}
+      onclick={() => goto("/login")}
     >
       Proceed to Login
     </button>
