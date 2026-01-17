@@ -14,8 +14,9 @@
     updatePlaybackReportingSettings,
   } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
+  import { writable } from "svelte/store";
 
-  let playbackReportingDialogOpen = $state(false);
+  let playbackReportingDialogOpen = writable(false);
   let waitingForRestart = $state(false);
 
   const issueDescription = $derived.by(() => {
@@ -272,7 +273,7 @@
 
   <button
     class="px-2 py-1 rounded-lg text-sm border-[#00A4DC] border-2 hover:bg-[#0085B2] font-medium text-gray-200 text-balance text-center mt-12 flex flex-row gap-4 items-center mx-auto hover:text-white"
-    onclick={() => (playbackReportingDialogOpen = true)}
+    onclick={() => ($playbackReportingDialogOpen = true)}
   >
     <span>More Information about why this is important</span>
   </button>
@@ -296,7 +297,7 @@
         Setting up Playback Reporting
       </h3>
       <button
-        onclick={() => (playbackReportingDialogOpen = false)}
+        onclick={() => ($playbackReportingDialogOpen = false)}
         class="absolute right-2 text-[#00A4DC] hover:text-[#0085B2]"
         title="Close"
       >
@@ -383,5 +384,5 @@
       </div>
     </div>
   </div>
-  <button onclick={() => (playbackReportingDialogOpen = false)}>Okay!</button>
+  <button onclick={() => ($playbackReportingDialogOpen = false)}>Okay!</button>
 </Modal>

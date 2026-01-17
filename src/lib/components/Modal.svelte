@@ -1,15 +1,16 @@
 <script lang="ts">
   import { stopPropagation } from "$lib/utility/handlers";
+  import type { Writable } from "svelte/store";
   import { fade } from "svelte/transition";
 
-  export let open: boolean;
+  export let open: Writable<boolean>;
 </script>
 
-{#if open}
+{#if $open}
   <div
     class="fixed top-0 left-0 w-screen h-screen bg-white/10 backdrop-blur flex justify-center items-center z-50 px-8 py-12"
-    onkeypress={stopPropagation(() => open = false)}
-    onclick={stopPropagation(() => open = false)}
+    onkeypress={stopPropagation(() => $open = false)}
+    onclick={stopPropagation(() => $open = false)}
     onscroll={stopPropagation()}
     onwheel={stopPropagation()}
     in:fade={{ delay: 0, duration: 250 }}
@@ -19,7 +20,7 @@
     tabindex="0"
   >
     <div
-      onkeypress={stopPropagation(() => open = false)}
+      onkeypress={stopPropagation(() => $open = false)}
       onclick={stopPropagation()}
       class="relative w-full max-w-2xl h-full rounded-xl shadow-lg pt-16 p-4 bg-gray-900 text-white overflow-y-auto"
       role="button"
@@ -29,7 +30,7 @@
         class="fixed top-16 right-12 text-white bg-black/50 p-2 rounded-lg"
         title="Close dialog"
         aria-roledescription="Dismiss the Modal"
-        onclick={stopPropagation(() => open = false)}
+        onclick={stopPropagation(() => $open = false)}
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"

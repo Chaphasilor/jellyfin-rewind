@@ -7,7 +7,7 @@
   import Unavailable from "$lib/components/Unavailable/Unavailable.svelte";
   import StarIcon from "$lib/components/icons/StarIcon.svelte";
   import UnavailableReasonPlaybackReporting from "$lib/components/Unavailable/UnavailableReasonPlaybackReporting.svelte";
-    import { stopPropagation } from "$lib/utility/handlers";
+  import { stopPropagation } from "$lib/utility/handlers";
 
   const { informationSource, rankingMetric, extraFeatures }: FeatureProps =
     $props();

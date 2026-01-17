@@ -47,7 +47,7 @@
     </PageTransition>
   </main>
   <!-- TODO this can't be opened from other features -->
-  <Modal open={$isAccuracyDisclaimerOpen}>
+  <Modal open={isAccuracyDisclaimerOpen}>
     <div class="flex flex-col items-center gap-2 z-20">
       <p>
         Jellyfin doesn't save any information about played tracks other than the

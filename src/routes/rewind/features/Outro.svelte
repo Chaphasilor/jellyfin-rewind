@@ -9,6 +9,7 @@
   import jellyfin from "$lib/jellyfin";
   import DownloadIcon from "$lib/components/icons/DownloadIcon.svelte";
   import { stopPropagation } from "$lib/utility/handlers";
+  import { writable } from "svelte/store";
 
   const {}: FeatureProps = $props();
 
@@ -55,8 +56,6 @@
   }
   export function onExit() {
   }
-
-  let closeModalOpen = $state(false);
 
   onMount(() => {});
 </script>
@@ -116,32 +115,3 @@
     </p>
   </div>
 </div>
-
-<Modal open={closeModalOpen}>
-  <h1>Thanks for checking out the {year} rewind!</h1>
-  {#if !rewindReportDownloaded}
-    <p>
-      You haven't yet downloaded the rewind, so you can compare {year} to {
-        year + 1
-      }
-    </p>
-    <p>Do you want to close the rewind without saving?</p>
-    <button onclick={stopPropagation(() => download())}>
-      Stop! I want to the Download Report!
-    </button>
-  {:else}
-    <p>Make sure you have placed the rewind json in the right place.</p>
-    <p>If you want you can also download it again</p>
-    <button onclick={stopPropagation(() => download())}>
-      I want to be sure!
-    </button>
-  {/if}
-  <br>
-  <br>
-  <br>
-  <button onclick={() => closeModalOpen = false}>Don't Close</button>
-  <br>
-  <br>
-  <button onclick={() => close()}>Close</button>
-  <button onclick={() => close(true)}>Close & Logout</button>
-</Modal>

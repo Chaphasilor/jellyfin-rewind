@@ -9,11 +9,12 @@
   import { PlaybackReportingIssueAction } from "$lib/types";
   import { checkPlaybackReportingSetup } from "$lib/utility/jellyfin-helper";
   import { onMount } from "svelte";
+  import { writable } from "svelte/store";
 
   let serverUrl: string = $state("");
   let adminUserName: string = $state("");
   let adminUserPassword: string = $state("");
-  let connectionHelpOpen = $state(false);
+  let connectionHelpOpen = writable(false);
 
   async function proceed() {
     playbackReportingInspectionResult.set(
@@ -170,7 +171,7 @@
         <!-- svelte-ignore event_directive_deprecated -->
         <button
           class="self-center mt-2 text-[#00A4DC] font-semibold px-3 py-1 rounded-md bg-orange-500 text-white"
-          onclick={() => (connectionHelpOpen = true)}
+          onclick={() => ($connectionHelpOpen = true)}
         >
           Help me!?
         </button>
